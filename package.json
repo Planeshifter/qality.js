@@ -1,0 +1,36 @@
+{
+  "name": "qa",
+  "version": "0.0.1",
+  "description": "Multiple-Choice QA System for JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Planeshifter/QA.js.git"
+  },
+  "keywords": [
+    "question-answer",
+    "multiple-choice",
+    "examination"
+  ],
+  "author": "Philipp Burckhardt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Planeshifter/QA.js/issues"
+  },
+  "homepage": "https://github.com/Planeshifter/QA.js#readme",
+  "dependencies": {
+    "gsap": "^1.16.1",
+    "jquery": "^2.1.3"
+  },
+  "devDependencies": {
+    "chai": "^2.2.0",
+    "coveralls": "^2.11.2",
+    "istanbul": "^0.3.13",
+    "jshint": "^2.7.0",
+    "jshint-stylish": "^1.0.1",
+    "mocha": "^2.2.4"
+  }
+}
