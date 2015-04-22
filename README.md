@@ -1,7 +1,7 @@
-[![NPM version][npm-image]][npm-url] 
-[![Bower version][bower-image]][bower-url] 
-[![Build Status][travis-image]][travis-url] 
-[![Coverage Status][coveralls-image]][coveralls-url] 
+[![NPM version][npm-image]][npm-url]
+[![Bower version][bower-image]][bower-url]
+[![Build Status][travis-image]][travis-url]
+[![Coverage Status][coveralls-image]][coveralls-url]
 [![Dependencies][dependencies-image]][dependencies-url]
 
 # QA.js
@@ -13,8 +13,18 @@
 
 [MIT](http://opensource.org/licenses/MIT)
 
-[npm-image]: https://badge.fury.io/js/QA.svg
-[npm-url]: http://badge.fury.io/js/QA
+### Icon Credits
+
+- "Wrench" by Calvin Goodman
+- "Network" by José Campos
+- "Survey" by Ann Fandrey
+- "Close" by Mateo Zlatar
+- "Play" by Mike Rowe
+- "Add" by Vittorio Maria Vecchi
+- "Upload" by Thomas Le Bas
+
+[npm-image]: https://badge.fury.io/js/qa.svg
+[npm-url]: http://badge.fury.io/js/qa
 
 [bower-image]:  https://img.shields.io/bower/v/QA.js.svg
 [bower-url]: https://github.com/Planeshifter/QA.js.git
