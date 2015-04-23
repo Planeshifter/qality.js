@@ -4,7 +4,7 @@
 [![Coverage Status][coveralls-image]][coveralls-url]
 [![Dependencies][dependencies-image]][dependencies-url]
 
-# QA.js
+# qality.js
 
 > Multiple-Choice QA System for JavaScript
 
@@ -23,17 +23,17 @@
 - "Add" by Vittorio Maria Vecchi
 - "Upload" by Thomas Le Bas
 
-[npm-image]: https://badge.fury.io/js/qa.svg
-[npm-url]: http://badge.fury.io/js/qa
+[npm-image]: https://badge.fury.io/js/qality.svg
+[npm-url]: http://badge.fury.io/js/qality
 
-[bower-image]:  https://img.shields.io/bower/v/QA.js.svg
-[bower-url]: https://github.com/Planeshifter/QA.js.git
+[bower-image]:  https://img.shields.io/bower/v/qality.js.svg
+[bower-url]: https://github.com/Planeshifter/qality.js.git
 
-[travis-image]: https://travis-ci.org/Planeshifter/QA.js.svg
-[travis-url]: https://travis-ci.org/Planeshifter/QA.js
+[travis-image]: https://travis-ci.org/Planeshifter/qality.js.svg
+[travis-url]: https://travis-ci.org/Planeshifter/qality.js
 
-[coveralls-image]: https://img.shields.io/coveralls/Planeshifter/QA.js/master.svg
-[coveralls-url]: https://coveralls.io/r/Planeshifter/QA.js?branch=master
+[coveralls-image]: https://img.shields.io/coveralls/Planeshifter/qality.js/master.svg
+[coveralls-url]: https://coveralls.io/r/Planeshifter/qality.js?branch=master
 
-[dependencies-image]: http://img.shields.io/david/Planeshifter/QA.js.svg
-[dependencies-url]: https://david-dm.org/Planeshifter/QA.js
+[dependencies-image]: http://img.shields.io/david/Planeshifter/qality.js.svg
+[dependencies-url]: https://david-dm.org/Planeshifter/qality.js
