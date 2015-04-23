@@ -35,6 +35,18 @@ height: 100%;
 }
 
 
+#exam_panel .node
+{
+position: absolute;
+left: 5%;
+top: 5%;
+width: 90%;
+height: 90%;
+background: red;	
+z-index: 2;
+}
+
+
 
 #exam_panel .mc_question
 {
