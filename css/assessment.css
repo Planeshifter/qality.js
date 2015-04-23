@@ -288,6 +288,26 @@ color: white;
 background: darkorange;	
 }
 
+.setting #delete
+{
+position: absolute;
+right: 4%;
+bottom: 10px;
+width: 20%;
+text-align: center;
+font-family: Droid Sans Mono;
+color: darkgray;
+background: red;	
+box-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+padding: 5px;
+}
+
+.setting #delete:hover
+{
+cursor: pointer;
+color: white;
+background: darkorange;	
+}
 
 
 
@@ -357,6 +377,28 @@ padding: 5px;
 }
 
 .prompt .submit:hover
+{
+cursor: pointer;
+color: white;
+background: darkorange;	
+}
+
+
+.prompt .delete
+{
+position: absolute;
+right: 4%;
+bottom: 10px;
+width: 20%;
+text-align: center;
+font-family: Droid Sans Mono;
+color: darkgray;
+background: red;	
+box-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+padding: 5px;
+}
+
+.prompt .delete:hover
 {
 cursor: pointer;
 color: white;
