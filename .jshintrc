@@ -65,8 +65,5 @@
 	"shelljs": false,
 	"worker": false,
 	"wsh": false,
-	"yui": false,
-	"globals": {
-		"Assessment"
-	}
+	"yui": false
 }
