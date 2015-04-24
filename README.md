@@ -4,7 +4,7 @@
 [![Coverage Status][coveralls-image]][coveralls-url]
 [![Dependencies][dependencies-image]][dependencies-url]
 
-# qality.js
+# QAlity.js
 
 > Multiple-Choice QA System for JavaScript
 
