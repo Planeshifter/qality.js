@@ -130,6 +130,17 @@ background: darkorange;
 }
 
 
+.input
+{
+position: absolute;
+left: 5%;
+top: 5%;
+height: 80%;
+width: 90%;
+background: rgba(0,64,128, 0.3);	
+}
+
+
 .multiple_choice
 {
 position: absolute;
