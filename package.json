@@ -34,7 +34,8 @@
     "istanbul": "^0.3.13",
     "jshint": "^2.7.0",
     "jshint-stylish": "^1.0.1",
-    "mocha": "^2.2.4"
+    "mocha": "^2.2.4",
+    "uglify-js": "^2.4.20"
   },
   "browser": {
     "gsap-tween-max": "./node_modules/gsap/src/minified/TweenMax.min.js"
