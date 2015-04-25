@@ -24,3 +24,7 @@ build/Release
 
 # node_modules
 node_modules
+
+# browserify output
+bundle.js
+bundle.min.js

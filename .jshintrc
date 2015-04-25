@@ -27,7 +27,7 @@
 	"boss": false,
 	"debug": false,
 	"eqnull": false,
-	"esnext": false,
+	"esnext": true,
 	"evil": false,
 	"expr": false,
 	"funcscope": false,
@@ -65,8 +65,5 @@
 	"shelljs": false,
 	"worker": false,
 	"wsh": false,
-	"yui": false,
-	"globals": {
-		"Assessment"
-	}
+	"yui": false
 }
