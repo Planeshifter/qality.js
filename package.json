@@ -35,7 +35,8 @@
     "jshint": "^2.7.0",
     "jshint-stylish": "^1.0.1",
     "mocha": "^2.2.4",
-    "uglify-js": "^2.4.20"
+    "uglify-js": "^2.4.20",
+    "watch": "^0.16.0"
   },
   "browser": {
     "gsap-tween-max": "./node_modules/gsap/src/minified/TweenMax.min.js"
