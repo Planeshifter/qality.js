@@ -23,6 +23,7 @@
 - "Add" by Vittorio Maria Vecchi
 - "Upload" by Thomas Le Bas
 - "Text" by Zyad Basheer
+- "Survey" by Icons8
 
 [npm-image]: https://badge.fury.io/js/qality.svg
 [npm-url]: http://badge.fury.io/js/qality
