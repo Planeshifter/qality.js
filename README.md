@@ -24,6 +24,7 @@
 - "Upload" by Thomas Le Bas
 - "Text" by Zyad Basheer
 - "Survey" by Icons8
+- "Marker" by Anton Gajdosik
 
 [npm-image]: https://badge.fury.io/js/qality.svg
 [npm-url]: http://badge.fury.io/js/qality
