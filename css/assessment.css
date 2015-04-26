@@ -147,11 +147,26 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#090909', end
 .evaluation_form .range #left_legend
 {
 position: absolute;
-right: 101%;
+right: 98%;
 top: 10px;
 width: 100px;
-height: 20px;	
+height: 20px;
+font-size: 20px;
+color: rgb(64,64,64);	
 }
+
+
+.evaluation_form .range #right_legend
+{
+position: absolute;
+left: 102%;
+top: 10px;
+width: 100px;
+height: 20px;
+font-size: 20px;	
+color: rgb(64,64,64);	
+}
+
 
 
 .evaluation_form .range .seperator
