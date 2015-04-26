@@ -9,11 +9,9 @@ WATCH ?= ./node_modules/.bin/watch
 
 .PHONY: build
 
-build: bundle.js
+build:
+	$(BROWSERIFY) lib/main.js -t $(BABELIFY) --outfile bundle.js 
 	$(UGLIFY) bundle.js --compress --output bundle.min.js
-
-bundle.js:
-	$(BROWSERIFY) lib/main.js -t $(BABELIFY) --outfile bundle.js
 
 # Watch for file changes #
 
