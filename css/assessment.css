@@ -143,6 +143,17 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#090909', end
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#090909', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */	
 }
 
+
+.evaluation_form .range #left_legend
+{
+position: absolute;
+right: 101%;
+top: 10px;
+width: 100px;
+height: 20px;	
+}
+
+
 .evaluation_form .range .seperator
 {
 position: absolute;
