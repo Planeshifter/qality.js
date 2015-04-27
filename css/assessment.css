@@ -252,6 +252,11 @@ opacity: 0.5;
 cursor: pointer;	
 }
 
+.evaluation:hover
+{
+opacity: 1;	
+}
+
 .evaluation img
 {
 width: 100%;
@@ -269,6 +274,11 @@ width: 40px;
 color: darkgray;
 opacity: 0.5;
 cursor: pointer;	
+}
+
+.player:hover
+{
+opacity: 1;	
 }
 
 .player img
@@ -290,7 +300,10 @@ color: darkgray;
 opacity: 0.5;
 }
 
-
+.graphic_tool:hover
+{
+opacity: 1;	
+}
 
 .graphic_tool img
 {
