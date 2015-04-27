@@ -9,3 +9,9 @@ reports/
 # Git #
 #######
 .git*
+
+
+# Compiled Files #
+##################
+bundle.js
+bundle.min.js
