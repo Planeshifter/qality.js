@@ -333,6 +333,7 @@ height: 48px;
 margin-top: 24px;	
 opacity: 0.5;
 margin-left: 24px;
+border:solid 2px transparent;
 }
 
 .node:hover
@@ -351,6 +352,7 @@ height: 100%;
 {
 background: darkorange;	
 opacity: 1;
+border:solid 2px black;
 }
 
 
