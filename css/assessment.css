@@ -31,13 +31,13 @@ padding-right: 8px;
 font-family: "Iceland";	
 font-size: 24px;
 text-align: center;
-color: darkgray;
+color: black;
 }
 
 
 .tool:hover
 {
-color: black;
+color: red;
 cursor: pointer;	
 }
 
@@ -333,7 +333,7 @@ height: 48px;
 margin-top: 24px;	
 opacity: 0.5;
 margin-left: 24px;
-border:solid 2px transparent;
+border:solid 2px;
 }
 
 .node:hover
