@@ -51,6 +51,17 @@ background: white;
 }
 
 
+#exam_panel .timer
+{
+position: absolute;
+right: 30px;
+bottom: 0;
+height: 200px;
+width: 300px;
+font-size: 6em;
+text-align: center;
+}
+
 
 #exam_panel .result
 {
