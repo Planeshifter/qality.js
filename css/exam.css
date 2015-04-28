@@ -93,6 +93,22 @@ background: gainsboro;
 }
 
 
+#exam_panel #ip_input
+{
+position: relative;
+margin-left: 25%;
+margin-top: 2%;
+width: 50%;
+height: auto;
+padding: 4px;
+font-size: 32px;
+z-index: 2;
+cursor: pointer;	
+outline: none;
+border:solid 3px black;
+}
+
+
 
 #exam_panel .mc_question
 {
