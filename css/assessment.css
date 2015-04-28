@@ -238,6 +238,63 @@ z-index: 4;
 
 
 
+.load
+{
+position: absolute;
+top: 12px;
+right: 320px;
+height: 40px;
+width: 40px;
+color: darkgray;
+opacity: 0.5;
+cursor: pointer;
+}
+
+.load:hover
+{
+opacity: 1;
+}
+
+.load img
+{
+width: 100%;
+height: 100%;
+}
+
+
+#load_file
+{
+position: absolute;
+width: 60%;
+height: 70%;
+left: 20%;
+top: 15%;
+background: pink;
+border:solid 3px black;
+z-index: 101;	
+}
+
+#load_file #exit
+{
+position: absolute;
+right: 20px;
+top: 20px;
+width: 48px;
+height: 48px;
+opacity: 0.3;
+}
+
+#load_file #exit:hover
+{
+opacity: 1;
+cursor: pointer;
+}
+
+#load_file #exit img
+{
+width: 100%;
+height: 100%;
+}
 
 
 
@@ -750,4 +807,13 @@ background: darkorange;
 margin-left: 10px;
 color: rgb(32,32,32);
 font-size: 20px;
+}
+
+
+.fileInput
+{
+margin-top: 20px;
+margin-left: 20px;
+width: 40%;
+height: 28px;	
 }
