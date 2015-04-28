@@ -2,6 +2,7 @@ body
 {
 font-family: Droid Sans Mono;
 overflow: hidden;
+
 }
 
 .toolbar
@@ -379,10 +380,73 @@ border:solid 2px black;
 position: absolute;
 left: 5%;
 top: 5%;
-height: 80%;
+height: auto;
 width: 90%;
-background: rgba(0,64,128, 0.3);
+background: rgba(120,190,230, 1);
+border:solid 3px black;
 }
+
+.input .tool
+{
+position: relative;
+float: left;
+width: 32px;
+height: 32px;
+margin-top: 16px;
+opacity: 0.5;
+margin-left: 24px;	
+}
+
+.input .tool:hover
+{
+opacity: 1;
+cursor: pointer;
+}
+
+
+.input .tool img
+{
+width: 100%;
+height: 100%;
+}
+
+
+.input .question
+{
+position: relative;
+margin-left: 2%;
+margin-top: 80px;
+width: 90%;
+height: auto;
+font-size: 16px;
+z-index: 2;
+cursor: pointer;
+}
+
+.input .legend
+{
+float: left;
+margin-left: 2%;
+color: rgb(64,64,64);
+margin-top: 20px;
+width: 100%;
+font-size: 14px;	
+}
+
+.input input
+{
+width: 50%;
+height: 32px;
+font-size: 24px;
+padding: 4px;
+margin-left: 2%;
+margin-top: 10px; 
+outline: none;
+border:solid 2px black;	
+background: paperwhite;
+margin-bottom: 40px;
+}
+
 
 
 .multiple_choice
