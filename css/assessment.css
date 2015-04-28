@@ -1,7 +1,7 @@
 body
 {
 font-family: Droid Sans Mono;
-overflow: hidden;	
+overflow: hidden;
 }
 
 .toolbar
@@ -28,7 +28,7 @@ height: 32px;
 width: 160px;
 padding-left: 8px;
 padding-right: 8px;
-font-family: "Iceland";	
+font-family: "Iceland";
 font-size: 24px;
 text-align: center;
 color: black;
@@ -38,7 +38,7 @@ color: black;
 .tool:hover
 {
 color: red;
-cursor: pointer;	
+cursor: pointer;
 }
 
 
@@ -50,7 +50,7 @@ top: 66px;
 height: 90%;
 left: 100%;
 background: gold;
-z-index: 7;	
+z-index: 7;
 }
 
 .evaluation_form #exit
@@ -60,25 +60,25 @@ right: 30px;
 top: 30px;
 width: 48px;
 height: 48px;
-opacity: 0.3;	
+opacity: 0.3;
 }
 
 .evaluation_form #exit:hover
 {
 opacity: 1;
-cursor: pointer;	
+cursor: pointer;
 }
 
 .evaluation_form #exit img
 {
 width: 100%;
-height: 100%;	
+height: 100%;
 }
 
 .evaluation_form h1
 {
 margin-left: 30px;
-color: rgb(32,32,32);	
+color: rgb(32,32,32);
 }
 
 .evaluation_form .tools
@@ -96,7 +96,7 @@ bottom: 26%;
 float: left;
 margin-left: 10px;
 width: 200px;
-font-size: 14px;	
+font-size: 14px;
 }
 
 
@@ -107,19 +107,19 @@ float: left;
 margin-top: -6px;
 width: 24px;
 height: 24px;
-opacity: 0.5;	
+opacity: 0.5;
 }
 
 
 .evaluation_form .tools .tool:hover
 {
-opacity: 1;	
+opacity: 1;
 }
 .evaluation_form .tools .tool img
 {
 width: 100%;
 height: 100%;
-cursor: pointer;	
+cursor: pointer;
 }
 
 
@@ -133,7 +133,7 @@ width: 50%;
 height: 50%;
 top: 15%;
 display: none;
-border:solid 3px black;	
+border:solid 3px black;
 }
 
 
@@ -161,7 +161,7 @@ top: 10px;
 width: 100px;
 height: 20px;
 font-size: 20px;
-color: rgb(64,64,64);	
+color: rgb(64,64,64);
 }
 
 
@@ -172,8 +172,8 @@ left: 102%;
 top: 10px;
 width: 100px;
 height: 20px;
-font-size: 20px;	
-color: rgb(64,64,64);	
+font-size: 20px;
+color: rgb(64,64,64);
 }
 
 
@@ -182,7 +182,7 @@ color: rgb(64,64,64);
 {
 position: absolute;
 left: 0;
-top: -50%;	
+top: -50%;
 width: 6px;
 height: 150%;
 background: black;
@@ -200,7 +200,7 @@ top: -15px;
 left: -15px;
 width: 36px;
 height: 15px;
-background: black;	
+background: black;
 color: white;
 font-size: 10px;
 text-align: center;
@@ -211,7 +211,7 @@ text-align: center;
 
 .evaluation_form .range .eval_range
 {
-float: left;	
+float: left;
 position: relative;
 width: 33.333%;
 margin-top: 8px;
@@ -232,7 +232,7 @@ height: 120%;
 top: -20%;
 width: 8px;
 color: blue;
-z-index: 4;	
+z-index: 4;
 }
 
 
@@ -249,18 +249,18 @@ height: 40px;
 width: 40px;
 color: darkgray;
 opacity: 0.5;
-cursor: pointer;	
+cursor: pointer;
 }
 
 .evaluation:hover
 {
-opacity: 1;	
+opacity: 1;
 }
 
 .evaluation img
 {
 width: 100%;
-height: 100%;	
+height: 100%;
 }
 
 
@@ -273,18 +273,18 @@ height: 40px;
 width: 40px;
 color: darkgray;
 opacity: 0.5;
-cursor: pointer;	
+cursor: pointer;
 }
 
 .player:hover
 {
-opacity: 1;	
+opacity: 1;
 }
 
 .player img
 {
 width: 100%;
-height: 100%;	
+height: 100%;
 }
 
 
@@ -302,13 +302,13 @@ opacity: 0.5;
 
 .graphic_tool:hover
 {
-opacity: 1;	
+opacity: 1;
 }
 
 .graphic_tool img
 {
 width: 100%;
-height: 100%;	
+height: 100%;
 }
 
 
@@ -319,7 +319,7 @@ left: 0;
 top: 64px;
 width: 100%;
 height: 92%;
-background: rgb(222,222,222);	
+background: rgb(222,222,222);
 }
 
 .sequence
@@ -327,23 +327,28 @@ background: rgb(222,222,222);
 position: absolute;
 left: 0;
 bottom: 0px;
-min-width: 100%;
+width: 100%;
 float: left;
 border-top:solid 3px black;
 
 height: 96px;
 background: white;
 z-index: 8;
-overflow-y: auto;
+overflow-x: auto;
+}
+
+#sequence-inner
+{
+width: 100%;
 }
 
 .node
 {
 position: relative;
-float: left; 
+float: left;
 width: 48px;
 height: 48px;
-margin-top: 24px;	
+margin-top: 24px;
 opacity: 0.5;
 margin-left: 24px;
 border:solid 2px;
@@ -351,19 +356,19 @@ border:solid 2px;
 
 .node:hover
 {
-opacity: 1;	
+opacity: 1;
 }
 
 .node img
 {
 width: 100%;
-height: 100%;	
+height: 100%;
 }
 
 
 .active_node
 {
-background: darkorange;	
+background: darkorange;
 opacity: 1;
 border:solid 2px black;
 }
@@ -376,7 +381,7 @@ left: 5%;
 top: 5%;
 height: 80%;
 width: 90%;
-background: rgba(0,64,128, 0.3);	
+background: rgba(0,64,128, 0.3);
 }
 
 
@@ -389,32 +394,32 @@ height: auto;
 width: 90%;
 background: GreenYellow;
 border:solid 3px black;
-/* background: rgba(0,64,128, 0.3); */	
+/* background: rgba(0,64,128, 0.3); */
 }
 
 
 .multiple_choice .tool
 {
 position: relative;
-float: left; 
+float: left;
 width: 32px;
 height: 32px;
-margin-top: 16px;	
+margin-top: 16px;
 opacity: 0.5;
-margin-left: 24px;	
+margin-left: 24px;
 }
 
 .multiple_choice .tool:hover
 {
 opacity: 1;
-cursor: pointer;	
+cursor: pointer;
 }
 
 
 .multiple_choice .tool img
 {
 width: 100%;
-height: 100%;	
+height: 100%;
 }
 
 
@@ -427,7 +432,7 @@ width: 90%;
 height: auto;
 font-size: 16px;
 z-index: 2;
-cursor: pointer;	
+cursor: pointer;
 }
 
 
@@ -441,7 +446,7 @@ width: 96%;
 height: 80%;
 border:solid 1px darkgray;
 z-index: 2;
-cursor: pointer;	
+cursor: pointer;
 }
 
 
@@ -464,20 +469,20 @@ position: absolute;
 width: 24px;
 height: 24px;
 right: 10px;
-top: 10px;	
+top: 10px;
 cursor: pointer;
 opacity: 0.5;
 }
 
 .setting #exit:hover
 {
-opacity: 1;	
+opacity: 1;
 }
 
 .setting #exit img
 {
 width: 100%;
-height: 100%;	
+height: 100%;
 }
 
 
@@ -488,7 +493,7 @@ top: 6%;
 left: 5%;
 width: 90%;
 height: 88%;
-background: white;	
+background: white;
 }
 
 
@@ -499,7 +504,7 @@ margin-left: 2%;
 width: 90%;
 margin-right: 5%;
 font-size: 12px;
-color: darkgray;	
+color: darkgray;
 }
 
 .setting input
@@ -510,7 +515,7 @@ width: 90%;
 margin-right: 5%;
 padding-left: 3px;
 height: 24px;
-font-size: 18px;	
+font-size: 18px;
 outline: none;
 border:solid 1px darkgray;
 }
@@ -518,7 +523,7 @@ border:solid 1px darkgray;
 .setting select
 {
 margin-top: 8px;
-margin-left: 2%;	
+margin-left: 2%;
 }
 
 
@@ -531,7 +536,7 @@ width: 20%;
 text-align: center;
 font-family: Droid Sans Mono;
 color: black;
-background: gainsboro;	
+background: gainsboro;
 border:solid 2px black;
 padding: 5px;
 }
@@ -540,7 +545,7 @@ padding: 5px;
 {
 margin-left: 2%;
 border:solid 1px darkgray;
-padding: 3px;	
+padding: 3px;
 }
 
 
@@ -548,7 +553,7 @@ padding: 3px;
 {
 cursor: pointer;
 color: white;
-background: darkorange;	
+background: darkorange;
 }
 
 .setting #delete
@@ -560,7 +565,7 @@ width: 20%;
 text-align: center;
 font-family: Droid Sans Mono;
 color: white;
-background: red;	
+background: red;
 border:solid 2px black;
 padding: 5px;
 }
@@ -569,7 +574,7 @@ padding: 5px;
 {
 cursor: pointer;
 color: white;
-background: darkorange;	
+background: darkorange;
 }
 
 
@@ -590,20 +595,20 @@ z-index: 2;
 {
 margin-left: 96%;
 margin-top: 0.5%;
-width: 3%;	
+width: 3%;
 opacity: 0.5;
 cursor: pointer;
 }
 
 .prompt #exit:hover
 {
-opacity: 1;	
+opacity: 1;
 }
 
 .prompt #exit img
 {
 width: 100%;
-height: auto;	
+height: auto;
 }
 
 
@@ -614,7 +619,7 @@ margin-left: 5%;
 width: 90%;
 margin-right: 5%;
 font-size: 12px;
-color: darkgray;	
+color: darkgray;
 }
 
 .prompt input
@@ -625,7 +630,7 @@ padding-left: 6px;
 width: 90%;
 margin-right: 5%;
 height: 22px;
-font-size: 16px;	
+font-size: 16px;
 outline: none;
 border:solid 1px darkgray;
 }
@@ -640,7 +645,7 @@ width: 20%;
 text-align: center;
 font-family: Droid Sans Mono;
 color: black;
-background: gainsboro;	
+background: gainsboro;
 border:solid 2px black;
 padding: 5px;
 }
@@ -649,7 +654,7 @@ padding: 5px;
 {
 cursor: pointer;
 color: white;
-background: darkorange;	
+background: darkorange;
 }
 
 
@@ -662,7 +667,7 @@ width: 20%;
 text-align: center;
 font-family: Droid Sans Mono;
 color: white;
-background: red;	
+background: red;
 border:solid 2px black;
 padding: 5px;
 }
@@ -671,15 +676,14 @@ padding: 5px;
 {
 cursor: pointer;
 color: white;
-background: darkorange;	
+background: darkorange;
 }
 
 
 
 .label
 {
-margin-left: 10px;	
+margin-left: 10px;
 color: rgb(32,32,32);
 font-size: 20px;
 }
-
