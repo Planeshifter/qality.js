@@ -25,6 +25,7 @@
 - "Text" by Zyad Basheer
 - "Survey" by Icons8
 - "Marker" by Anton Gajdosik
+- "Box" by Arthur Schmitt
 
 [npm-image]: https://badge.fury.io/js/qality.svg
 [npm-url]: http://badge.fury.io/js/qality
