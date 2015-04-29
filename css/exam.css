@@ -93,7 +93,7 @@ background: gainsboro;
 }
 
 
-#exam_panel #ip_input
+#exam_panel .ip_input
 {
 position: relative;
 margin-left: 25%;
