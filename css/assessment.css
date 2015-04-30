@@ -5,6 +5,16 @@ overflow: hidden;
 
 }
 
+
+#fixed_body
+{
+position: fixed;
+left: 0;
+top: 0; 
+width: 100%;
+height: 100%;	
+}
+
 .toolbar
 {
 position: absolute;
@@ -272,7 +282,23 @@ top: 15%;
 background: pink;
 border:solid 3px black;
 z-index: 101;	
+
+
 }
+
+#load_file #Backing
+{
+position: absolute;
+left: 0;
+right: 0;
+top: 8%;
+margin:auto;
+height: 90%;
+width: auto;
+opacity: 0.2;	
+}
+
+
 
 #load_file #exit
 {
