@@ -286,6 +286,55 @@ z-index: 101;
 
 }
 
+#load_file hr
+{
+margin-top: 20px;
+margin-bottom: 20px;	
+}
+
+
+#load_file .label
+{
+margin-left: 5%;
+color: rgb(32,32,32);
+font-size: 12px;
+}
+
+
+#load_file textarea
+{
+margin-left: 5%;
+width: 60%;
+height: 60%;
+padding: 8px;
+z-index: 5;
+background: white;	
+}
+
+#load_file #submit
+{
+margin-left: 5%; 
+margin-top: 10px;
+width: 20%;
+
+text-align: center;
+font-family: Droid Sans Mono;
+color: black;
+background: gainsboro;
+border:solid 2px black;
+padding: 5px;
+}
+
+
+#load_file #submit:hover
+{
+cursor: pointer;
+color: white;
+background: darkorange;
+}
+
+
+
 #load_file #Backing
 {
 position: absolute;
@@ -295,7 +344,7 @@ top: 8%;
 margin:auto;
 height: 90%;
 width: auto;
-opacity: 0.2;	
+opacity: 0.12;	
 }
 
 
