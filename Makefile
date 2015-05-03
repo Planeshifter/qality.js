@@ -20,9 +20,9 @@ BROWSER ?=  xdg-open
 .PHONY: build
 
 build:
-	$(BROWSERIFY) lib/main.js -t $(BABELIFY) --outfile QAwriter.js
+	$(BROWSERIFY) lib/writer.js -t $(BABELIFY) --outfile QAwriter.js
 	$(UGLIFY) QAwriter.js --compress --output QAwriter.min.js
-	$(BROWSERIFY) lib/exam.js -t $(BABELIFY) --outfile QAreader.js
+	$(BROWSERIFY) lib/reader.js -t $(BABELIFY) --outfile QAreader.js
 	$(UGLIFY) QAreader.js --compress --output QAreader.min.js
 
 # Start server #
