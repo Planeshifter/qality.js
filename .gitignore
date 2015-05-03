@@ -26,5 +26,7 @@ build/Release
 node_modules
 
 # browserify output
-bundle.js
-bundle.min.js
+QAreader.js
+QAreader.min.js
+QAwriter.js
+QAwriter.min.js

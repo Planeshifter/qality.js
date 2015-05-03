@@ -4,19 +4,34 @@ BROWSERIFY ?= ./node_modules/.bin/browserify
 BABELIFY ?= ./node_modules/babelify
 UGLIFY ?= ./node_modules/.bin/uglifyjs
 WATCH ?= ./node_modules/.bin/watch
+HTTP_SERVER ?= ./node_modules/.bin/http-server
 
 # JSHINT #
 
 JSHINT ?= ./node_modules/.bin/jshint
 JSHINT_REPORTER ?= ./node_modules/jshint-stylish/stylish.js
 
+# Browser #
+
+BROWSER ?=  xdg-open
+
 # Build process #
 
 .PHONY: build
 
 build:
-	$(BROWSERIFY) lib/main.js -t $(BABELIFY) --outfile bundle.js
-	$(UGLIFY) bundle.js --compress --output bundle.min.js
+	$(BROWSERIFY) lib/main.js -t $(BABELIFY) --outfile QAwriter.js
+	$(UGLIFY) QAwriter.js --compress --output QAwriter.min.js
+	$(BROWSERIFY) lib/exam.js -t $(BABELIFY) --outfile QAreader.js
+	$(UGLIFY) QAreader.js --compress --output QAreader.min.js
+
+# Start server #
+
+.PHONY: server
+
+server:
+	$(BROWSER) "http://localhost:8000"
+	$(HTTP_SERVER) -p 8000
 
 # Watch for file changes #
 
