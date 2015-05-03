@@ -1,4 +1,4 @@
-#exam_panel
+.exam_panel
 {
 position: absolute;
 left: 0;
@@ -8,11 +8,12 @@ width: 100%;
 height: 100%;
 z-index: 100;
 
-font-family: Droid Sans Mono;	
+font-size: 0.75em;
+font-family: Droid Sans Mono;
 overflow: hidden;
 }
 
-#exam_panel #exit
+.exam_panel #exit
 {
 position: absolute;
 right: 20px;
@@ -24,20 +25,20 @@ z-index: 100;
 }
 
 
-#exam_panel #exit:hover
+.exam_panel #exit:hover
 {
 cursor: pointer;
-opacity: 1;	
+opacity: 1;
 }
 
-#exam_panel #exit img
+.exam_panel #exit img
 {
 width: 100%;
-height: 100%;	
+height: 100%;
 }
 
 
-#exam_panel .node_area
+.exam_panel .node_area
 {
 position: absolute;
 left: 0%;
@@ -51,19 +52,19 @@ background: white;
 }
 
 
-#exam_panel .timer
+.exam_panel .timer
 {
 position: absolute;
 right: 30px;
 bottom: 0;
 height: 200px;
 width: 300px;
-font-size: 6em;
+font-size: 3em;
 text-align: center;
 }
 
 
-#exam_panel .result
+.exam_panel .result
 {
 position: absolute;
 left: 0;
@@ -72,28 +73,28 @@ width: 100%;
 height: 95%;
 background: white;
 z-index: 5;
-color: darkblue;	
+color: darkblue;
 }
 
 
-#exam_panel .result h1
+.exam_panel .result h1
 {
-text-align: center;	
+text-align: center;
 }
 
 
-#exam_panel .result #assessment
+.exam_panel .result #assessment
 {
 position: absolute;
 left: 10%;
 top: 10%;
 width: 80%;
 height: 80%;
-background: gainsboro;	
+background: gainsboro;
 }
 
 
-#exam_panel .ip_input
+.exam_panel .ip_input
 {
 position: relative;
 margin-left: 25%;
@@ -101,53 +102,51 @@ margin-top: 2%;
 width: 50%;
 height: auto;
 padding: 4px;
-font-size: 32px;
+font-size: 2em;
 z-index: 2;
-cursor: pointer;	
+cursor: pointer;
 outline: none;
 border:solid 3px black;
 }
 
 
 
-#exam_panel .mc_question
+.exam_panel .mc_question
 {
 position: relative;
 left: 2%;
 top: 2%;
 width: 90%;
 height: auto;
-font-size: 32px;
+font-size: 2em;
 z-index: 2;
-cursor: pointer;	
+cursor: pointer;
 }
 
 
-#exam_panel input[type="radio"]
+.exam_panel input[type="radio"]
 {
-float: left; 
+float: left;
 width: 24px;
 height: 24px;
-	
 }
 
-#exam_panel .mc_answer
+.exam_panel .mc_answer
 {
 position: relative;
 float: left;
-width: 97%;	
+width: 97%;
 }
 
 
-
-#exam_panel #answers
+.exam_panel .answers
 {
 position: relative;
 margin-left: 4%;
 margin-top: 30px;
 width: 90%;
 height: auto;
-font-size: 24px;
+font-size: 1.5em;
 z-index: 2;
-cursor: pointer;	
+cursor: pointer;
 }

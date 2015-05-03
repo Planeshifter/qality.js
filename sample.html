@@ -7,10 +7,18 @@
 
 		<link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono|Cutive+Mono|Iceland|Droid+Sans+Mono|Oswald|Share+Tech+Mono|Open+Sans:400,600' rel='stylesheet' type='text/css'>
 
-		<script src="client.min.js"></script>
+		<script src="QAreader.js"></script>
 
-		<link href="css/exam.css" media="screen" rel="stylesheet" type="text/css" />
-
+		<script>
+			window.x = new Examination.Session(
+				{"sequence":{"nodes":[{"id":0,"type":"multiple_choice","right_value":-1,"question":"QUESTION","transition_in":"dynamic","transition_out":"dynamic","answers":[{"text":"A_0","points":1,"assessment":"ASSESSMENT"},{"text":"A_1","points":1,"assessment":"ASSESSMENT"}],"duration":0,"setting":null,"chosen":1},{"id":1,"type":"input","question":"UNKNOWN QUESTION","right_answer":"unknown","transition_in":"dynamic","transition_out":"dynamic","points":1,"duration":"30","background":"none","actual_time":27550,"given_answer":"ddsdikhudus","chosen":-1},{"id":2,"type":"multiple_choice","right_value":-1,"question":"QUESTION","transition_in":"dynamic","transition_out":"dynamic","answers":[{"text":"A_0","points":1,"assessment":"ASSESSMENT"},{"text":"A_1","points":1,"assessment":"ASSESSMENT"}],"duration":0,"setting":null}]},"evaluation":{"seperator":[{"start":0.33,"id":0},{"start":0.66,"id":1}],"sorted":[],"ranges":[{"id":0,"text":"RANGE 1","start":0,"end":0.33},{"id":1,"text":"RANGE 2","start":0.33,"end":0.66},{"id":2,"text":"RANGE 3","start":0.66,"end":1}]}},
+				{"div":"TEST","exit":true}
+			);
+			window.y = new Examination.Session(
+				{"sequence":{"nodes":[{"id":0,"type":"multiple_choice","right_value":-1,"question":"QUESTION","transition_in":"dynamic","transition_out":"dynamic","answers":[{"text":"A_0","points":1,"assessment":"ASSESSMENT"},{"text":"A_1","points":1,"assessment":"ASSESSMENT"}],"duration":0,"setting":null,"chosen":1},{"id":1,"type":"input","question":"UNKNOWN QUESTION","right_answer":"unknown","transition_in":"dynamic","transition_out":"dynamic","points":1,"duration":"30","background":"none","actual_time":27550,"given_answer":"ddsdikhudus","chosen":-1},{"id":2,"type":"multiple_choice","right_value":-1,"question":"QUESTION","transition_in":"dynamic","transition_out":"dynamic","answers":[{"text":"A_0","points":1,"assessment":"ASSESSMENT"},{"text":"A_1","points":1,"assessment":"ASSESSMENT"}],"duration":0,"setting":null}]},"evaluation":{"seperator":[{"start":0.33,"id":0},{"start":0.66,"id":1}],"sorted":[],"ranges":[{"id":0,"text":"RANGE 1","start":0,"end":0.33},{"id":1,"text":"RANGE 2","start":0.33,"end":0.66},{"id":2,"text":"RANGE 3","start":0.66,"end":1}]}},
+				{"div":"TEST2","exit":true}
+			);
+		</script>
 
 		<style media="screen" type="text/css">
 
