@@ -44,6 +44,22 @@ new qality.Session(<qa object>, {
 
 ### Running the Editor
 
+A hosted version of the editor is accessible under the following link: [QAlity Frontend](http://qality.philipp-burckhardt.com/). 
+
+To run your own version, clone this repository and run 
+
+```bash
+make build
+```
+
+to compile the JavaScript necessary for running the frontend. The command 
+
+```bash
+make server
+```
+
+starts a server at port 8000 and should automatically open the frontend in a browser. 
+
 ### API
 
 ## Tests:
