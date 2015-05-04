@@ -31,9 +31,9 @@ npm install qality
 Use [browserify](https://github.com/substack/node-browserify) and render a quiz with only a few lines:
 
 ```javascript
-var qality = require( 'qality' );
+var QAlity = require( 'qality' );
 
-new qality.Session(<qa object>, {
+new QAlity(<qa object>, {
   "div":"<div to render to>"
 }, <optional callback>);
 ```
