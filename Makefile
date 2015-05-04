@@ -25,8 +25,9 @@ BUILDDIR ?= build
 deploy:	build
 	mkdir $(BUILDDIR)
 	cp -r img/ $(BUILDDIR)/img
-	cp -r img/ $(BUILDDIR)/css
+	cp -r css/ $(BUILDDIR)/css
 	cp index.html $(BUILDDIR)/index.html
+	cp CNAME $(BUILDDIR)/CNAME
 	cp QAwriter.min.js $(BUILDDIR)/QAwriter.min.js
 	cd ./build && \
 	git init . && \
@@ -51,8 +52,7 @@ build:
 .PHONY: server
 
 server:
-	cd ./build && \
-	$(BROWSER) "http://localhost:8000" && \
+	$(BROWSER) "http://localhost:8000"
 	$(HTTP_SERVER) -p 8000
 
 # Watch for file changes #
