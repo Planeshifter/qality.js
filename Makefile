@@ -15,6 +15,27 @@ JSHINT_REPORTER ?= ./node_modules/jshint-stylish/stylish.js
 
 BROWSER ?=  xdg-open
 
+# Build folder #
+BUILDDIR ?= build
+
+# Deploy #
+
+.PHONY: deploy
+
+deploy:	build
+	mkdir $(BUILDDIR)
+	cp -r img/ $(BUILDDIR)/img
+	cp -r img/ $(BUILDDIR)/css
+	cp index.html $(BUILDDIR)/index.html
+	cp QAwriter.min.js $(BUILDDIR)/QAwriter.min.js
+	cd ./build && \
+	git init . && \
+	git add . && \
+	git commit -m "deploy page"; \
+	git push "https://github.com/Planeshifter/qality.js.git" master:gh-pages --force && \
+	rm -rf .git
+	rm -rf build
+
 # Build process #
 
 .PHONY: build
@@ -30,7 +51,8 @@ build:
 .PHONY: server
 
 server:
-	$(BROWSER) "http://localhost:8000"
+	cd ./build && \
+	$(BROWSER) "http://localhost:8000" && \
 	$(HTTP_SERVER) -p 8000
 
 # Watch for file changes #
@@ -64,3 +86,9 @@ install:
 clean:
 	rm bundle.js
 	rm bundle.min.js
+
+# PRINT #
+.PHONY: print-%
+
+print-%:
+	@echo $*=$($*)
