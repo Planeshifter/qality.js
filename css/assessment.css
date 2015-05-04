@@ -746,7 +746,8 @@ height: 75%;
 background: white;
 /* box-shadow: 0 2px 2px rgba(0,0,0,0.7); */
 border:solid 3px black;
-z-index: 2;
+z-index: 20;
+overflow-y: auto;
 }
 
 .setting #exit
@@ -833,6 +834,8 @@ padding: 5px;
 margin-left: 2%;
 border:solid 1px darkgray;
 padding: 3px;
+width: 90%;
+font-size: 1.2em;
 }
 
 

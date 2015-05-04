@@ -8,7 +8,7 @@ width: 100%;
 height: 100%;
 z-index: 100;
 
-font-size: 0.75em;
+font-size: 1em;
 font-family: Droid Sans Mono;
 overflow: hidden;
 }
@@ -73,13 +73,16 @@ width: 100%;
 height: 95%;
 background: white;
 z-index: 5;
-color: darkblue;
+color: rgb(64,64,64);
 }
 
 
 .exam_panel .result h1
 {
 text-align: center;
+text-decoration: underline;
+text-shadow: 1px 1px rgba(0,0,0, 0.2);
+color: black;
 }
 
 
@@ -90,6 +93,12 @@ left: 10%;
 top: 10%;
 width: 80%;
 height: 80%;
+}
+
+
+.phigh
+{
+color: darkorange;	
 }
 
 
@@ -126,8 +135,11 @@ cursor: pointer;
 .exam_panel input[type="radio"]
 {
 float: left;
-width: 24px;
-height: 24px;
+width: 1.5em;
+height: 1.5em;
+
+background: orange;
+
 }
 
 .exam_panel .mc_answer
@@ -135,6 +147,7 @@ height: 24px;
 position: relative;
 float: left;
 width: 97%;
+margin-left: 2%;
 }
 
 
