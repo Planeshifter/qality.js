@@ -8,6 +8,46 @@
 
 > Multiple-Choice QA System for JavaScript
 
+## Features:
+
+- **Versatile**: Several question types: *multiple choice*, *input fields*, *timed and untimed questions*
+- **Evaluation system**: Provide result scores and targeted feedback
+- **Animations**: customizable animations based on the performant [gsap](http://greensock.com/gsap) library
+- **Visual Editor**: create quizzes interactively using a visual frontend
+- **Markdown support**: implemented via [markdown-it](https://markdown-it.github.io/)
+- **Math support**: blazingly fast rendering via [KaTeX](http://khan.github.io/KaTeX/)
+- **Customizable Design**: change appearance of all elements via CSS
+
+## Installation:
+
+#### CDN 
+
+#### npm
+
+```bash 
+npm install qality
+```
+
+Use [browserify](https://github.com/substack/node-browserify) and render a quiz with only a few lines:
+
+```javascript
+var qality = require( 'qality' );
+
+new qality.Session(<qa object>, {
+  "div":"<div to render to>"
+}, <optional callback>);
+```
+
+#### bower
+
+## Usage:
+
+### Running the Editor
+
+### API
+
+## Tests:
+
 ---
 ### License
 
@@ -41,3 +81,7 @@
 
 [dependencies-image]: http://img.shields.io/david/Planeshifter/qality.js.svg
 [dependencies-url]: https://david-dm.org/Planeshifter/qality.js
+
+### Copyright
+
+Copyright &copy; 2015. Philipp Burckhardt.
