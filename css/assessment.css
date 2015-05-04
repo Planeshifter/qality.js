@@ -333,10 +333,32 @@ height: 100%;
 {
 position: absolute;
 left: 5%;
-top: 10%;
+top: 12%;
 height: 80%;
 width: 90%;
 overflow-y: auto;	
+overflow-x: none;
+}
+
+#download
+{
+position: absolute;
+left: 4%;
+top: 10px;
+width: 20%;
+text-align: center;
+font-family: Droid Sans Mono;
+color: black;
+background: gainsboro;
+border:solid 2px black;
+padding: 5px;
+}
+
+#download:hover
+{
+cursor: pointer;
+color: white;
+background: darkorange;
 }
 
 
