@@ -1,0 +1,29 @@
+{
+  "name": "qality",
+  "version": "0.0.6",
+  "homepage": "https://github.com/Planeshifter/qality.js.git",
+  "authors": [
+    {
+      "name":"Philipp Burckhardt",
+      "email":"pburckhardt@outlook.com"
+    }
+  ],
+  "description": "Multiple-Choice QA System for JavaScript",
+  "main": "QAreader.min.js",
+  "keywords": [
+    "question-answer",
+    "multiple-choice",
+    "examination",
+    "quiz"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+	"package.json",
+	"Makefile"
+  ]
+}
