@@ -18,16 +18,15 @@
   ],
   "license": "MIT",
   "ignore": [
-	"lib"
+    "lib"
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
     "tests",
-	"img",
-	"css",
-	"package.json",
-	"index.html",
-	"Makefile"
+    "img",
+    "package.json",
+    "index.html",
+    "Makefile"
   ]
 }
