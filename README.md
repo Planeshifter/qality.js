@@ -8,6 +8,8 @@
 
 > Multiple-Choice QA System for JavaScript
 
+![editor] (http://burckhardt.ludicmedia.de/Quiz01.png)
+
 ## Features:
 
 - **Versatile**: Several question types: *multiple choice*, *input fields*, *timed and untimed questions*
