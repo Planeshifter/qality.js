@@ -26,7 +26,8 @@ build/Release
 node_modules
 
 # browserify output
-QAreader.js
-QAreader.min.js
-QAwriter.js
-QAwriter.min.js
+dist/QAwriter.js
+dist/QAwriter.min.js
+
+# node output
+index.js
