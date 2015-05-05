@@ -2,6 +2,7 @@
 
 BROWSERIFY ?= ./node_modules/.bin/browserify
 BABELIFY ?= ./node_modules/babelify
+BABEL ?= ./node_modules/.bin/babel
 UGLIFY ?= ./node_modules/.bin/uglifyjs
 WATCH ?= ./node_modules/.bin/watch
 HTTP_SERVER ?= ./node_modules/.bin/http-server
@@ -41,11 +42,18 @@ deploy:	build
 
 .PHONY: build
 
-build:
-	$(BROWSERIFY) lib/writer.js -t $(BABELIFY) --outfile QAwriter.js
-	$(UGLIFY) QAwriter.js --compress --output QAwriter.min.js
+build: build-reader build-writer build-node
+
+build-reader:
 	$(BROWSERIFY) lib/reader.js -t $(BABELIFY) --outfile QAreader.js
 	$(UGLIFY) QAreader.js --compress --output QAreader.min.js
+
+build-writer:
+	$(BROWSERIFY) lib/writer.js -t $(BABELIFY) --outfile QAwriter.js
+	$(UGLIFY) QAwriter.js --compress --output QAwriter.min.js
+
+build-node:
+	$(BABEL) lib/ -o index.js
 
 # Start server #
 

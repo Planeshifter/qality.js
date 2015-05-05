@@ -2,7 +2,7 @@
   "name": "qality",
   "version": "0.0.6",
   "description": "Multiple-Choice QA System for JavaScript",
-  "main": "QAreader.min.js",
+  "main": "index.js",
   "scripts": {
     "test": "mocha test",
     "prepublish": "make build"
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/Planeshifter/QA.js#readme",
   "dependencies": {
+    "babel": "^5.2.12",
     "gsap": "^1.16.1",
     "http-server": "^0.8.0",
     "jquery": "^2.1.3",
