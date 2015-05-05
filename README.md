@@ -40,6 +40,10 @@ new QAlity(<qa object>, {
 
 #### bower
 
+```
+bower install qality
+```
+
 ## Usage:
 
 ### Running the Editor
@@ -86,7 +90,7 @@ starts a server at port 8000 and should automatically open the frontend in a bro
 [npm-image]: https://badge.fury.io/js/qality.svg
 [npm-url]: http://badge.fury.io/js/qality
 
-[bower-image]:  https://img.shields.io/bower/v/qality.js.svg
+[bower-image]:  https://img.shields.io/bower/v/qality.svg
 [bower-url]: https://github.com/Planeshifter/qality.js.git
 
 [travis-image]: https://travis-ci.org/Planeshifter/qality.js.svg
