@@ -44,6 +44,24 @@ new QAlity(<qa object>, {
 bower install qality
 ```
 
+Require the necessary files in your `index.html` document:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Load QA Reader, which exposes constructor function QAlity to the window object -->
+    <script src="bower_components/qality/dist/QAreader.min.js"></script>
+    <!-- Load the standard CSS or provide your own -->
+    <link href="bower_components/qality/css/exam.css" media="screen" 
+      rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <!-- your code comes here -->
+  </body>
+</html>
+```
+
 ## Usage:
 
 ### Running the Editor
