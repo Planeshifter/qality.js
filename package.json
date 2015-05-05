@@ -25,7 +25,6 @@
   "dependencies": {
     "gsap": "^1.16.1",
     "jquery": "^2.1.3",
-    "jquery-ui": "^1.10.5",
     "katex": "^0.2.0",
     "markdown-it": "^4.2.0"
   },
