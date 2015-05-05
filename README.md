@@ -8,7 +8,7 @@
 
 > Multiple-Choice QA System for JavaScript
 
-![editor] (http://burckhardt.ludicmedia.de/Quiz01.png)
+
 
 ## Features:
 
@@ -93,6 +93,8 @@ Require the necessary files in your `index.html` document:
 ### Running the Editor
 
 A hosted version of the editor is accessible under the following link: [QAlity Frontend](http://qality.philipp-burckhardt.com/).
+
+![editor] (http://burckhardt.ludicmedia.de/Quiz01.png)
 
 To run your own version, clone this repository and run
 
