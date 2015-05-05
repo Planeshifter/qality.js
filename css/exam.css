@@ -104,7 +104,7 @@ color: darkorange;
 
 .pcaps
 {
-font-variant:small-caps;	
+color: darkred;	
 }
 
 
@@ -145,7 +145,7 @@ float: left;
 width: 1.5em;
 height: 1.5em;
 
-background: orange;
+cursor: pointer;
 
 }
 
@@ -154,8 +154,7 @@ background: orange;
 position: relative;
 float: left;
 width: 97%;
-margin-left: 2%;
-font-family: 1.5em;
+margin-left: 2.5%;
 }
 
 
@@ -169,4 +168,32 @@ height: auto;
 font-size: 1.5em;
 z-index: 2;
 cursor: pointer;
+
+}
+
+
+.exam_panel .answer
+{
+position: relative;
+margin-left: 1%;
+font-size: 1.5em;
+color: black;
+}
+
+
+.exam_panel .Evaluation
+{
+margin-left: 3%;
+font-weight: 400;
+font-size: 0.9em;
+line-height: 1.2em;
+}
+
+
+.exam_panel .Assessment
+{
+margin-left: 3%;
+font-weight: 400;
+font-size: 0.9em;
+line-height: 1.2em;
 }
