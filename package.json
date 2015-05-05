@@ -23,15 +23,15 @@
   },
   "homepage": "https://github.com/Planeshifter/QA.js#readme",
   "dependencies": {
-    "babel": "^5.2.12",
     "gsap": "^1.16.1",
-    "http-server": "^0.8.0",
     "jquery": "^2.1.3",
     "jquery-ui": "^1.10.5",
     "katex": "^0.2.0",
     "markdown-it": "^4.2.0"
   },
   "devDependencies": {
+    "http-server": "^0.8.0",
+    "babel": "^5.2.12",
     "babelify": "^6.0.2",
     "browserify": "^10.0.0",
     "chai": "^2.2.0",

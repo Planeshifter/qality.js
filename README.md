@@ -20,11 +20,35 @@
 
 ## Installation:
 
-#### CDN 
+#### CDN
+
+Include the following two lines in your `head` and you are ready to go:
+```html
+<script src="https://cdn.rawgit.com/Planeshifter/qality.js/master/dist/QAreader.min.js"</script>
+<link href="https://cdn.rawgit.com/Planeshifter/qality.js/master/css/exam.css" media="screen" rel="stylesheet" type="text/css"/>
+```
+
+See the following minimal working example:
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+      <script src="https://cdn.rawgit.com/Planeshifter/qality.js/master/dist/QAreader.min.js"></script>
+      <link href="https://cdn.rawgit.com/Planeshifter/qality.js/master/css/exam.css" media="screen" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <script>
+        new QAlity({"sequence":{"nodes":[{"id":0,"type":"input","question":"Who is the current president of the United States?","right_answer":"Barack Obama","transition_in":"dynamic","transition_out":"dynamic","points":1,"duration":"0","mathOptions":[{"left":"$$","right":"$$","display":true},{"left":"\\[","right":"\\]","display":true},{"left":"\\(","right":"\\)","display":false}],"background":"none"}]},"evaluation":{"seperator":[{"start":0.33,"id":0},{"start":0.66,"id":1}],"sorted":[],"ranges":[{"id":0,"text":"RANGE 1","start":0,"end":0.33},{"id":1,"text":"RANGE 2","start":0.33,"end":0.66},{"id":2,"text":"RANGE 3","start":0.66,"end":1}]}},
+        {"div":"quizHolder"});
+    </script>
+    <div id = "quizHolder"></div>
+  </body>
+</html>
+```
 
 #### npm
 
-```bash 
+```bash
 npm install qality
 ```
 
@@ -53,7 +77,7 @@ Require the necessary files in your `index.html` document:
     <!-- Load QA Reader, which exposes constructor function QAlity to the window object -->
     <script src="bower_components/qality/dist/QAreader.min.js"></script>
     <!-- Load the standard CSS or provide your own -->
-    <link href="bower_components/qality/css/exam.css" media="screen" 
+    <link href="bower_components/qality/css/exam.css" media="screen"
       rel="stylesheet" type="text/css"/>
   </head>
   <body>
@@ -66,21 +90,21 @@ Require the necessary files in your `index.html` document:
 
 ### Running the Editor
 
-A hosted version of the editor is accessible under the following link: [QAlity Frontend](http://qality.philipp-burckhardt.com/). 
+A hosted version of the editor is accessible under the following link: [QAlity Frontend](http://qality.philipp-burckhardt.com/).
 
-To run your own version, clone this repository and run 
+To run your own version, clone this repository and run
 
 ```bash
 make build
 ```
 
-to compile the JavaScript necessary for running the frontend. The command 
+to compile the JavaScript necessary for running the frontend. The command
 
 ```bash
 make server
 ```
 
-starts a server at port 8000 and should automatically open the frontend in a browser. 
+starts a server at port 8000 and should automatically open the frontend in a browser.
 
 ### API
 
