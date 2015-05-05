@@ -49,11 +49,11 @@ build: build-reader build-writer build-node
 
 build-reader:
 	$(BROWSERIFY) lib/reader.js -t $(BABELIFY) --outfile $(DIST)/QAreader.js
-	$(UGLIFY) QAreader.js --compress --output $(DIST)/QAreader.min.js
+	$(UGLIFY) $(DIST)/QAreader.js --compress --output $(DIST)/QAreader.min.js
 
 build-writer:
 	$(BROWSERIFY) lib/writer.js -t $(BABELIFY) --outfile $(DIST)/QAwriter.js
-	$(UGLIFY) QAwriter.js --compress --output $(DIST)/QAwriter.min.js
+	$(UGLIFY) $(DIST)/QAwriter.js --compress --output $(DIST)/QAwriter.min.js
 
 build-node:
 	$(BABEL) lib/ -o index.js
