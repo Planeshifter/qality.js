@@ -167,6 +167,9 @@ width: 50%;
 height: 50%;
 top: 15%;
 display: none;
+padding: 4px;
+font-size: 16px;
+color: darkblue;
 border:solid 3px black;
 }
 

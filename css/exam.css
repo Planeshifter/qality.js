@@ -175,9 +175,10 @@ cursor: pointer;
 .exam_panel .answer
 {
 position: relative;
-margin-left: 1%;
+margin-left: 2%;
 font-size: 1.5em;
 color: black;
+margin-bottom: 3px;
 }
 
 
