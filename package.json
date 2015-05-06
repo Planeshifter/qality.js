@@ -29,13 +29,14 @@
     "markdown-it": "^4.2.0"
   },
   "devDependencies": {
-    "http-server": "^0.8.0",
     "babel": "^5.2.12",
     "babelify": "^6.0.2",
     "browserify": "^10.0.0",
     "chai": "^2.2.0",
     "coveralls": "^2.11.2",
+    "http-server": "^0.8.0",
     "istanbul": "^0.3.13",
+    "jquery-ui": "^1.10.5",
     "jshint": "^2.7.0",
     "jshint-stylish": "^1.0.1",
     "mocha": "^2.2.4",
@@ -45,6 +46,7 @@
   "browser": {
     "gsap-tween-max": "./node_modules/gsap/src/minified/TweenMax.min.js",
     "katex": "./node_modules/katex/katex.js",
-    "katex-auto-render": "./vendor/auto-render.min.js"
+    "katex-auto-render": "./vendor/auto-render.min.js",
+    "download": "./vendor/download.js"
   }
 }

@@ -28,11 +28,12 @@ DIST ?= dist
 
 deploy:	build
 	mkdir $(BUILDDIR)
+	mkdir $(BUILDDIR)/$(DIST)
 	cp -r img/ $(BUILDDIR)/img
 	cp -r css/ $(BUILDDIR)/css
 	cp index.html $(BUILDDIR)/index.html
 	cp CNAME $(BUILDDIR)/CNAME
-	cp QAwriter.min.js $(BUILDDIR)/QAwriter.min.js
+	cp $(DIST)/QAwriter.min.js $(BUILDDIR)/$(DIST)/QAwriter.min.js
 	cd ./build && \
 	git init . && \
 	git add . && \
