@@ -1,6 +1,6 @@
 {
   "name": "qality",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Multiple-Choice QA System for JavaScript",
   "main": "index.js",
   "scripts": {
