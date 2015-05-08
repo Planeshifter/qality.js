@@ -179,6 +179,13 @@ margin-left: 2%;
 font-size: 1.5em;
 color: black;
 margin-bottom: 3px;
+cursor: pointer;
+}
+
+
+.exam_panel .answer:hover
+{
+color: darkorange;	
 }
 
 
