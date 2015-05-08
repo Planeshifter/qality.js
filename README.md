@@ -40,7 +40,7 @@ See the following minimal working example:
   </head>
   <body>
     <script>
-        new QAlity({"sequence":{"nodes":[{"id":0,"type":"input","question":"Who is the current president of the United States?","right_answer":"Barack Obama","transition_in":"dynamic","transition_out":"dynamic","points":1,"duration":"0","mathOptions":[{"left":"$$","right":"$$","display":true},{"left":"\\[","right":"\\]","display":true},{"left":"\\(","right":"\\)","display":false}],"background":"none"}]},"evaluation":{"seperator":[{"start":0.33,"id":0},{"start":0.66,"id":1}],"sorted":[],"ranges":[{"id":0,"text":"RANGE 1","start":0,"end":0.33},{"id":1,"text":"RANGE 2","start":0.33,"end":0.66},{"id":2,"text":"RANGE 3","start":0.66,"end":1}]}},
+        new QAlity({"sequence":{"nodes":[{"id":0,"type":"input","question":"Who is the current president of the United States?","right_answer":"Barack Obama","transition_in":"dynamic","transition_out":"dynamic","points":1,"duration":"0","background":"none"}]},"evaluation":{"seperator":[{"start":0.33,"id":0},{"start":0.66,"id":1}],"sorted":[],"ranges":[{"id":0,"text":"RANGE 1","start":0,"end":0.33},{"id":1,"text":"RANGE 2","start":0.33,"end":0.66},{"id":2,"text":"RANGE 3","start":0.66,"end":1}]}},
         {"div":"quizHolder"});
     </script>
     <div id = "quizHolder"></div>
