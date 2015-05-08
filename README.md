@@ -1,7 +1,6 @@
 [![NPM version][npm-image]][npm-url]
 [![Bower version][bower-image]][bower-url]
 [![Build Status][travis-image]][travis-url]
-[![Coverage Status][coveralls-image]][coveralls-url]
 [![Dependencies][dependencies-image]][dependencies-url]
 
 # QAlity.js
@@ -141,9 +140,6 @@ starts a server at port 8000 and should automatically open the frontend in a bro
 
 [travis-image]: https://travis-ci.org/Planeshifter/qality.js.svg
 [travis-url]: https://travis-ci.org/Planeshifter/qality.js
-
-[coveralls-image]: https://img.shields.io/coveralls/Planeshifter/qality.js/master.svg
-[coveralls-url]: https://coveralls.io/r/Planeshifter/qality.js?branch=master
 
 [dependencies-image]: http://img.shields.io/david/Planeshifter/qality.js.svg
 [dependencies-url]: https://david-dm.org/Planeshifter/qality.js
