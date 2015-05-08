@@ -7,7 +7,7 @@
 
 > Multiple-Choice QA System for JavaScript
 
-![editor] (http://burckhardt.ludicmedia.de/Quiz02.png)
+<img src="http://burckhardt.ludicmedia.de/Quiz02.png">
 
 ## Features:
 
@@ -18,6 +18,11 @@
 - **Markdown support**: implemented via [markdown-it](https://markdown-it.github.io/)
 - **Math support**: blazingly fast rendering via [KaTeX](http://khan.github.io/KaTeX/)
 - **Customizable Design**: change appearance of all elements via CSS
+
+## Getting Started
+
+Create a quiz on on the [QAlity Frontend](http://qality.philipp-burckhardt.com/),
+grab the created JavaScript object and insert on your page via one of the following options.
 
 ## Installation:
 
@@ -46,6 +51,8 @@ See the following minimal working example:
   </body>
 </html>
 ```
+
+To render your own quiz, replace the first argument passed to the `QAlity` function.  
 
 #### npm
 
@@ -93,7 +100,7 @@ Require the necessary files in your `index.html` document:
 
 A hosted version of the editor is accessible under the following link: [QAlity Frontend](http://qality.philipp-burckhardt.com/).
 
-![editor] (http://burckhardt.ludicmedia.de/Quiz01.png)
+<img src="http://burckhardt.ludicmedia.de/Quiz01.png">
 
 To run your own version, clone this repository and run
 
@@ -112,6 +119,8 @@ starts a server at port 8000 and should automatically open the frontend in a bro
 ### API
 
 ## Tests:
+
+Run tests via the command `npm test`
 
 ---
 ### License
