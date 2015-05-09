@@ -15,520 +15,542 @@ require('katex-auto-render');
 var Examination = {};
 
 Examination.ResponsiveDesign = function () {
-				var self = this;
+    var self = this;
 
-				this.hrs = [600, 800, 1024, 1280, 1400, 1900]; // horizontal ranges
+    this.hrs = [600, 800, 1024, 1280, 1400, 1900]; // horizontal ranges
 
-				this.horizontal_setting = function () {
+    this.horizontal_setting = function () {
 
-								self.HR = 0;
+        self.HR = 0;
 
-								for (var i = 0; i < self.hrs.length; i++) {
-												if (self.width > self.hrs[i]) self.HR = i;
-								}
+        for (var i = 0; i < self.hrs.length; i++) {
+            if (self.width > self.hrs[i]) self.HR = i;
+        }
 
-								switch (self.HR) {
-												case 0:
-																break;
+        switch (self.HR) {
+            case 0:
+                break;
 
-												case 1:
-																break;
+            case 1:
+                break;
 
-												case 2:
+            case 2:
 
-																break;
+                break;
 
-												case 3:
-																break;
+            case 3:
+                break;
 
-												case 4:
-																break;
+            case 4:
+                break;
 
-												case 5:
-																break;
-								}
-				};
+            case 5:
+                break;
+        }
+    };
 
-				this.vertical_setting = function () {
-								console.log('VERTICAL');
-				};
+    this.vertical_setting = function () {
+        console.log('VERTICAL');
+    };
 
-				this.init = function () {
-								self.width = window.innerWidth;
-								self.height = window.innerHeight;
+    this.init = function () {
+        self.width = window.innerWidth;
+        self.height = window.innerHeight;
 
-								if (self.width > self.height) self.horizontal_setting();else self.vertical_setting();
-				};
+        if (self.width > self.height) self.horizontal_setting();else self.vertical_setting();
+    };
 
-				self.init();
+    self.init();
 };
 
 Examination.Session = function (qa, opts, callback) {
 
-				this.evaluation = qa.evaluation;
-				this.sequence = qa.sequence;
+    this.evaluation = qa.evaluation;
+    this.sequence = qa.sequence;
 
-				if (opts === undefined) {
-								opts = {};
-				}
-				this.opts = opts;
+    if (opts === undefined) {
+        opts = {};
+    }
+    this.opts = opts;
 
-				if (!opts.math) {
-								this.mathOptions = [{ left: '$$', right: '$$', display: true }, { left: '\\[', right: '\\]', display: true }, { left: '\\(', right: '\\)', display: false }];
-				} else {
-								if (!Array.isArray(opts.math)) {
-												throw new TypeError('Math option has to be an array of delimiters. Value: ' + opts.math + ' ');
-								}
-								opts.math.forEach(function (rule) {
-												if (!('left' in rule && 'right' in rule && 'display' in rule)) {
-																throw new TypeError('Each delimiter has to have properties left, right and display. Value: ' + rule + ' ');
-												}
-								});
-								this.mathOptions = opts.math;
-				}
+    if (!opts.math) {
+        this.mathOptions = [{ left: '$$', right: '$$', display: true }, { left: '\\[', right: '\\]', display: true }, { left: '\\(', right: '\\)', display: false }];
+    } else {
+        if (!Array.isArray(opts.math)) {
+            throw new TypeError('Math option has to be an array of delimiters. Value: ' + opts.math + ' ');
+        }
+        opts.math.forEach(function (rule) {
+            if (!('left' in rule && 'right' in rule && 'display' in rule)) {
+                throw new TypeError('Each delimiter has to have properties left, right and display. Value: ' + rule + ' ');
+            }
+        });
+        this.mathOptions = opts.math;
+    }
 
-				var self = this;
-				var it = 0;
+    var self = this;
+    var it = 0;
 
-				this.dynamic_change = function (node) {
+    this.dynamic_change = function (node) {
 
-								var name = self.opts.div + '_node_item_' + node.id;
+        var name = self.opts.div + '_node_item_' + node.id;
 
-								/// Animation //
-								var el = document.getElementById(name);
-								var tl = new TimelineMax({});
-								tl.pause();
+        /// Animation //
+        var el = document.getElementById(name);
+        var tl = new TimelineMax({});
+        tl.pause();
 
-								tl.to(el, 0, {
-												left: '-100%',
-												opacity: 1 }, 'start');
+        tl.to(el, 0, {
+            left: '-100%',
+            opacity: 1 }, 'start');
 
-								if (node.id > 0) {
+        if (node.id > 0) {
 
-												var fname = self.opts.div + '_node_item_' + (node.id - 1);
-												var former = document.getElementById(fname);
+            var fname = self.opts.div + '_node_item_' + (node.id - 1);
+            var former = document.getElementById(fname);
 
-												tl.to(former, 1, {
-																left: '100%' }, 'go');
-								}
+            tl.to(former, 1, {
+                left: '100%' }, 'go');
+        }
 
-								tl.to(el, 1, {
-												left: '0',
-												opacity: 1 }, 'go');
+        tl.to(el, 1, {
+            left: '0',
+            opacity: 1 }, 'go');
 
-								tl.play();
-				};
+        tl.play();
+    };
 
-				this.top_down_change = function (node) {
-								var name = self.opts.div + '_node_item_' + node.id;
+    this.top_down_change = function (node) {
+        var name = self.opts.div + '_node_item_' + node.id;
 
-								/// Animation //
-								var el = document.getElementById(name);
-								var tl = new TimelineMax({});
-								tl.pause();
+        /// Animation //
+        var el = document.getElementById(name);
+        var tl = new TimelineMax({});
+        tl.pause();
 
-								tl.to(el, 0, {
-												top: '-100%',
-												opacity: 0 }, 'start');
+        tl.to(el, 0, {
+            top: '-100%',
+            opacity: 0 }, 'start');
 
-								if (node.id > 0) {
+        if (node.id > 0) {
 
-												var fname = self.opts.div + '_node_item_' + (node.id - 1);
-												var former = document.getElementById(fname);
+            var fname = self.opts.div + '_node_item_' + (node.id - 1);
+            var former = document.getElementById(fname);
 
-												tl.to(former, 1, {
-																top: '100%' }, 'go');
-								}
+            tl.to(former, 1, {
+                top: '100%' }, 'go');
+        }
 
-								tl.to(el, 1, {
-												top: '0',
-												opacity: 1 }, 'go');
+        tl.to(el, 1, {
+            top: '0',
+            opacity: 1 }, 'go');
 
-								tl.play();
-				};
+        tl.play();
+    };
 
-				this.bottom_up_change = function (node) {
-								var name = self.opts.div + '_node_item_' + node.id;
+    this.bottom_up_change = function (node) {
+        var name = self.opts.div + '_node_item_' + node.id;
 
-								/// Animation //
-								var el = document.getElementById(name);
-								var tl = new TimelineMax({});
-								tl.pause();
+        /// Animation //
+        var el = document.getElementById(name);
+        var tl = new TimelineMax({});
+        tl.pause();
 
-								tl.to(el, 0, {
-												top: '100%',
-												opacity: 0 }, 'start');
+        tl.to(el, 0, {
+            top: '100%',
+            opacity: 0 }, 'start');
 
-								if (node.id > 0) {
+        if (node.id > 0) {
 
-												var fname = self.opts.div + '_node_item_' + (node.id - 1);
-												var former = document.getElementById(fname);
+            var fname = self.opts.div + '_node_item_' + (node.id - 1);
+            var former = document.getElementById(fname);
 
-												tl.to(former, 1, {
-																top: '-100%' }, 'go');
-								}
+            tl.to(former, 1, {
+                top: '-100%' }, 'go');
+        }
 
-								tl.to(el, 1, {
-												top: '0',
-												opacity: 1 }, 'go');
+        tl.to(el, 1, {
+            top: '0',
+            opacity: 1 }, 'go');
 
-								tl.play();
-				};
+        tl.play();
+    };
 
-				this.page_change = function (node) {
+    this.page_change = function (node) {
 
-								if (!node.transition_in) {
-												node.transition_in = 'default';
-								}
+        if (!node.transition_in) {
+            node.transition_in = 'default';
+        }
 
-								switch (node.transition_in) {
+        switch (node.transition_in) {
 
-												case 'static':
+            case 'static':
 
-																break;
+                break;
 
-												case 'dynamic':
-																self.dynamic_change(node);
-																break;
+            case 'dynamic':
+                self.dynamic_change(node);
+                break;
 
-												case 'top_down':
-																self.top_down_change(node);
-																break;
+            case 'top_down':
+                self.top_down_change(node);
+                break;
 
-												case 'bottom_up':
-																self.bottom_up_change(node);
-																break;
+            case 'bottom_up':
+                self.bottom_up_change(node);
+                break;
 
-												default:
+            default:
 
-																break;
-								}
-				};
+                break;
+        }
+    };
 
-				this.input = function (node) {
-								var s = '';
+    this.input = function (node) {
+        var s = '';
 
-								var name = self.opts.div + '_node_item_' + node.id;
+        var name = self.opts.div + '_node_item_' + node.id;
 
-								s += '<div id = "' + name + '" class = "node_area">';
-								s += '<div class = "mc_question">' + md.render(node.question) + '</div>';
+        s += '<div id = "' + name + '" class = "node_area">';
+        s += '<div class = "mc_question">' + md.render(node.question) + '</div>';
 
-								var ip_name = self.opts.div + '_ip_input_' + node.id;
+        var ip_name = self.opts.div + '_ip_input_' + node.id;
 
-								s += '<input class = "ip_input" name="vorname" type="text" value="TYPE IN YOUR ANSWER - confirm with RETURN">';
+        s += '<input class = "ip_input" name="vorname" type="text" value="TYPE IN YOUR ANSWER - confirm with RETURN">';
 
-								// TIMER
-								var timer = 'timer_' + node.id;
+        // TIMER
+        var timer = 'timer_' + node.id;
 
-								if (node.duration > 0) {
-												s += '<div id = "' + timer + '" class = "timer"></div>';
-								}
-								// END TIMER
+        if (node.duration > 0) {
+            s += '<div id = "' + timer + '" class = "timer"></div>';
+        }
+        // END TIMER
 
-								s += '</div>';
+        s += '</div>';
 
-								$(self.div).append(s);
-								renderMathInElement(document.body, self.mathOptions);
+        $(self.div).append(s);
+        renderMathInElement(document.body, self.mathOptions);
 
-								if (node.duration > 0) {
-												self.set_timer(node);
-								}
+        if (node.duration > 0) {
+            self.set_timer(node);
+        }
 
-								var ipdiv = '#' + name + ' .ip_input';
+        self.page_change(node);
 
-								$(ipdiv).click(function () {
-												$(this).val('');
-								});
+        var ipdiv = '#' + name + ' .ip_input';
 
-								$(ipdiv).change(function () {
-												node.given_answer = $(this).val();
+        $(ipdiv).click(function () {
+            $(this).val('');
+        });
 
-												if (node.duration > 0) {
-																self.deactivate_timer(node);
-												}
+        $(ipdiv).change(function () {
+            node.given_answer = $(this).val();
 
-												self.decision(node);
-								});
-				};
+            if (node.duration > 0) {
+                self.deactivate_timer(node);
+            }
 
-				this.multiple_choice = function (node) {
-								var s = '';
+            self.decision(node);
+        });
+    };
 
-								var name = self.opts.div + '_node_item_' + node.id;
-								var form = self.opts.div + '_node_form_' + node.id;
+    this.multiple_choice = function (node) {
+        var s = '';
 
-								s += '<div id = "' + name + '" class = "node_area">';
-								s += '<div class = "mc_question">' + md.render(node.question) + '</div>';
+        var name = self.opts.div + '_node_item_' + node.id;
+        var form = self.opts.div + '_node_form_' + node.id;
 
-								s += '<div id = "' + self.opts.div + '_answers">';
+        s += '<div id = "' + name + '" class = "node_area">';
+        s += '<div class = "mc_question">' + md.render(node.question) + '</div>';
 
-								s += '<form id = "' + form + '" name = "' + form + '">';
+        s += '<div id = "' + self.opts.div + '_answers">';
 
-								for (var i = 0; i < node.answers.length; i++) {
+        s += '<form id = "' + form + '" name = "' + form + '">';
 
-												s += '<div class = "mc_answer">';
-												s += '<input class = "clicked_answer" type="radio" name="mpanswers" value="' + i + '">';
-												s += '<div class = "answer">' + node.answers[i].text + '</div>';
-												s += '</div>';
-								}
+        for (var i = 0; i < node.answers.length; i++) {
 
-								s += '</form>';
+            s += '<div class = "mc_answer">';
+            s += '<input class = "clicked_answer" type="radio" name="mpanswers" value="' + i + '">';
+            s += '<div class = "answer" no = "' + i + '">' + node.answers[i].text + '</div>';
+            s += '</div>';
+        }
 
-								s += '</div>';
+        s += '</form>';
 
-								// TIMER
-								var timer = 'timer_' + node.id;
-								if (node.duration > 0) {
-												s += '<div id = "' + timer + '" class = "timer"></div>';
-								}
-								// END TIMER
+        s += '</div>';
 
-								s += '</div>';
+        // TIMER
+        var timer = 'timer_' + node.id;
+        if (node.duration > 0) {
+            s += '<div id = "' + timer + '" class = "timer"></div>';
+        }
+        // END TIMER
 
-								$(self.div).append(s);
-								renderMathInElement(document.body, self.mathOptions);
+        s += '</div>';
 
-								if (node.duration > 0) {
-												self.set_timer(node);
-								}
+        $(self.div).append(s);
+        renderMathInElement(document.body, self.mathOptions);
 
-								self.page_change(node);
+        if (node.duration > 0) {
+            self.set_timer(node);
+        }
 
-								/////////////////////////////////////
+        self.page_change(node);
 
-								$('#' + self.opts.div + ' .clicked_answer').click(function () {
+        /////////////////////////////////////
 
-												var actual_form = document.getElementById(form);
-												node.chosen = parseInt(actual_form.mpanswers.value);
-												console.log(node.chosen);
+        $('.answer').unbind('click');
+        $('.answer').click(function () {
+            var n = $(this).attr('no');
+            node.chosen = parseInt(n);
+            var actual_form = document.getElementById(form);
+            self.deactivate_timer(node);
 
-												self.deactivate_timer(node);
+            it++;
 
-												it++;
+            var beta = self.sequence.nodes[it];
 
-												var beta = self.sequence.nodes[it];
+            if (it < self.sequence.nodes.length) {
+                self.play_node(beta);
+            } else {
+                self.result();
+            }
+        });
 
-												if (it < self.sequence.nodes.length) {
-																self.play_node(beta);
-												} else {
-																self.result();
-												}
-								});
-				};
+        $('#' + self.opts.div + ' .clicked_answer').click(function () {
 
-				this.get_max_points = function () {
+            var actual_form = document.getElementById(form);
+            node.chosen = parseInt(actual_form.mpanswers.value);
+            console.log(node.chosen);
 
-								var maximal = 0;
+            self.deactivate_timer(node);
 
-								for (var i = 0; i < self.sequence.nodes.length; i++) {
+            it++;
 
-												var actual = self.sequence.nodes[i];
-												switch (actual.type) {
+            var beta = self.sequence.nodes[it];
 
-																case 'multiple_choice':
-																				var tmax = 0;
+            if (it < self.sequence.nodes.length) {
+                self.play_node(beta);
+            } else {
+                self.result();
+            }
+        });
+    };
 
-																				for (var j = 0; j < actual.answers.length; j++) {
-																								if (actual.answers[j].points > tmax) {
-																												tmax = actual.answers[j].points;
-																								}
-																				}
+    this.get_max_points = function () {
 
-																				maximal += tmax;
+        var maximal = 0;
 
-																				break;
+        for (var i = 0; i < self.sequence.nodes.length; i++) {
 
-																case 'input':
-																				maximal += actual.points;
-																				break;
+            var actual = self.sequence.nodes[i];
+            switch (actual.type) {
 
-												}
-								}
+                case 'multiple_choice':
+                    var tmax = 0;
 
-								return maximal;
-				};
+                    for (var j = 0; j < actual.answers.length; j++) {
+                        if (actual.answers[j].points > tmax) {
+                            tmax = actual.answers[j].points;
+                        }
+                    }
 
-				this.result = function () {
+                    maximal += tmax;
 
-								var res = { points: 0, text: '', right_answers: 0, questions: self.sequence.nodes.length };
+                    break;
 
-								for (var i = 0; i < self.sequence.nodes.length; i++) {
+                case 'input':
+                    maximal += actual.points;
+                    break;
 
-												var actual = self.sequence.nodes[i];
+            }
+        }
 
-												switch (actual.type) {
-																case 'multiple_choice':
-																				if (actual.chosen === actual.right_value) res.right_answers += 1;
+        return maximal;
+    };
 
-																				var answer = actual.answers[actual.chosen];
-																				if (answer) {
-																								res.points += parseInt(answer.points);
-																								if (answer.assessment !== 'ASSESSMENT') {
+    this.result = function () {
 
-																												res.text += answer.assessment + ' ';
-																												console.log(res.text);
-																								}
-																				} else {
-																								res.points += 0;
-																				}
+        var res = { points: 0, text: '', right_answers: 0, questions: self.sequence.nodes.length };
 
-																				break;
+        for (var i = 0; i < self.sequence.nodes.length; i++) {
 
-																case 'input':
-																				// alert( actual.given_answer);
-																				if (actual.given_answer === actual.right_answer) {
-																								res.points += actual.points;
-																								res.right_answers += 1;
-																				}
-																				break;
-												}
-								}
+            var actual = self.sequence.nodes[i];
 
-								res.max = self.get_max_points();
+            switch (actual.type) {
+                case 'multiple_choice':
+                    if (actual.chosen === actual.right_value) res.right_answers += 1;
 
-								res.percentage = res.points / res.max;
+                    var answer = actual.answers[actual.chosen];
+                    if (answer) {
+                        res.points += parseInt(answer.points);
+                        if (answer.assessment !== 'ASSESSMENT') {
 
-								var s = '<div class = "result"><h1>RESULT</h1>\n                <div id = "assessment">\n                <h3>You have answered <span class = "phigh">' + res.right_answers + '</span> of <span class = "phigh">' + res.questions + '</span> questions correctly</h3>\n        \t\t    <h3>You have reached <span class = "phigh">' + res.points + '</span> of <span class = "phigh">' + res.max + '</span> points</h3>\n            \t\t<h3>Percentage: <span class = "phigh">' + (res.percentage * 100).toFixed(2) + '%</span></h3>\n            \t\t<h3><span class = "pcaps">Evaluation</span></h3><div class = "Evaluation">' + self.get_evaluation(res.percentage) + '</div>\n            \t\t<h3><span class = "pcaps">Assessment</span></h3><div class = "Assessment">' + res.text + '</div>\n                </div>\n            </div>';
+                            res.text += answer.assessment + ' ';
+                            console.log(res.text);
+                        }
+                    } else {
+                        res.points += 0;
+                    }
 
-								$(self.div).append(s);
-				};
+                    break;
 
-				this.get_evaluation = function (percentage) {
+                case 'input':
+                    // alert( actual.given_answer);
+                    if (actual.given_answer === actual.right_answer) {
+                        res.points += actual.points;
+                        res.right_answers += 1;
+                    }
+                    break;
+            }
+        }
 
-								for (var i = 0; i < self.evaluation.ranges.length; i++) {
-												var r = self.evaluation.ranges[i];
+        res.max = self.get_max_points();
 
-												if (percentage > r.start && percentage <= r.end) {
-																return r.text;
-												}
-								}
-								return 'no evaluation';
-				};
+        res.percentage = res.points / res.max;
 
-				this.deactivate_timer = function (node) {
-								window.clearInterval(self.interval);
-				};
+        var s = '<div class = "result"><h1>RESULT</h1>\n                <div id = "assessment">\n                <h3>You have answered <span class = "phigh">' + res.right_answers + '</span> of <span class = "phigh">' + res.questions + '</span> questions correctly</h3>\n        \t\t    <h3>You have reached <span class = "phigh">' + res.points + '</span> of <span class = "phigh">' + res.max + '</span> points</h3>\n            \t\t<h3>Percentage: <span class = "phigh">' + (res.percentage * 100).toFixed(2) + '%</span></h3>\n            \t\t<h3><span class = "pcaps">Evaluation</span></h3><div class = "Evaluation">' + self.get_evaluation(res.percentage) + '</div>\n            \t\t<h3><span class = "pcaps">Assessment</span></h3><div class = "Assessment">' + res.text + '</div>\n                </div>\n            </div>';
 
-				this.refresh_time = function () {
+        $(self.div).append(s);
+    };
 
-								var t = '#timer_' + self.timed_node.id;
-								self.timed_node.actual_time -= 50;
+    this.get_evaluation = function (percentage) {
 
-								var sec = parseInt(self.timed_node.actual_time / 1000);
-								var msec = self.timed_node.actual_time % 1000 / 10;
+        for (var i = 0; i < self.evaluation.ranges.length; i++) {
+            var r = self.evaluation.ranges[i];
 
-								if (sec < 10) {
-												sec = '0' + sec;
-								}
-								if (msec < 10) {
-												msec = '0' + msec;
-								}
+            if (percentage > r.start && percentage <= r.end) {
+                return r.text;
+            }
+        }
+        return 'no evaluation';
+    };
 
-								var s = sec + ':' + msec;
+    this.deactivate_timer = function (node) {
+        window.clearInterval(self.interval);
+    };
 
-								// ENDE Bedingung = 0
-								if (self.timed_node.actual_time <= 0) {
-												window.clearInterval(self.interval);
-												self.decision(self.timed_node);
-								}
+    this.refresh_time = function () {
 
-								$(t).html(s);
-				};
+        var t = '#timer_' + self.timed_node.id;
+        self.timed_node.actual_time -= 50;
 
-				self.decision = function (node) {
+        var sec = parseInt(self.timed_node.actual_time / 1000);
+        var msec = self.timed_node.actual_time % 1000 / 10;
 
-								node.chosen = -1;
-								it++;
+        if (sec < 10) {
+            sec = '0' + sec;
+        }
+        if (msec < 10) {
+            msec = '0' + msec;
+        }
 
-								var beta = self.sequence.nodes[it];
+        var s = sec + ':' + msec;
 
-								if (it < self.sequence.nodes.length) {
-												self.play_node(beta);
-								} else {
-												self.result();
-								}
-				};
+        // ENDE Bedingung = 0
+        if (self.timed_node.actual_time <= 0) {
+            window.clearInterval(self.interval);
+            self.decision(self.timed_node);
+        }
 
-				this.set_timer = function (node) {
-								var t = '#timer_' + node.id;
-								node.actual_time = node.duration * 1000;
-								$(t).html('20:00');
+        $(t).html(s);
+    };
 
-								self.timed_node = node;
-								self.interval = window.setInterval(self.refresh_time, 100);
-				};
+    self.decision = function (node) {
 
-				this.play_node = function (node) {
+        node.chosen = -1;
+        it++;
 
-								switch (node.type) {
-												case 'multiple_choice':
-																console.log('multiple_choice');
-																self.multiple_choice(node);
-																break;
+        var beta = self.sequence.nodes[it];
 
-												case 'input':
-																// alert("Hier kommt ein Input");
-																self.input(node);
-																break;
-								}
-				};
+        if (it < self.sequence.nodes.length) {
+            self.play_node(beta);
+        } else {
+            self.result();
+        }
+    };
 
-				this.play = function () {
-								self.play_node(self.sequence.nodes[it]);
-				};
+    this.set_timer = function (node) {
+        var t = '#timer_' + node.id;
+        node.actual_time = node.duration * 1000;
+        $(t).html('20:00');
 
-				this.injectCSS = function () {
+        self.timed_node = node;
+        self.interval = window.setInterval(self.refresh_time, 100);
+    };
 
-								var cssPath;
+    this.play_node = function (node) {
 
-								if (self.opts.css === undefined || self.opts.css === '') {
-												cssPath = './css/exam.css';
-								}
+        switch (node.type) {
+            case 'multiple_choice':
+                console.log('multiple_choice');
+                self.multiple_choice(node);
+                break;
 
-								var cssExam = '<link href="' + cssPath + '" media="screen" rel="stylesheet" type="text/css" />';
-								$('head').append(cssExam);
+            case 'input':
+                // alert("Hier kommt ein Input");
+                self.input(node);
+                break;
+        }
+    };
 
-								var cssKatex = '<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css" media="screen" rel="stylesheet" type="text/css" />';
-								$('head').append(cssKatex);
-				};
+    this.play = function () {
+        self.play_node(self.sequence.nodes[it]);
+    };
 
-				this.init = function () {
+    this.injectCSS = function () {
 
-								self.responsive = new Examination.ResponsiveDesign();
+        var cssPath, cssExam;
 
-								window._exam = this;
+        if (self.opts.css === undefined || self.opts.css === '') {
+            cssExam = '<link href="https://cdn.rawgit.com/Planeshifter/qality.js/master/css/exam.css" media="screen" rel="stylesheet" type="text/css"/>';
+        } else {
+            cssPath = './css/exam.css';
+            cssExam = '<link href="' + cssPath + '" media="screen" rel="stylesheet" type="text/css" />';
+        }
 
-								$(document).ready(function () {
+        $('head').append(cssExam);
 
-												// inject exam.css
-												self.injectCSS();
+        var cssKatex = '<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css" media="screen" rel="stylesheet" type="text/css" />';
+        $('head').append(cssKatex);
+    };
 
-												var s = '<div id = "exam_panel" class="exam_panel"></div>';
-												$('#' + self.opts.div).append(s);
+    this.init = function () {
 
-												self.div = '#' + self.opts.div + ' .exam_panel';
+        self.responsive = new Examination.ResponsiveDesign();
 
-												if (self.opts.exit === true) {
-																var divExit = '<div id = "exit">&#x274c</div>';
-																var divPanel = '#' + self.opts.div + ' .exam_panel';
-																$(divPanel).append(divExit);
-																$(divPanel + ' #exit').click(function () {
-																				$(divPanel).fadeOut(200, function () {
-																								if (self.opts.div === 'qapreview') {
-																												$('#' + self.opts.div).html('');
-																												$('#' + self.opts.div).hide();
-																								} else {
-																												$(divPanel).remove();
-																								}
-																				});
-																});
-												}
+        window._exam = this;
 
-												self.play();
-								});
-				};
+        $(document).ready(function () {
 
-				self.init();
+            // inject exam.css
+            self.injectCSS();
+
+            var s = '<div id = "exam_panel" class="exam_panel"></div>';
+            $('#' + self.opts.div).append(s);
+
+            self.div = '#' + self.opts.div + ' .exam_panel';
+
+            if (self.opts.exit === true) {
+                var divExit = '<div id = "exit">&#x274c</div>';
+                var divPanel = '#' + self.opts.div + ' .exam_panel';
+                $(divPanel).append(divExit);
+                $(divPanel + ' #exit').click(function () {
+                    $(divPanel).fadeOut(200, function () {
+                        if (self.opts.div === 'qapreview') {
+                            $('#' + self.opts.div).html('');
+                            $('#' + self.opts.div).hide();
+                        } else {
+                            $(divPanel).remove();
+                        }
+                    });
+                });
+            }
+
+            self.play();
+        });
+    };
+
+    self.init();
 };
 
 module.exports = exports = Examination;
