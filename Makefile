@@ -99,6 +99,9 @@ clean:
 	rm bundle.js
 	rm bundle.min.js
 
+clean-build:
+	rm -rf build
+
 # PRINT #
 .PHONY: print-%
 
