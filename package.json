@@ -2,7 +2,7 @@
   "name": "qality",
   "version": "0.0.9",
   "description": "Multiple-Choice QA System for JavaScript",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha-phantomjs ./test/TestRunner.html",
     "prepublish": "make build"
@@ -16,7 +16,10 @@
     "multiple-choice",
     "examination"
   ],
-  "author": "Philipp Burckhardt",
+  "author": {
+    "name": "Philipp Burckhardt",
+    "email": "pburckhardt@outlook.com"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Planeshifter/QA.js/issues"

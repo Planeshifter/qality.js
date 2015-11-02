@@ -57,7 +57,7 @@ build-writer:
 	$(UGLIFY) $(DIST)/QAwriter.js --compress --output $(DIST)/QAwriter.min.js
 
 build-node:
-	$(BABEL) lib/ -o index.js
+	$(BABEL) lib/ -o dist/index.js
 
 # Start server #
 

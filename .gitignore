@@ -30,4 +30,4 @@ dist/QAwriter.js
 dist/QAwriter.min.js
 
 # node output
-index.js
+dist/index.js
