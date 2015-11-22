@@ -49,7 +49,7 @@ deploy:	build
 build: build-reader build-writer build-node
 
 build-reader:
-	$(BROWSERIFY) lib/reader.js -t $(BABELIFY) --outfile $(DIST)/QAreader.js
+	$(BROWSERIFY) lib/reader.js --exclude jquery -t $(BABELIFY) --outfile $(DIST)/QAreader.js
 	$(UGLIFY) $(DIST)/QAreader.js --compress --output $(DIST)/QAreader.min.js
 
 build-writer:

@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/Planeshifter/QA.js#readme",
   "dependencies": {
+    "compute-sum": "^2.0.0",
     "g": "^2.0.0",
     "gsap": "^1.16.1",
     "jquery": "^2.1.3",
@@ -49,6 +50,14 @@
     "phantomjs": "^1.9.16",
     "uglify-js": "^2.5.0",
     "watch": "^0.16.0"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "browserify-shim": {
+    "jquery": "global:$"
   },
   "browser": {
     "gsap-tween-max": "./node_modules/gsap/src/minified/TweenMax.min.js",
