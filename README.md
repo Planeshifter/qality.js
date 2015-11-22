@@ -30,8 +30,8 @@ grab the created JavaScript object and insert on your page via one of the follow
 
 Include the following two lines in your `head` and you are ready to go:
 ```html
-<script src="https://cdn.rawgit.com/Planeshifter/qality.js/master/dist/QAreader.min.js"</script>
-<link href="https://cdn.rawgit.com/Planeshifter/qality.js/master/css/exam.css" media="screen" rel="stylesheet" type="text/css"/>
+<script src="https://cdn.rawgit.com/Planeshifter/qality.js/d02a37d884cd658448ee64a058cd32ceb7df4dfb/dist/QAreader.min.js"</script>
+<link href="https://cdn.rawgit.com/Planeshifter/qality.js/d02a37d884cd658448ee64a058cd32ceb7df4dfb/css/exam.css" media="screen" rel="stylesheet" type="text/css"/>
 ```
 
 See the following minimal working example:
@@ -39,8 +39,8 @@ See the following minimal working example:
 <!DOCTYPE html>
 <html>
   <head>
-      <script src="https://cdn.rawgit.com/Planeshifter/qality.js/master/dist/QAreader.min.js"></script>
-      <link href="https://cdn.rawgit.com/Planeshifter/qality.js/master/css/exam.css" media="screen" rel="stylesheet" type="text/css"/>
+      <script src="https://cdn.rawgit.com/Planeshifter/qality.js/d02a37d884cd658448ee64a058cd32ceb7df4dfb/dist/QAreader.min.js"></script>
+      <link href="https://cdn.rawgit.com/Planeshifter/qality.js/d02a37d884cd658448ee64a058cd32ceb7df4dfb/css/exam.css" media="screen" rel="stylesheet" type="text/css"/>
   </head>
   <body>
     <script>
