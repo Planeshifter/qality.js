@@ -46,7 +46,7 @@ deploy:	build
 
 .PHONY: build
 
-build: build-reader build-writer build-node
+build: build-reader build-writer
 
 build-reader:
 	$(BROWSERIFY) lib/reader.js --exclude jquery -t $(BABELIFY) --outfile $(DIST)/QAreader.js
@@ -56,8 +56,6 @@ build-writer:
 	$(BROWSERIFY) lib/writer.js -t $(BABELIFY) --outfile $(DIST)/QAwriter.js
 	$(UGLIFY) $(DIST)/QAwriter.js --compress --output $(DIST)/QAwriter.min.js
 
-build-node:
-	$(BABEL) lib/ -o dist/index.js
 
 # Start server #
 

@@ -59,7 +59,7 @@ function appendResultPage() {
 				if (answer) {
 					res.points += parseInt(answer.points);
 					if (answer.assessment !== 'ASSESSMENT') {
-						res.text += '' + answer.assessment;
+						res.text += '<p>' + answer.assessment + '</p>';
 					}
 				} else {
 					res.points += 0;
@@ -75,7 +75,11 @@ function appendResultPage() {
 	}
 	res.max = getMaxPoints(nodes);
 	res.percentage = res.points / res.max;
-	var s = '<div class = "result"><h1>RESULT</h1>\n\t\t\t<div id = "assessment">\n\t\t\t<h3>You have answered <span class = "phigh">' + res.right_answers + '</span> of <span class = "phigh">' + res.questions + '</span> questions correctly</h3>\n\t\t\t\t<h3>You have reached <span class = "phigh">' + res.points + '</span> of <span class = "phigh">' + res.max + '</span> points</h3>\n\t\t\t\t<h3>Percentage: <span class = "phigh">' + (res.percentage * 100).toFixed(2) + '%</span></h3>\n\t\t\t\t<h3><span class = "pcaps">Evaluation</span></h3><h3>' + this.getEvaluation(res.percentage) + '</h3>\n\t\t\t\t<h3><span class = "pcaps">Assessment</span></h3><div class = "Assessment">' + res.text + '</div>\n\t\t\t</div>\n\t\t</div>';
+	var s = '<div class = "result"><h1>RESULT</h1>\n\t\t\t<div id = "assessment">\n\t\t\t<h3>You have answered <span class = "phigh">' + res.right_answers + '</span> of <span class = "phigh">' + res.questions + '</span> questions correctly</h3>\n\t\t\t\t<h3>You have reached <span class = "phigh">' + res.points + '</span> of <span class = "phigh">' + res.max + '</span> points</h3>\n\t\t\t\t<h3>Percentage: <span class = "phigh">' + (res.percentage * 100).toFixed(2) + '%</span></h3>';
+	if (self.opts.evaluation === true) {
+		s += '<h3><span class = "pcaps">Evaluation</span></h3><h3>' + this.getEvaluation(res.percentage) + '</h3>';
+	}
+	s += '<h3><span class = "pcaps">Assessment</span></h3><div class = "Assessment">' + res.text + '</div>\n\t\t\t</div>\n\t\t</div>';
 	$(this.div).append(s);
 	renderMathInElement(document.body, self.mathOptions);
 } // end FUNCTION appendResultPage()
@@ -85,7 +89,7 @@ function appendResultPage() {
 module.exports = appendResultPage;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./getMaxPoints.js":3,"compute-sum":17,"katex":82,"markdown-it":105}],2:[function(require,module,exports){
+},{"./getMaxPoints.js":3,"compute-sum":18,"katex":83,"markdown-it":106}],2:[function(require,module,exports){
 'use strict';
 
 /**
@@ -155,54 +159,7 @@ module.exports = getMaxPoints;
 
 var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
 
-var Examination = {};
-Examination.ResponsiveDesign = function () {
-	var self = this;
-
-	// horizontal ranges
-	this.hrs = [600, 800, 1024, 1280, 1400, 1900];
-
-	this.horizontal_setting = function () {
-		self.HR = 0;
-		for (var i = 0; i < self.hrs.length; i++) {
-			if (self.width > self.hrs[i]) {
-				self.HR = i;
-			}
-		}
-		switch (self.HR) {
-			case 0:
-				break;
-			case 1:
-				break;
-			case 2:
-				break;
-			case 3:
-				break;
-			case 4:
-				break;
-			case 5:
-				break;
-		}
-	};
-
-	this.vertical_setting = function () {
-		console.log('VERTICAL');
-	};
-
-	this.init = function () {
-		self.width = window.innerWidth;
-		self.height = window.innerHeight;
-		if (self.width > self.height) {
-			self.horizontal_setting();
-		} else {
-			self.vertical_setting();
-		}
-	};
-
-	self.init();
-};
-
-Examination.Session = function (qa, opts, callback) {
+function Session(qa, opts, callback) {
 
 	this.evaluation = qa.evaluation;
 	this.sequence = qa.sequence;
@@ -228,13 +185,6 @@ Examination.Session = function (qa, opts, callback) {
 
 	var self = this;
 	this.it = 0;
-
-	this.page_change = require('./pageChange');
-	this.input = require('./input.js');
-	this.multiple_choice = require('./multipleChoice.js');
-
-	this.result = require('./appendResultPage.js');
-	this.getEvaluation = require('./getEvaluation.js');
 
 	this.deactivate_timer = function () {
 		window.clearInterval(self.interval);
@@ -294,15 +244,24 @@ Examination.Session = function (qa, opts, callback) {
 		self.play_node(self.sequence.nodes[self.it]);
 	};
 
-	this.injectCSS = require('./injectCSS.js');
-	this.init = require('./init.js');
-
 	self.init();
-};
+}
+
+// METHODS //
+
+Session.prototype.page_change = require('./pageChange');
+
+Session.prototype.input = require('./input.js');
+Session.prototype.multiple_choice = require('./multipleChoice.js');
+
+Session.prototype.result = require('./appendResultPage.js');
+Session.prototype.getEvaluation = require('./getEvaluation.js');
+Session.prototype.injectCSS = require('./injectCSS.js');
+Session.prototype.init = require('./init.js');
 
 // EXPORTS //
 
-module.exports = exports = Examination;
+module.exports = exports = Session;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./appendResultPage.js":1,"./getEvaluation.js":2,"./init.js":5,"./injectCSS.js":6,"./input.js":7,"./multipleChoice.js":8,"./pageChange":11}],5:[function(require,module,exports){
@@ -312,7 +271,7 @@ module.exports = exports = Examination;
 // MODULES //
 
 var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null),
-    Examination = require('./index.js');
+    ResponsiveDesign = require('./responsiveDesign.js');
 
 // INITIALIZE //
 
@@ -325,8 +284,7 @@ var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined
 function init() {
 	/* jshint validthis:true */
 	var self = this;
-	self.responsive = new Examination.ResponsiveDesign();
-	window._exam = this;
+	self.responsive = new ResponsiveDesign();
 	$(document).ready(function onReady() {
 		// Inject exam.css:
 		self.injectCSS();
@@ -337,7 +295,7 @@ function init() {
 			var divExit = '<div id = "exit">&#x274c</div>';
 			var divPanel = '#' + self.opts.div + ' .exam_panel';
 			$(divPanel).append(divExit);
-			$(divPanel + ' #exit').click(function () {
+			$(divPanel + ' #exit').click(function onClick() {
 				$(divPanel).fadeOut(200, function () {
 					if (self.opts.div === 'qapreview') {
 						$('#' + self.opts.div).html('');
@@ -357,7 +315,7 @@ function init() {
 module.exports = init;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./index.js":4}],6:[function(require,module,exports){
+},{"./responsiveDesign.js":13}],6:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -455,7 +413,7 @@ function input(node) {
 module.exports = input;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"katex":82,"katex-auto-render":172,"markdown-it":105}],8:[function(require,module,exports){
+},{"katex":83,"katex-auto-render":173,"markdown-it":106}],8:[function(require,module,exports){
 (function (global){
 /* global renderMathInElement */
 'use strict';
@@ -501,8 +459,8 @@ function multipleChoiceElement(node) {
 
 	self.page_change(node);
 
-	$('.answer').unbind('click');
-	$('.answer').click(function onClick() {
+	$('#' + self.opts.div + ' .answer').unbind('click');
+	$('#' + self.opts.div + ' .answer').click(function onClick() {
 		var n = $(this).attr('no');
 		node.chosen = parseInt(n, 10);
 		self.deactivate_timer(node);
@@ -534,7 +492,7 @@ function multipleChoiceElement(node) {
 module.exports = multipleChoiceElement;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"katex":82,"katex-auto-render":172,"markdown-it":105}],9:[function(require,module,exports){
+},{"katex":83,"katex-auto-render":173,"markdown-it":106}],9:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -578,7 +536,7 @@ function bottomUpChange(node, div) {
 
 module.exports = bottomUpChange;
 
-},{"gsap-tween-max":81}],10:[function(require,module,exports){
+},{"gsap-tween-max":82}],10:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -623,7 +581,7 @@ function dynamicChange(node, div) {
 
 module.exports = dynamicChange;
 
-},{"gsap-tween-max":81}],11:[function(require,module,exports){
+},{"gsap-tween-max":82}],11:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -711,13 +669,66 @@ function topDownChange(node, div) {
 
 module.exports = topDownChange;
 
-},{"gsap-tween-max":81}],13:[function(require,module,exports){
+},{"gsap-tween-max":82}],13:[function(require,module,exports){
+"use strict";
+
+function ResponsiveDesign() {
+	var self = this;
+
+	// horizontal ranges
+	this.hrs = [600, 800, 1024, 1280, 1400, 1900];
+
+	this.horizontal_setting = function () {
+		self.HR = 0;
+		for (var i = 0; i < self.hrs.length; i++) {
+			if (self.width > self.hrs[i]) {
+				self.HR = i;
+			}
+		}
+		switch (self.HR) {
+			case 0:
+				break;
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+			case 5:
+				break;
+		}
+	};
+
+	this.vertical_setting = function () {
+		console.log("VERTICAL");
+	};
+
+	this.init = function () {
+		self.width = window.innerWidth;
+		self.height = window.innerHeight;
+		if (self.width > self.height) {
+			self.horizontal_setting();
+		} else {
+			self.vertical_setting();
+		}
+	};
+
+	self.init();
+}
+
+// EXPORTS //
+
+module.exports = ResponsiveDesign;
+
+},{}],14:[function(require,module,exports){
 (function (global){
 'use strict';
 
 var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
 
-window.QAlity = require('./exam').Session;
+window.QAlity = require('./exam');
 
 if (!window.hasOwnProperty('$')) {
 	window.$ = $;
@@ -732,7 +743,7 @@ if (!window.hasOwnProperty('renderMathInElement')) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./exam":4,"katex":82,"katex-auto-render":172}],14:[function(require,module,exports){
+},{"./exam":4,"katex":83,"katex-auto-render":173}],15:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -1243,7 +1254,7 @@ if (!window.hasOwnProperty('renderMathInElement')) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1269,7 +1280,7 @@ function sum( arr, clbk ) {
 
 module.exports = sum;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1294,7 +1305,7 @@ function sum( arr ) {
 
 module.exports = sum;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -1386,7 +1397,7 @@ function sum( x, options ) {
 
 module.exports = sum;
 
-},{"./accessor.js":15,"./array.js":16,"./matrix.js":18,"./validate.js":19,"compute-array-constructors":21,"dstructs-matrix":30,"validate.io-array-like":69,"validate.io-matrix-like":74}],18:[function(require,module,exports){
+},{"./accessor.js":16,"./array.js":17,"./matrix.js":19,"./validate.js":20,"compute-array-constructors":22,"dstructs-matrix":31,"validate.io-array-like":70,"validate.io-matrix-like":75}],19:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1438,7 +1449,7 @@ function sum( out, mat, dim ) {
 
 module.exports = sum;
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -1491,7 +1502,7 @@ function validate( opts, options ) {
 
 module.exports = validate;
 
-},{"validate.io-function":73,"validate.io-object":75,"validate.io-positive-integer":77,"validate.io-string-primitive":80}],20:[function(require,module,exports){
+},{"validate.io-function":74,"validate.io-object":76,"validate.io-positive-integer":78,"validate.io-string-primitive":81}],21:[function(require,module,exports){
 'use strict';
 
 var CTORS = {
@@ -1512,7 +1523,7 @@ var CTORS = {
 
 module.exports = CTORS;
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 // CTORS //
@@ -1538,7 +1549,7 @@ function getCtor( dtype ) {
 
 module.exports = getCtor;
 
-},{"./ctors.js":20}],22:[function(require,module,exports){
+},{"./ctors.js":21}],23:[function(require,module,exports){
 'use strict';
 
 // BASE TYPES //
@@ -1560,7 +1571,7 @@ var BTYPES = {
 
 module.exports = BTYPES;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 // MATRIX //
@@ -1668,7 +1679,7 @@ Matrix.prototype.toString = require( './toString.js' );
 
 module.exports = Matrix;
 
-},{"./get.js":26,"./iget.js":28,"./iset.js":31,"./mget.js":35,"./mset.js":37,"./set.js":45,"./sget.js":47,"./sset.js":49,"./toString.js":51}],24:[function(require,module,exports){
+},{"./get.js":27,"./iget.js":29,"./iset.js":32,"./mget.js":36,"./mset.js":38,"./set.js":46,"./sget.js":48,"./sset.js":50,"./toString.js":52}],25:[function(require,module,exports){
 'use strict';
 
 // MATRIX //
@@ -1720,7 +1731,7 @@ Matrix.prototype.toString = require( './toString.js' );
 
 module.exports = Matrix;
 
-},{"./get.raw.js":27,"./iget.raw.js":29,"./iset.raw.js":32,"./mget.raw.js":36,"./mset.raw.js":38,"./set.raw.js":46,"./sget.raw.js":48,"./sset.raw.js":50,"./toString.js":51}],25:[function(require,module,exports){
+},{"./get.raw.js":28,"./iget.raw.js":30,"./iset.raw.js":33,"./mget.raw.js":37,"./mset.raw.js":39,"./set.raw.js":47,"./sget.raw.js":49,"./sset.raw.js":51,"./toString.js":52}],26:[function(require,module,exports){
 'use strict';
 
 // DATA TYPES //
@@ -1742,7 +1753,7 @@ var DTYPES = [
 
 module.exports = DTYPES;
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -1773,7 +1784,7 @@ function get( i, j ) {
 
 module.exports = get;
 
-},{"validate.io-nonnegative-integer":65}],27:[function(require,module,exports){
+},{"validate.io-nonnegative-integer":66}],28:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1794,7 +1805,7 @@ function get( i, j ) {
 
 module.exports = get;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -1836,7 +1847,7 @@ function iget( idx ) {
 
 module.exports = iget;
 
-},{"validate.io-integer-primitive":63}],29:[function(require,module,exports){
+},{"validate.io-integer-primitive":64}],30:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1868,7 +1879,7 @@ function iget( idx ) {
 
 module.exports = iget;
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 // EXPORTS //
@@ -1876,7 +1887,7 @@ module.exports = iget;
 module.exports = require( './matrix.js' );
 module.exports.raw = require( './matrix.raw.js' );
 
-},{"./matrix.js":33,"./matrix.raw.js":34}],31:[function(require,module,exports){
+},{"./matrix.js":34,"./matrix.raw.js":35}],32:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -1924,7 +1935,7 @@ function iset( idx, v ) {
 
 module.exports = iset;
 
-},{"validate.io-integer-primitive":63,"validate.io-number-primitive":68}],32:[function(require,module,exports){
+},{"validate.io-integer-primitive":64,"validate.io-number-primitive":69}],33:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1958,7 +1969,7 @@ function iset( idx, v ) {
 
 module.exports = iset;
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -2069,7 +2080,7 @@ function matrix() {
 
 module.exports = matrix;
 
-},{"./btypes.js":22,"./ctor.js":23,"./dtypes.js":25,"compute-cast-arrays":52,"compute-dtype":55,"validate.io-array":60,"validate.io-contains":61,"validate.io-nonnegative-integer-array":64,"validate.io-string-primitive":80}],34:[function(require,module,exports){
+},{"./btypes.js":23,"./ctor.js":24,"./dtypes.js":26,"compute-cast-arrays":53,"compute-dtype":56,"validate.io-array":61,"validate.io-contains":62,"validate.io-nonnegative-integer-array":65,"validate.io-string-primitive":81}],35:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -2157,7 +2168,7 @@ function matrix() {
 
 module.exports = matrix;
 
-},{"./btypes.js":22,"./ctor.raw.js":24,"./dtypes.js":25,"compute-dtype":55,"validate.io-contains":61,"validate.io-string-primitive":80}],35:[function(require,module,exports){
+},{"./btypes.js":23,"./ctor.raw.js":25,"./dtypes.js":26,"compute-dtype":56,"validate.io-contains":62,"validate.io-string-primitive":81}],36:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -2281,7 +2292,7 @@ function mget( rows, cols ) {
 
 module.exports = mget;
 
-},{"./btypes.js":22,"validate.io-nonnegative-integer-array":64}],36:[function(require,module,exports){
+},{"./btypes.js":23,"validate.io-nonnegative-integer-array":65}],37:[function(require,module,exports){
 'use strict';
 
 // VARIABLES //
@@ -2373,7 +2384,7 @@ function mget( rows, cols ) {
 
 module.exports = mget;
 
-},{"./btypes.js":22}],37:[function(require,module,exports){
+},{"./btypes.js":23}],38:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -2516,7 +2527,7 @@ function mset() {
 
 module.exports = mset;
 
-},{"./mset1.js":39,"./mset2.js":40,"./mset3.js":41,"./mset4.js":42,"./mset5.js":43,"./mset6.js":44,"validate.io-function":73,"validate.io-nonnegative-integer-array":64,"validate.io-number-primitive":68}],38:[function(require,module,exports){
+},{"./mset1.js":40,"./mset2.js":41,"./mset3.js":42,"./mset4.js":43,"./mset5.js":44,"./mset6.js":45,"validate.io-function":74,"validate.io-nonnegative-integer-array":65,"validate.io-number-primitive":69}],39:[function(require,module,exports){
 'use strict';
 
 // FUNCTIONS //
@@ -2630,7 +2641,7 @@ function mset() {
 
 module.exports = mset;
 
-},{"./mset1.js":39,"./mset2.js":40,"./mset3.js":41,"./mset4.js":42,"./mset5.js":43,"./mset6.js":44}],39:[function(require,module,exports){
+},{"./mset1.js":40,"./mset2.js":41,"./mset3.js":42,"./mset4.js":43,"./mset5.js":44,"./mset6.js":45}],40:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2663,7 +2674,7 @@ function mset1( mat, idx, v ) {
 
 module.exports = mset1;
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2709,7 +2720,7 @@ function mset2( mat, idx, clbk, ctx ) {
 
 module.exports = mset2;
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2757,7 +2768,7 @@ function mset3( mat, idx, m ) {
 
 module.exports = mset3;
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2794,7 +2805,7 @@ function mset4( mat, rows, cols, clbk, ctx ) {
 
 module.exports = mset4;
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2829,7 +2840,7 @@ function mset5( mat, rows, cols, v ) {
 
 module.exports = mset5;
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2871,7 +2882,7 @@ function mset6( mat, rows, cols, m ) {
 
 module.exports = mset6;
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -2911,7 +2922,7 @@ function set( i, j, v ) {
 
 module.exports = set;
 
-},{"validate.io-nonnegative-integer":65,"validate.io-number-primitive":68}],46:[function(require,module,exports){
+},{"validate.io-nonnegative-integer":66,"validate.io-number-primitive":69}],47:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2937,7 +2948,7 @@ function set( i, j, v ) {
 
 module.exports = set;
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -3012,7 +3023,7 @@ function sget( seq ) {
 
 module.exports = sget;
 
-},{"./btypes.js":22,"compute-indexspace":59,"validate.io-string-primitive":80}],48:[function(require,module,exports){
+},{"./btypes.js":23,"compute-indexspace":60,"validate.io-string-primitive":81}],49:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -3080,7 +3091,7 @@ function sget( seq ) {
 
 module.exports = sget;
 
-},{"./btypes.js":22,"compute-indexspace":59}],49:[function(require,module,exports){
+},{"./btypes.js":23,"compute-indexspace":60}],50:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -3194,7 +3205,7 @@ function sset( seq, val, thisArg ) {
 
 module.exports = sset;
 
-},{"compute-indexspace":59,"validate.io-function":73,"validate.io-number-primitive":68,"validate.io-string-primitive":80}],50:[function(require,module,exports){
+},{"compute-indexspace":60,"validate.io-function":74,"validate.io-number-primitive":69,"validate.io-string-primitive":81}],51:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -3299,7 +3310,7 @@ function sset( seq, val, thisArg ) {
 
 module.exports = sset;
 
-},{"compute-indexspace":59}],51:[function(require,module,exports){
+},{"compute-indexspace":60}],52:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3340,7 +3351,7 @@ function toString() {
 
 module.exports = toString;
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -3396,7 +3407,7 @@ function cast( x, type ) {
 
 module.exports = cast;
 
-},{"compute-array-constructors/lib/ctors":20,"compute-array-dtype/lib/dtypes":53,"type-name":54,"validate.io-array-like":69}],53:[function(require,module,exports){
+},{"compute-array-constructors/lib/ctors":21,"compute-array-dtype/lib/dtypes":54,"type-name":55,"validate.io-array-like":70}],54:[function(require,module,exports){
 'use strict';
 
 var DTYPES = {
@@ -3417,7 +3428,7 @@ var DTYPES = {
 
 module.exports = DTYPES;
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /**
  * type-name - Just a reasonable typeof
  * 
@@ -3457,7 +3468,7 @@ function typeName (val) {
 
 module.exports = typeName;
 
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -3513,9 +3524,9 @@ function dtype( value ) {
 
 module.exports = dtype;
 
-},{"compute-array-dtype":57,"type-name":58}],56:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],57:[function(require,module,exports){
+},{"compute-array-dtype":58,"type-name":59}],57:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"dup":54}],58:[function(require,module,exports){
 'use strict';
 
 // DTYPES //
@@ -3541,9 +3552,9 @@ function getType( name ) {
 
 module.exports = getType;
 
-},{"./dtypes.js":56}],58:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],59:[function(require,module,exports){
+},{"./dtypes.js":57}],59:[function(require,module,exports){
+arguments[4][55][0].apply(exports,arguments)
+},{"dup":55}],60:[function(require,module,exports){
 /**
 *
 *	COMPUTE: indexspace
@@ -3816,7 +3827,7 @@ function indexspace( str, len ) {
 
 module.exports = indexspace;
 
-},{"validate.io-nonnegative-integer":65,"validate.io-string-primitive":80}],60:[function(require,module,exports){
+},{"validate.io-nonnegative-integer":66,"validate.io-string-primitive":81}],61:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3834,7 +3845,7 @@ function isArray( value ) {
 
 module.exports = Array.isArray || isArray;
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 /**
 *
 *	VALIDATE: contains
@@ -3908,7 +3919,7 @@ function contains( arr, value ) {
 
 module.exports = contains;
 
-},{"validate.io-array":60,"validate.io-nan-primitive":62}],62:[function(require,module,exports){
+},{"validate.io-array":61,"validate.io-nan-primitive":63}],63:[function(require,module,exports){
 /**
 *
 *	VALIDATE: nan-primitive
@@ -3955,7 +3966,7 @@ function nan( value ) {
 
 module.exports = nan;
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -3981,7 +3992,7 @@ function isInteger( value ) {
 
 module.exports = isInteger;
 
-},{"validate.io-number-primitive":68}],64:[function(require,module,exports){
+},{"validate.io-number-primitive":69}],65:[function(require,module,exports){
 /**
 *
 *	VALIDATE: nonnegative-integer-array
@@ -4049,7 +4060,7 @@ function isNonNegativeIntegerArray( value ) {
 
 module.exports = isNonNegativeIntegerArray;
 
-},{"validate.io-array":60,"validate.io-nonnegative-integer":65}],65:[function(require,module,exports){
+},{"validate.io-array":61,"validate.io-nonnegative-integer":66}],66:[function(require,module,exports){
 /**
 *
 *	VALIDATE: nonnegative-integer
@@ -4103,7 +4114,7 @@ function isNonNegativeInteger( value ) {
 
 module.exports = isNonNegativeInteger;
 
-},{"validate.io-integer":66}],66:[function(require,module,exports){
+},{"validate.io-integer":67}],67:[function(require,module,exports){
 /**
 *
 *	VALIDATE: integer
@@ -4157,7 +4168,7 @@ function isInteger( value ) {
 
 module.exports = isInteger;
 
-},{"validate.io-number":67}],67:[function(require,module,exports){
+},{"validate.io-number":68}],68:[function(require,module,exports){
 /**
 *
 *	VALIDATE: number
@@ -4204,7 +4215,7 @@ function isNumber( value ) {
 
 module.exports = isNumber;
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 /**
 *
 *	VALIDATE: number-primitive
@@ -4251,7 +4262,7 @@ function isNumber( value ) {
 
 module.exports = isNumber;
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -4282,18 +4293,18 @@ function isArrayLike( value ) {
 
 module.exports = isArrayLike;
 
-},{"compute-const-max-safe-integer":70,"validate.io-integer-primitive":71}],70:[function(require,module,exports){
+},{"compute-const-max-safe-integer":71,"validate.io-integer-primitive":72}],71:[function(require,module,exports){
 'use strict';
 
 // EXPORTS //
 
 module.exports = 9007199254740991; // Math.pow( 2, 53 ) - 1
 
-},{}],71:[function(require,module,exports){
-arguments[4][63][0].apply(exports,arguments)
-},{"dup":63,"validate.io-number-primitive":72}],72:[function(require,module,exports){
-arguments[4][68][0].apply(exports,arguments)
-},{"dup":68}],73:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
+arguments[4][64][0].apply(exports,arguments)
+},{"dup":64,"validate.io-number-primitive":73}],73:[function(require,module,exports){
+arguments[4][69][0].apply(exports,arguments)
+},{"dup":69}],74:[function(require,module,exports){
 /**
 *
 *	VALIDATE: function
@@ -4340,7 +4351,7 @@ function isFunction( value ) {
 
 module.exports = isFunction;
 
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4366,7 +4377,7 @@ function matrixLike( v ) {
 
 module.exports = matrixLike;
 
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 'use strict';
 
 // MODULES //
@@ -4392,9 +4403,9 @@ function isObject( value ) {
 
 module.exports = isObject;
 
-},{"validate.io-array":76}],76:[function(require,module,exports){
-arguments[4][60][0].apply(exports,arguments)
-},{"dup":60}],77:[function(require,module,exports){
+},{"validate.io-array":77}],77:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],78:[function(require,module,exports){
 /**
 *
 *	VALIDATE: positive-integer
@@ -4448,11 +4459,11 @@ function isPositiveInteger( value ) {
 
 module.exports = isPositiveInteger;
 
-},{"validate.io-integer":78}],78:[function(require,module,exports){
-arguments[4][66][0].apply(exports,arguments)
-},{"dup":66,"validate.io-number":79}],79:[function(require,module,exports){
+},{"validate.io-integer":79}],79:[function(require,module,exports){
 arguments[4][67][0].apply(exports,arguments)
-},{"dup":67}],80:[function(require,module,exports){
+},{"dup":67,"validate.io-number":80}],80:[function(require,module,exports){
+arguments[4][68][0].apply(exports,arguments)
+},{"dup":68}],81:[function(require,module,exports){
 /**
 *
 *	VALIDATE: string-primitive
@@ -4499,27 +4510,12 @@ function isString( value ) {
 
 module.exports = isString;
 
-},{}],81:[function(require,module,exports){
-(function (global){
-/*!
- * VERSION: 1.16.1
- * DATE: 2015-03-13
- * UPDATES AND DOCS AT: http://greensock.com
- * 
- * Includes all of the following: TweenLite, TweenMax, TimelineLite, TimelineMax, EasePack, CSSPlugin, RoundPropsPlugin, BezierPlugin, AttrPlugin, DirectionalRotationPlugin
- *
- * @license Copyright (c) 2008-2015, GreenSock. All rights reserved.
- * This work is subject to the terms at http://greensock.com/standard-license or for
- * Club GreenSock members, the software agreement that was issued with your membership.
- * 
- * @author: Jack Doyle, jack@greensock.com
- **/
-var _gsScope="undefined"!=typeof module&&module.exports&&"undefined"!=typeof global?global:this||window;(_gsScope._gsQueue||(_gsScope._gsQueue=[])).push(function(){"use strict";_gsScope._gsDefine("TweenMax",["core.Animation","core.SimpleTimeline","TweenLite"],function(t,e,i){var s=function(t){var e,i=[],s=t.length;for(e=0;e!==s;i.push(t[e++]));return i},r=function(t,e,s){i.call(this,t,e,s),this._cycle=0,this._yoyo=this.vars.yoyo===!0,this._repeat=this.vars.repeat||0,this._repeatDelay=this.vars.repeatDelay||0,this._dirty=!0,this.render=r.prototype.render},n=1e-10,a=i._internals,o=a.isSelector,h=a.isArray,l=r.prototype=i.to({},.1,{}),_=[];r.version="1.16.1",l.constructor=r,l.kill()._gc=!1,r.killTweensOf=r.killDelayedCallsTo=i.killTweensOf,r.getTweensOf=i.getTweensOf,r.lagSmoothing=i.lagSmoothing,r.ticker=i.ticker,r.render=i.render,l.invalidate=function(){return this._yoyo=this.vars.yoyo===!0,this._repeat=this.vars.repeat||0,this._repeatDelay=this.vars.repeatDelay||0,this._uncache(!0),i.prototype.invalidate.call(this)},l.updateTo=function(t,e){var s,r=this.ratio,n=this.vars.immediateRender||t.immediateRender;e&&this._startTime<this._timeline._time&&(this._startTime=this._timeline._time,this._uncache(!1),this._gc?this._enabled(!0,!1):this._timeline.insert(this,this._startTime-this._delay));for(s in t)this.vars[s]=t[s];if(this._initted||n)if(e)this._initted=!1,n&&this.render(0,!0,!0);else if(this._gc&&this._enabled(!0,!1),this._notifyPluginsOfEnabled&&this._firstPT&&i._onPluginEvent("_onDisable",this),this._time/this._duration>.998){var a=this._time;this.render(0,!0,!1),this._initted=!1,this.render(a,!0,!1)}else if(this._time>0||n){this._initted=!1,this._init();for(var o,h=1/(1-r),l=this._firstPT;l;)o=l.s+l.c,l.c*=h,l.s=o-l.c,l=l._next}return this},l.render=function(t,e,i){this._initted||0===this._duration&&this.vars.repeat&&this.invalidate();var s,r,o,h,l,u,p,f,c=this._dirty?this.totalDuration():this._totalDuration,m=this._time,d=this._totalTime,g=this._cycle,v=this._duration,y=this._rawPrevTime;if(t>=c?(this._totalTime=c,this._cycle=this._repeat,this._yoyo&&0!==(1&this._cycle)?(this._time=0,this.ratio=this._ease._calcEnd?this._ease.getRatio(0):0):(this._time=v,this.ratio=this._ease._calcEnd?this._ease.getRatio(1):1),this._reversed||(s=!0,r="onComplete",i=i||this._timeline.autoRemoveChildren),0===v&&(this._initted||!this.vars.lazy||i)&&(this._startTime===this._timeline._duration&&(t=0),(0===t||0>y||y===n)&&y!==t&&(i=!0,y>n&&(r="onReverseComplete")),this._rawPrevTime=f=!e||t||y===t?t:n)):1e-7>t?(this._totalTime=this._time=this._cycle=0,this.ratio=this._ease._calcEnd?this._ease.getRatio(0):0,(0!==d||0===v&&y>0)&&(r="onReverseComplete",s=this._reversed),0>t&&(this._active=!1,0===v&&(this._initted||!this.vars.lazy||i)&&(y>=0&&(i=!0),this._rawPrevTime=f=!e||t||y===t?t:n)),this._initted||(i=!0)):(this._totalTime=this._time=t,0!==this._repeat&&(h=v+this._repeatDelay,this._cycle=this._totalTime/h>>0,0!==this._cycle&&this._cycle===this._totalTime/h&&this._cycle--,this._time=this._totalTime-this._cycle*h,this._yoyo&&0!==(1&this._cycle)&&(this._time=v-this._time),this._time>v?this._time=v:0>this._time&&(this._time=0)),this._easeType?(l=this._time/v,u=this._easeType,p=this._easePower,(1===u||3===u&&l>=.5)&&(l=1-l),3===u&&(l*=2),1===p?l*=l:2===p?l*=l*l:3===p?l*=l*l*l:4===p&&(l*=l*l*l*l),this.ratio=1===u?1-l:2===u?l:.5>this._time/v?l/2:1-l/2):this.ratio=this._ease.getRatio(this._time/v)),m===this._time&&!i&&g===this._cycle)return d!==this._totalTime&&this._onUpdate&&(e||this._onUpdate.apply(this.vars.onUpdateScope||this,this.vars.onUpdateParams||_)),void 0;if(!this._initted){if(this._init(),!this._initted||this._gc)return;if(!i&&this._firstPT&&(this.vars.lazy!==!1&&this._duration||this.vars.lazy&&!this._duration))return this._time=m,this._totalTime=d,this._rawPrevTime=y,this._cycle=g,a.lazyTweens.push(this),this._lazy=[t,e],void 0;this._time&&!s?this.ratio=this._ease.getRatio(this._time/v):s&&this._ease._calcEnd&&(this.ratio=this._ease.getRatio(0===this._time?0:1))}for(this._lazy!==!1&&(this._lazy=!1),this._active||!this._paused&&this._time!==m&&t>=0&&(this._active=!0),0===d&&(2===this._initted&&t>0&&this._init(),this._startAt&&(t>=0?this._startAt.render(t,e,i):r||(r="_dummyGS")),this.vars.onStart&&(0!==this._totalTime||0===v)&&(e||this.vars.onStart.apply(this.vars.onStartScope||this,this.vars.onStartParams||_))),o=this._firstPT;o;)o.f?o.t[o.p](o.c*this.ratio+o.s):o.t[o.p]=o.c*this.ratio+o.s,o=o._next;this._onUpdate&&(0>t&&this._startAt&&this._startTime&&this._startAt.render(t,e,i),e||(this._totalTime!==d||s)&&this._onUpdate.apply(this.vars.onUpdateScope||this,this.vars.onUpdateParams||_)),this._cycle!==g&&(e||this._gc||this.vars.onRepeat&&this.vars.onRepeat.apply(this.vars.onRepeatScope||this,this.vars.onRepeatParams||_)),r&&(!this._gc||i)&&(0>t&&this._startAt&&!this._onUpdate&&this._startTime&&this._startAt.render(t,e,i),s&&(this._timeline.autoRemoveChildren&&this._enabled(!1,!1),this._active=!1),!e&&this.vars[r]&&this.vars[r].apply(this.vars[r+"Scope"]||this,this.vars[r+"Params"]||_),0===v&&this._rawPrevTime===n&&f!==n&&(this._rawPrevTime=0))},r.to=function(t,e,i){return new r(t,e,i)},r.from=function(t,e,i){return i.runBackwards=!0,i.immediateRender=0!=i.immediateRender,new r(t,e,i)},r.fromTo=function(t,e,i,s){return s.startAt=i,s.immediateRender=0!=s.immediateRender&&0!=i.immediateRender,new r(t,e,s)},r.staggerTo=r.allTo=function(t,e,n,a,l,u,p){a=a||0;var f,c,m,d,g=n.delay||0,v=[],y=function(){n.onComplete&&n.onComplete.apply(n.onCompleteScope||this,arguments),l.apply(p||this,u||_)};for(h(t)||("string"==typeof t&&(t=i.selector(t)||t),o(t)&&(t=s(t))),t=t||[],0>a&&(t=s(t),t.reverse(),a*=-1),f=t.length-1,m=0;f>=m;m++){c={};for(d in n)c[d]=n[d];c.delay=g,m===f&&l&&(c.onComplete=y),v[m]=new r(t[m],e,c),g+=a}return v},r.staggerFrom=r.allFrom=function(t,e,i,s,n,a,o){return i.runBackwards=!0,i.immediateRender=0!=i.immediateRender,r.staggerTo(t,e,i,s,n,a,o)},r.staggerFromTo=r.allFromTo=function(t,e,i,s,n,a,o,h){return s.startAt=i,s.immediateRender=0!=s.immediateRender&&0!=i.immediateRender,r.staggerTo(t,e,s,n,a,o,h)},r.delayedCall=function(t,e,i,s,n){return new r(e,0,{delay:t,onComplete:e,onCompleteParams:i,onCompleteScope:s,onReverseComplete:e,onReverseCompleteParams:i,onReverseCompleteScope:s,immediateRender:!1,useFrames:n,overwrite:0})},r.set=function(t,e){return new r(t,0,e)},r.isTweening=function(t){return i.getTweensOf(t,!0).length>0};var u=function(t,e){for(var s=[],r=0,n=t._first;n;)n instanceof i?s[r++]=n:(e&&(s[r++]=n),s=s.concat(u(n,e)),r=s.length),n=n._next;return s},p=r.getAllTweens=function(e){return u(t._rootTimeline,e).concat(u(t._rootFramesTimeline,e))};r.killAll=function(t,i,s,r){null==i&&(i=!0),null==s&&(s=!0);var n,a,o,h=p(0!=r),l=h.length,_=i&&s&&r;for(o=0;l>o;o++)a=h[o],(_||a instanceof e||(n=a.target===a.vars.onComplete)&&s||i&&!n)&&(t?a.totalTime(a._reversed?0:a.totalDuration()):a._enabled(!1,!1))},r.killChildTweensOf=function(t,e){if(null!=t){var n,l,_,u,p,f=a.tweenLookup;if("string"==typeof t&&(t=i.selector(t)||t),o(t)&&(t=s(t)),h(t))for(u=t.length;--u>-1;)r.killChildTweensOf(t[u],e);else{n=[];for(_ in f)for(l=f[_].target.parentNode;l;)l===t&&(n=n.concat(f[_].tweens)),l=l.parentNode;for(p=n.length,u=0;p>u;u++)e&&n[u].totalTime(n[u].totalDuration()),n[u]._enabled(!1,!1)}}};var f=function(t,i,s,r){i=i!==!1,s=s!==!1,r=r!==!1;for(var n,a,o=p(r),h=i&&s&&r,l=o.length;--l>-1;)a=o[l],(h||a instanceof e||(n=a.target===a.vars.onComplete)&&s||i&&!n)&&a.paused(t)};return r.pauseAll=function(t,e,i){f(!0,t,e,i)},r.resumeAll=function(t,e,i){f(!1,t,e,i)},r.globalTimeScale=function(e){var s=t._rootTimeline,r=i.ticker.time;return arguments.length?(e=e||n,s._startTime=r-(r-s._startTime)*s._timeScale/e,s=t._rootFramesTimeline,r=i.ticker.frame,s._startTime=r-(r-s._startTime)*s._timeScale/e,s._timeScale=t._rootTimeline._timeScale=e,e):s._timeScale},l.progress=function(t){return arguments.length?this.totalTime(this.duration()*(this._yoyo&&0!==(1&this._cycle)?1-t:t)+this._cycle*(this._duration+this._repeatDelay),!1):this._time/this.duration()},l.totalProgress=function(t){return arguments.length?this.totalTime(this.totalDuration()*t,!1):this._totalTime/this.totalDuration()},l.time=function(t,e){return arguments.length?(this._dirty&&this.totalDuration(),t>this._duration&&(t=this._duration),this._yoyo&&0!==(1&this._cycle)?t=this._duration-t+this._cycle*(this._duration+this._repeatDelay):0!==this._repeat&&(t+=this._cycle*(this._duration+this._repeatDelay)),this.totalTime(t,e)):this._time},l.duration=function(e){return arguments.length?t.prototype.duration.call(this,e):this._duration},l.totalDuration=function(t){return arguments.length?-1===this._repeat?this:this.duration((t-this._repeat*this._repeatDelay)/(this._repeat+1)):(this._dirty&&(this._totalDuration=-1===this._repeat?999999999999:this._duration*(this._repeat+1)+this._repeatDelay*this._repeat,this._dirty=!1),this._totalDuration)},l.repeat=function(t){return arguments.length?(this._repeat=t,this._uncache(!0)):this._repeat},l.repeatDelay=function(t){return arguments.length?(this._repeatDelay=t,this._uncache(!0)):this._repeatDelay},l.yoyo=function(t){return arguments.length?(this._yoyo=t,this):this._yoyo},r},!0),_gsScope._gsDefine("TimelineLite",["core.Animation","core.SimpleTimeline","TweenLite"],function(t,e,i){var s=function(t){e.call(this,t),this._labels={},this.autoRemoveChildren=this.vars.autoRemoveChildren===!0,this.smoothChildTiming=this.vars.smoothChildTiming===!0,this._sortChildren=!0,this._onUpdate=this.vars.onUpdate;var i,s,r=this.vars;for(s in r)i=r[s],h(i)&&-1!==i.join("").indexOf("{self}")&&(r[s]=this._swapSelfInParams(i));h(r.tweens)&&this.add(r.tweens,0,r.align,r.stagger)},r=1e-10,n=i._internals,a=s._internals={},o=n.isSelector,h=n.isArray,l=n.lazyTweens,_=n.lazyRender,u=[],p=_gsScope._gsDefine.globals,f=function(t){var e,i={};for(e in t)i[e]=t[e];return i},c=a.pauseCallback=function(t,e,i,s){var n,a=t._timeline,o=a._totalTime,h=t._startTime,l=0>t._rawPrevTime||0===t._rawPrevTime&&a._reversed,_=l?0:r,p=l?r:0;if(e||!this._forcingPlayhead){for(a.pause(h),n=t._prev;n&&n._startTime===h;)n._rawPrevTime=p,n=n._prev;for(n=t._next;n&&n._startTime===h;)n._rawPrevTime=_,n=n._next;e&&e.apply(s||a,i||u),(this._forcingPlayhead||!a._paused)&&a.seek(o)}},m=function(t){var e,i=[],s=t.length;for(e=0;e!==s;i.push(t[e++]));return i},d=s.prototype=new e;return s.version="1.16.1",d.constructor=s,d.kill()._gc=d._forcingPlayhead=!1,d.to=function(t,e,s,r){var n=s.repeat&&p.TweenMax||i;return e?this.add(new n(t,e,s),r):this.set(t,s,r)},d.from=function(t,e,s,r){return this.add((s.repeat&&p.TweenMax||i).from(t,e,s),r)},d.fromTo=function(t,e,s,r,n){var a=r.repeat&&p.TweenMax||i;return e?this.add(a.fromTo(t,e,s,r),n):this.set(t,r,n)},d.staggerTo=function(t,e,r,n,a,h,l,_){var u,p=new s({onComplete:h,onCompleteParams:l,onCompleteScope:_,smoothChildTiming:this.smoothChildTiming});for("string"==typeof t&&(t=i.selector(t)||t),t=t||[],o(t)&&(t=m(t)),n=n||0,0>n&&(t=m(t),t.reverse(),n*=-1),u=0;t.length>u;u++)r.startAt&&(r.startAt=f(r.startAt)),p.to(t[u],e,f(r),u*n);return this.add(p,a)},d.staggerFrom=function(t,e,i,s,r,n,a,o){return i.immediateRender=0!=i.immediateRender,i.runBackwards=!0,this.staggerTo(t,e,i,s,r,n,a,o)},d.staggerFromTo=function(t,e,i,s,r,n,a,o,h){return s.startAt=i,s.immediateRender=0!=s.immediateRender&&0!=i.immediateRender,this.staggerTo(t,e,s,r,n,a,o,h)},d.call=function(t,e,s,r){return this.add(i.delayedCall(0,t,e,s),r)},d.set=function(t,e,s){return s=this._parseTimeOrLabel(s,0,!0),null==e.immediateRender&&(e.immediateRender=s===this._time&&!this._paused),this.add(new i(t,0,e),s)},s.exportRoot=function(t,e){t=t||{},null==t.smoothChildTiming&&(t.smoothChildTiming=!0);var r,n,a=new s(t),o=a._timeline;for(null==e&&(e=!0),o._remove(a,!0),a._startTime=0,a._rawPrevTime=a._time=a._totalTime=o._time,r=o._first;r;)n=r._next,e&&r instanceof i&&r.target===r.vars.onComplete||a.add(r,r._startTime-r._delay),r=n;return o.add(a,0),a},d.add=function(r,n,a,o){var l,_,u,p,f,c;if("number"!=typeof n&&(n=this._parseTimeOrLabel(n,0,!0,r)),!(r instanceof t)){if(r instanceof Array||r&&r.push&&h(r)){for(a=a||"normal",o=o||0,l=n,_=r.length,u=0;_>u;u++)h(p=r[u])&&(p=new s({tweens:p})),this.add(p,l),"string"!=typeof p&&"function"!=typeof p&&("sequence"===a?l=p._startTime+p.totalDuration()/p._timeScale:"start"===a&&(p._startTime-=p.delay())),l+=o;return this._uncache(!0)}if("string"==typeof r)return this.addLabel(r,n);if("function"!=typeof r)throw"Cannot add "+r+" into the timeline; it is not a tween, timeline, function, or string.";r=i.delayedCall(0,r)}if(e.prototype.add.call(this,r,n),(this._gc||this._time===this._duration)&&!this._paused&&this._duration<this.duration())for(f=this,c=f.rawTime()>r._startTime;f._timeline;)c&&f._timeline.smoothChildTiming?f.totalTime(f._totalTime,!0):f._gc&&f._enabled(!0,!1),f=f._timeline;return this},d.remove=function(e){if(e instanceof t)return this._remove(e,!1);if(e instanceof Array||e&&e.push&&h(e)){for(var i=e.length;--i>-1;)this.remove(e[i]);return this}return"string"==typeof e?this.removeLabel(e):this.kill(null,e)},d._remove=function(t,i){e.prototype._remove.call(this,t,i);var s=this._last;return s?this._time>s._startTime+s._totalDuration/s._timeScale&&(this._time=this.duration(),this._totalTime=this._totalDuration):this._time=this._totalTime=this._duration=this._totalDuration=0,this},d.append=function(t,e){return this.add(t,this._parseTimeOrLabel(null,e,!0,t))},d.insert=d.insertMultiple=function(t,e,i,s){return this.add(t,e||0,i,s)},d.appendMultiple=function(t,e,i,s){return this.add(t,this._parseTimeOrLabel(null,e,!0,t),i,s)},d.addLabel=function(t,e){return this._labels[t]=this._parseTimeOrLabel(e),this},d.addPause=function(t,e,s,r){var n=i.delayedCall(0,c,["{self}",e,s,r],this);return n.data="isPause",this.add(n,t)},d.removeLabel=function(t){return delete this._labels[t],this},d.getLabelTime=function(t){return null!=this._labels[t]?this._labels[t]:-1},d._parseTimeOrLabel=function(e,i,s,r){var n;if(r instanceof t&&r.timeline===this)this.remove(r);else if(r&&(r instanceof Array||r.push&&h(r)))for(n=r.length;--n>-1;)r[n]instanceof t&&r[n].timeline===this&&this.remove(r[n]);if("string"==typeof i)return this._parseTimeOrLabel(i,s&&"number"==typeof e&&null==this._labels[i]?e-this.duration():0,s);if(i=i||0,"string"!=typeof e||!isNaN(e)&&null==this._labels[e])null==e&&(e=this.duration());else{if(n=e.indexOf("="),-1===n)return null==this._labels[e]?s?this._labels[e]=this.duration()+i:i:this._labels[e]+i;i=parseInt(e.charAt(n-1)+"1",10)*Number(e.substr(n+1)),e=n>1?this._parseTimeOrLabel(e.substr(0,n-1),0,s):this.duration()}return Number(e)+i},d.seek=function(t,e){return this.totalTime("number"==typeof t?t:this._parseTimeOrLabel(t),e!==!1)},d.stop=function(){return this.paused(!0)},d.gotoAndPlay=function(t,e){return this.play(t,e)},d.gotoAndStop=function(t,e){return this.pause(t,e)},d.render=function(t,e,i){this._gc&&this._enabled(!0,!1);var s,n,a,o,h,p=this._dirty?this.totalDuration():this._totalDuration,f=this._time,c=this._startTime,m=this._timeScale,d=this._paused;if(t>=p)this._totalTime=this._time=p,this._reversed||this._hasPausedChild()||(n=!0,o="onComplete",h=!!this._timeline.autoRemoveChildren,0===this._duration&&(0===t||0>this._rawPrevTime||this._rawPrevTime===r)&&this._rawPrevTime!==t&&this._first&&(h=!0,this._rawPrevTime>r&&(o="onReverseComplete"))),this._rawPrevTime=this._duration||!e||t||this._rawPrevTime===t?t:r,t=p+1e-4;else if(1e-7>t)if(this._totalTime=this._time=0,(0!==f||0===this._duration&&this._rawPrevTime!==r&&(this._rawPrevTime>0||0>t&&this._rawPrevTime>=0))&&(o="onReverseComplete",n=this._reversed),0>t)this._active=!1,this._timeline.autoRemoveChildren&&this._reversed?(h=n=!0,o="onReverseComplete"):this._rawPrevTime>=0&&this._first&&(h=!0),this._rawPrevTime=t;else{if(this._rawPrevTime=this._duration||!e||t||this._rawPrevTime===t?t:r,0===t&&n)for(s=this._first;s&&0===s._startTime;)s._duration||(n=!1),s=s._next;t=0,this._initted||(h=!0)}else this._totalTime=this._time=this._rawPrevTime=t;if(this._time!==f&&this._first||i||h){if(this._initted||(this._initted=!0),this._active||!this._paused&&this._time!==f&&t>0&&(this._active=!0),0===f&&this.vars.onStart&&0!==this._time&&(e||this.vars.onStart.apply(this.vars.onStartScope||this,this.vars.onStartParams||u)),this._time>=f)for(s=this._first;s&&(a=s._next,!this._paused||d);)(s._active||s._startTime<=this._time&&!s._paused&&!s._gc)&&(s._reversed?s.render((s._dirty?s.totalDuration():s._totalDuration)-(t-s._startTime)*s._timeScale,e,i):s.render((t-s._startTime)*s._timeScale,e,i)),s=a;else for(s=this._last;s&&(a=s._prev,!this._paused||d);)(s._active||f>=s._startTime&&!s._paused&&!s._gc)&&(s._reversed?s.render((s._dirty?s.totalDuration():s._totalDuration)-(t-s._startTime)*s._timeScale,e,i):s.render((t-s._startTime)*s._timeScale,e,i)),s=a;this._onUpdate&&(e||(l.length&&_(),this._onUpdate.apply(this.vars.onUpdateScope||this,this.vars.onUpdateParams||u))),o&&(this._gc||(c===this._startTime||m!==this._timeScale)&&(0===this._time||p>=this.totalDuration())&&(n&&(l.length&&_(),this._timeline.autoRemoveChildren&&this._enabled(!1,!1),this._active=!1),!e&&this.vars[o]&&this.vars[o].apply(this.vars[o+"Scope"]||this,this.vars[o+"Params"]||u)))}},d._hasPausedChild=function(){for(var t=this._first;t;){if(t._paused||t instanceof s&&t._hasPausedChild())return!0;t=t._next}return!1},d.getChildren=function(t,e,s,r){r=r||-9999999999;for(var n=[],a=this._first,o=0;a;)r>a._startTime||(a instanceof i?e!==!1&&(n[o++]=a):(s!==!1&&(n[o++]=a),t!==!1&&(n=n.concat(a.getChildren(!0,e,s)),o=n.length))),a=a._next;return n},d.getTweensOf=function(t,e){var s,r,n=this._gc,a=[],o=0;for(n&&this._enabled(!0,!0),s=i.getTweensOf(t),r=s.length;--r>-1;)(s[r].timeline===this||e&&this._contains(s[r]))&&(a[o++]=s[r]);return n&&this._enabled(!1,!0),a},d.recent=function(){return this._recent},d._contains=function(t){for(var e=t.timeline;e;){if(e===this)return!0;e=e.timeline}return!1},d.shiftChildren=function(t,e,i){i=i||0;for(var s,r=this._first,n=this._labels;r;)r._startTime>=i&&(r._startTime+=t),r=r._next;if(e)for(s in n)n[s]>=i&&(n[s]+=t);return this._uncache(!0)},d._kill=function(t,e){if(!t&&!e)return this._enabled(!1,!1);for(var i=e?this.getTweensOf(e):this.getChildren(!0,!0,!1),s=i.length,r=!1;--s>-1;)i[s]._kill(t,e)&&(r=!0);return r},d.clear=function(t){var e=this.getChildren(!1,!0,!0),i=e.length;for(this._time=this._totalTime=0;--i>-1;)e[i]._enabled(!1,!1);return t!==!1&&(this._labels={}),this._uncache(!0)},d.invalidate=function(){for(var e=this._first;e;)e.invalidate(),e=e._next;return t.prototype.invalidate.call(this)},d._enabled=function(t,i){if(t===this._gc)for(var s=this._first;s;)s._enabled(t,!0),s=s._next;return e.prototype._enabled.call(this,t,i)},d.totalTime=function(){this._forcingPlayhead=!0;var e=t.prototype.totalTime.apply(this,arguments);return this._forcingPlayhead=!1,e},d.duration=function(t){return arguments.length?(0!==this.duration()&&0!==t&&this.timeScale(this._duration/t),this):(this._dirty&&this.totalDuration(),this._duration)},d.totalDuration=function(t){if(!arguments.length){if(this._dirty){for(var e,i,s=0,r=this._last,n=999999999999;r;)e=r._prev,r._dirty&&r.totalDuration(),r._startTime>n&&this._sortChildren&&!r._paused?this.add(r,r._startTime-r._delay):n=r._startTime,0>r._startTime&&!r._paused&&(s-=r._startTime,this._timeline.smoothChildTiming&&(this._startTime+=r._startTime/this._timeScale),this.shiftChildren(-r._startTime,!1,-9999999999),n=0),i=r._startTime+r._totalDuration/r._timeScale,i>s&&(s=i),r=e;this._duration=this._totalDuration=s,this._dirty=!1}return this._totalDuration}return 0!==this.totalDuration()&&0!==t&&this.timeScale(this._totalDuration/t),this},d.paused=function(e){if(!e)for(var i=this._first,s=this._time;i;)i._startTime===s&&"isPause"===i.data&&(i._rawPrevTime=0),i=i._next;return t.prototype.paused.apply(this,arguments)},d.usesFrames=function(){for(var e=this._timeline;e._timeline;)e=e._timeline;return e===t._rootFramesTimeline},d.rawTime=function(){return this._paused?this._totalTime:(this._timeline.rawTime()-this._startTime)*this._timeScale},s},!0),_gsScope._gsDefine("TimelineMax",["TimelineLite","TweenLite","easing.Ease"],function(t,e,i){var s=function(e){t.call(this,e),this._repeat=this.vars.repeat||0,this._repeatDelay=this.vars.repeatDelay||0,this._cycle=0,this._yoyo=this.vars.yoyo===!0,this._dirty=!0},r=1e-10,n=[],a=e._internals,o=a.lazyTweens,h=a.lazyRender,l=new i(null,null,1,0),_=s.prototype=new t;return _.constructor=s,_.kill()._gc=!1,s.version="1.16.1",_.invalidate=function(){return this._yoyo=this.vars.yoyo===!0,this._repeat=this.vars.repeat||0,this._repeatDelay=this.vars.repeatDelay||0,this._uncache(!0),t.prototype.invalidate.call(this)},_.addCallback=function(t,i,s,r){return this.add(e.delayedCall(0,t,s,r),i)},_.removeCallback=function(t,e){if(t)if(null==e)this._kill(null,t);else for(var i=this.getTweensOf(t,!1),s=i.length,r=this._parseTimeOrLabel(e);--s>-1;)i[s]._startTime===r&&i[s]._enabled(!1,!1);return this},_.removePause=function(e){return this.removeCallback(t._internals.pauseCallback,e)},_.tweenTo=function(t,i){i=i||{};var s,r,a,o={ease:l,useFrames:this.usesFrames(),immediateRender:!1};for(r in i)o[r]=i[r];return o.time=this._parseTimeOrLabel(t),s=Math.abs(Number(o.time)-this._time)/this._timeScale||.001,a=new e(this,s,o),o.onStart=function(){a.target.paused(!0),a.vars.time!==a.target.time()&&s===a.duration()&&a.duration(Math.abs(a.vars.time-a.target.time())/a.target._timeScale),i.onStart&&i.onStart.apply(i.onStartScope||a,i.onStartParams||n)},a},_.tweenFromTo=function(t,e,i){i=i||{},t=this._parseTimeOrLabel(t),i.startAt={onComplete:this.seek,onCompleteParams:[t],onCompleteScope:this},i.immediateRender=i.immediateRender!==!1;var s=this.tweenTo(e,i);return s.duration(Math.abs(s.vars.time-t)/this._timeScale||.001)},_.render=function(t,e,i){this._gc&&this._enabled(!0,!1);var s,a,l,_,u,p,f=this._dirty?this.totalDuration():this._totalDuration,c=this._duration,m=this._time,d=this._totalTime,g=this._startTime,v=this._timeScale,y=this._rawPrevTime,T=this._paused,w=this._cycle;if(t>=f)this._locked||(this._totalTime=f,this._cycle=this._repeat),this._reversed||this._hasPausedChild()||(a=!0,_="onComplete",u=!!this._timeline.autoRemoveChildren,0===this._duration&&(0===t||0>y||y===r)&&y!==t&&this._first&&(u=!0,y>r&&(_="onReverseComplete"))),this._rawPrevTime=this._duration||!e||t||this._rawPrevTime===t?t:r,this._yoyo&&0!==(1&this._cycle)?this._time=t=0:(this._time=c,t=c+1e-4);else if(1e-7>t)if(this._locked||(this._totalTime=this._cycle=0),this._time=0,(0!==m||0===c&&y!==r&&(y>0||0>t&&y>=0)&&!this._locked)&&(_="onReverseComplete",a=this._reversed),0>t)this._active=!1,this._timeline.autoRemoveChildren&&this._reversed?(u=a=!0,_="onReverseComplete"):y>=0&&this._first&&(u=!0),this._rawPrevTime=t;else{if(this._rawPrevTime=c||!e||t||this._rawPrevTime===t?t:r,0===t&&a)for(s=this._first;s&&0===s._startTime;)s._duration||(a=!1),s=s._next;t=0,this._initted||(u=!0)}else 0===c&&0>y&&(u=!0),this._time=this._rawPrevTime=t,this._locked||(this._totalTime=t,0!==this._repeat&&(p=c+this._repeatDelay,this._cycle=this._totalTime/p>>0,0!==this._cycle&&this._cycle===this._totalTime/p&&this._cycle--,this._time=this._totalTime-this._cycle*p,this._yoyo&&0!==(1&this._cycle)&&(this._time=c-this._time),this._time>c?(this._time=c,t=c+1e-4):0>this._time?this._time=t=0:t=this._time));if(this._cycle!==w&&!this._locked){var x=this._yoyo&&0!==(1&w),b=x===(this._yoyo&&0!==(1&this._cycle)),P=this._totalTime,S=this._cycle,k=this._rawPrevTime,R=this._time;if(this._totalTime=w*c,w>this._cycle?x=!x:this._totalTime+=c,this._time=m,this._rawPrevTime=0===c?y-1e-4:y,this._cycle=w,this._locked=!0,m=x?0:c,this.render(m,e,0===c),e||this._gc||this.vars.onRepeat&&this.vars.onRepeat.apply(this.vars.onRepeatScope||this,this.vars.onRepeatParams||n),b&&(m=x?c+1e-4:-1e-4,this.render(m,!0,!1)),this._locked=!1,this._paused&&!T)return;this._time=R,this._totalTime=P,this._cycle=S,this._rawPrevTime=k}if(!(this._time!==m&&this._first||i||u))return d!==this._totalTime&&this._onUpdate&&(e||this._onUpdate.apply(this.vars.onUpdateScope||this,this.vars.onUpdateParams||n)),void 0;if(this._initted||(this._initted=!0),this._active||!this._paused&&this._totalTime!==d&&t>0&&(this._active=!0),0===d&&this.vars.onStart&&0!==this._totalTime&&(e||this.vars.onStart.apply(this.vars.onStartScope||this,this.vars.onStartParams||n)),this._time>=m)for(s=this._first;s&&(l=s._next,!this._paused||T);)(s._active||s._startTime<=this._time&&!s._paused&&!s._gc)&&(s._reversed?s.render((s._dirty?s.totalDuration():s._totalDuration)-(t-s._startTime)*s._timeScale,e,i):s.render((t-s._startTime)*s._timeScale,e,i)),s=l;else for(s=this._last;s&&(l=s._prev,!this._paused||T);)(s._active||m>=s._startTime&&!s._paused&&!s._gc)&&(s._reversed?s.render((s._dirty?s.totalDuration():s._totalDuration)-(t-s._startTime)*s._timeScale,e,i):s.render((t-s._startTime)*s._timeScale,e,i)),s=l;this._onUpdate&&(e||(o.length&&h(),this._onUpdate.apply(this.vars.onUpdateScope||this,this.vars.onUpdateParams||n))),_&&(this._locked||this._gc||(g===this._startTime||v!==this._timeScale)&&(0===this._time||f>=this.totalDuration())&&(a&&(o.length&&h(),this._timeline.autoRemoveChildren&&this._enabled(!1,!1),this._active=!1),!e&&this.vars[_]&&this.vars[_].apply(this.vars[_+"Scope"]||this,this.vars[_+"Params"]||n)))},_.getActive=function(t,e,i){null==t&&(t=!0),null==e&&(e=!0),null==i&&(i=!1);var s,r,n=[],a=this.getChildren(t,e,i),o=0,h=a.length;for(s=0;h>s;s++)r=a[s],r.isActive()&&(n[o++]=r);return n},_.getLabelAfter=function(t){t||0!==t&&(t=this._time);var e,i=this.getLabelsArray(),s=i.length;for(e=0;s>e;e++)if(i[e].time>t)return i[e].name;return null},_.getLabelBefore=function(t){null==t&&(t=this._time);for(var e=this.getLabelsArray(),i=e.length;--i>-1;)if(t>e[i].time)return e[i].name;return null},_.getLabelsArray=function(){var t,e=[],i=0;for(t in this._labels)e[i++]={time:this._labels[t],name:t};return e.sort(function(t,e){return t.time-e.time}),e},_.progress=function(t,e){return arguments.length?this.totalTime(this.duration()*(this._yoyo&&0!==(1&this._cycle)?1-t:t)+this._cycle*(this._duration+this._repeatDelay),e):this._time/this.duration()},_.totalProgress=function(t,e){return arguments.length?this.totalTime(this.totalDuration()*t,e):this._totalTime/this.totalDuration()},_.totalDuration=function(e){return arguments.length?-1===this._repeat?this:this.duration((e-this._repeat*this._repeatDelay)/(this._repeat+1)):(this._dirty&&(t.prototype.totalDuration.call(this),this._totalDuration=-1===this._repeat?999999999999:this._duration*(this._repeat+1)+this._repeatDelay*this._repeat),this._totalDuration)},_.time=function(t,e){return arguments.length?(this._dirty&&this.totalDuration(),t>this._duration&&(t=this._duration),this._yoyo&&0!==(1&this._cycle)?t=this._duration-t+this._cycle*(this._duration+this._repeatDelay):0!==this._repeat&&(t+=this._cycle*(this._duration+this._repeatDelay)),this.totalTime(t,e)):this._time},_.repeat=function(t){return arguments.length?(this._repeat=t,this._uncache(!0)):this._repeat},_.repeatDelay=function(t){return arguments.length?(this._repeatDelay=t,this._uncache(!0)):this._repeatDelay},_.yoyo=function(t){return arguments.length?(this._yoyo=t,this):this._yoyo},_.currentLabel=function(t){return arguments.length?this.seek(t,!0):this.getLabelBefore(this._time+1e-8)},s},!0),function(){var t=180/Math.PI,e=[],i=[],s=[],r={},n=_gsScope._gsDefine.globals,a=function(t,e,i,s){this.a=t,this.b=e,this.c=i,this.d=s,this.da=s-t,this.ca=i-t,this.ba=e-t},o=",x,y,z,left,top,right,bottom,marginTop,marginLeft,marginRight,marginBottom,paddingLeft,paddingTop,paddingRight,paddingBottom,backgroundPosition,backgroundPosition_y,",h=function(t,e,i,s){var r={a:t},n={},a={},o={c:s},h=(t+e)/2,l=(e+i)/2,_=(i+s)/2,u=(h+l)/2,p=(l+_)/2,f=(p-u)/8;return r.b=h+(t-h)/4,n.b=u+f,r.c=n.a=(r.b+n.b)/2,n.c=a.a=(u+p)/2,a.b=p-f,o.b=_+(s-_)/4,a.c=o.a=(a.b+o.b)/2,[r,n,a,o]},l=function(t,r,n,a,o){var l,_,u,p,f,c,m,d,g,v,y,T,w,x=t.length-1,b=0,P=t[0].a;for(l=0;x>l;l++)f=t[b],_=f.a,u=f.d,p=t[b+1].d,o?(y=e[l],T=i[l],w=.25*(T+y)*r/(a?.5:s[l]||.5),c=u-(u-_)*(a?.5*r:0!==y?w/y:0),m=u+(p-u)*(a?.5*r:0!==T?w/T:0),d=u-(c+((m-c)*(3*y/(y+T)+.5)/4||0))):(c=u-.5*(u-_)*r,m=u+.5*(p-u)*r,d=u-(c+m)/2),c+=d,m+=d,f.c=g=c,f.b=0!==l?P:P=f.a+.6*(f.c-f.a),f.da=u-_,f.ca=g-_,f.ba=P-_,n?(v=h(_,P,g,u),t.splice(b,1,v[0],v[1],v[2],v[3]),b+=4):b++,P=m;f=t[b],f.b=P,f.c=P+.4*(f.d-P),f.da=f.d-f.a,f.ca=f.c-f.a,f.ba=P-f.a,n&&(v=h(f.a,P,f.c,f.d),t.splice(b,1,v[0],v[1],v[2],v[3]))},_=function(t,s,r,n){var o,h,l,_,u,p,f=[];if(n)for(t=[n].concat(t),h=t.length;--h>-1;)"string"==typeof(p=t[h][s])&&"="===p.charAt(1)&&(t[h][s]=n[s]+Number(p.charAt(0)+p.substr(2)));if(o=t.length-2,0>o)return f[0]=new a(t[0][s],0,0,t[-1>o?0:1][s]),f;for(h=0;o>h;h++)l=t[h][s],_=t[h+1][s],f[h]=new a(l,0,0,_),r&&(u=t[h+2][s],e[h]=(e[h]||0)+(_-l)*(_-l),i[h]=(i[h]||0)+(u-_)*(u-_));return f[h]=new a(t[h][s],0,0,t[h+1][s]),f},u=function(t,n,a,h,u,p){var f,c,m,d,g,v,y,T,w={},x=[],b=p||t[0];u="string"==typeof u?","+u+",":o,null==n&&(n=1);for(c in t[0])x.push(c);if(t.length>1){for(T=t[t.length-1],y=!0,f=x.length;--f>-1;)if(c=x[f],Math.abs(b[c]-T[c])>.05){y=!1;break}y&&(t=t.concat(),p&&t.unshift(p),t.push(t[1]),p=t[t.length-3])}for(e.length=i.length=s.length=0,f=x.length;--f>-1;)c=x[f],r[c]=-1!==u.indexOf(","+c+","),w[c]=_(t,c,r[c],p);for(f=e.length;--f>-1;)e[f]=Math.sqrt(e[f]),i[f]=Math.sqrt(i[f]);if(!h){for(f=x.length;--f>-1;)if(r[c])for(m=w[x[f]],v=m.length-1,d=0;v>d;d++)g=m[d+1].da/i[d]+m[d].da/e[d],s[d]=(s[d]||0)+g*g;for(f=s.length;--f>-1;)s[f]=Math.sqrt(s[f])}for(f=x.length,d=a?4:1;--f>-1;)c=x[f],m=w[c],l(m,n,a,h,r[c]),y&&(m.splice(0,d),m.splice(m.length-d,d));return w},p=function(t,e,i){e=e||"soft";var s,r,n,o,h,l,_,u,p,f,c,m={},d="cubic"===e?3:2,g="soft"===e,v=[];if(g&&i&&(t=[i].concat(t)),null==t||d+1>t.length)throw"invalid Bezier data";for(p in t[0])v.push(p);for(l=v.length;--l>-1;){for(p=v[l],m[p]=h=[],f=0,u=t.length,_=0;u>_;_++)s=null==i?t[_][p]:"string"==typeof(c=t[_][p])&&"="===c.charAt(1)?i[p]+Number(c.charAt(0)+c.substr(2)):Number(c),g&&_>1&&u-1>_&&(h[f++]=(s+h[f-2])/2),h[f++]=s;for(u=f-d+1,f=0,_=0;u>_;_+=d)s=h[_],r=h[_+1],n=h[_+2],o=2===d?0:h[_+3],h[f++]=c=3===d?new a(s,r,n,o):new a(s,(2*r+s)/3,(2*r+n)/3,n);h.length=f}return m},f=function(t,e,i){for(var s,r,n,a,o,h,l,_,u,p,f,c=1/i,m=t.length;--m>-1;)for(p=t[m],n=p.a,a=p.d-n,o=p.c-n,h=p.b-n,s=r=0,_=1;i>=_;_++)l=c*_,u=1-l,s=r-(r=(l*l*a+3*u*(l*o+u*h))*l),f=m*i+_-1,e[f]=(e[f]||0)+s*s},c=function(t,e){e=e>>0||6;var i,s,r,n,a=[],o=[],h=0,l=0,_=e-1,u=[],p=[];for(i in t)f(t[i],a,e);for(r=a.length,s=0;r>s;s++)h+=Math.sqrt(a[s]),n=s%e,p[n]=h,n===_&&(l+=h,n=s/e>>0,u[n]=p,o[n]=l,h=0,p=[]);return{length:l,lengths:o,segments:u}},m=_gsScope._gsDefine.plugin({propName:"bezier",priority:-1,version:"1.3.4",API:2,global:!0,init:function(t,e,i){this._target=t,e instanceof Array&&(e={values:e}),this._func={},this._round={},this._props=[],this._timeRes=null==e.timeResolution?6:parseInt(e.timeResolution,10);var s,r,n,a,o,h=e.values||[],l={},_=h[0],f=e.autoRotate||i.vars.orientToBezier;this._autoRotate=f?f instanceof Array?f:[["x","y","rotation",f===!0?0:Number(f)||0]]:null;for(s in _)this._props.push(s);for(n=this._props.length;--n>-1;)s=this._props[n],this._overwriteProps.push(s),r=this._func[s]="function"==typeof t[s],l[s]=r?t[s.indexOf("set")||"function"!=typeof t["get"+s.substr(3)]?s:"get"+s.substr(3)]():parseFloat(t[s]),o||l[s]!==h[0][s]&&(o=l);if(this._beziers="cubic"!==e.type&&"quadratic"!==e.type&&"soft"!==e.type?u(h,isNaN(e.curviness)?1:e.curviness,!1,"thruBasic"===e.type,e.correlate,o):p(h,e.type,l),this._segCount=this._beziers[s].length,this._timeRes){var m=c(this._beziers,this._timeRes);this._length=m.length,this._lengths=m.lengths,this._segments=m.segments,this._l1=this._li=this._s1=this._si=0,this._l2=this._lengths[0],this._curSeg=this._segments[0],this._s2=this._curSeg[0],this._prec=1/this._curSeg.length}if(f=this._autoRotate)for(this._initialRotations=[],f[0]instanceof Array||(this._autoRotate=f=[f]),n=f.length;--n>-1;){for(a=0;3>a;a++)s=f[n][a],this._func[s]="function"==typeof t[s]?t[s.indexOf("set")||"function"!=typeof t["get"+s.substr(3)]?s:"get"+s.substr(3)]:!1;
-s=f[n][2],this._initialRotations[n]=this._func[s]?this._func[s].call(this._target):this._target[s]}return this._startRatio=i.vars.runBackwards?1:0,!0},set:function(e){var i,s,r,n,a,o,h,l,_,u,p=this._segCount,f=this._func,c=this._target,m=e!==this._startRatio;if(this._timeRes){if(_=this._lengths,u=this._curSeg,e*=this._length,r=this._li,e>this._l2&&p-1>r){for(l=p-1;l>r&&e>=(this._l2=_[++r]););this._l1=_[r-1],this._li=r,this._curSeg=u=this._segments[r],this._s2=u[this._s1=this._si=0]}else if(this._l1>e&&r>0){for(;r>0&&(this._l1=_[--r])>=e;);0===r&&this._l1>e?this._l1=0:r++,this._l2=_[r],this._li=r,this._curSeg=u=this._segments[r],this._s1=u[(this._si=u.length-1)-1]||0,this._s2=u[this._si]}if(i=r,e-=this._l1,r=this._si,e>this._s2&&u.length-1>r){for(l=u.length-1;l>r&&e>=(this._s2=u[++r]););this._s1=u[r-1],this._si=r}else if(this._s1>e&&r>0){for(;r>0&&(this._s1=u[--r])>=e;);0===r&&this._s1>e?this._s1=0:r++,this._s2=u[r],this._si=r}o=(r+(e-this._s1)/(this._s2-this._s1))*this._prec}else i=0>e?0:e>=1?p-1:p*e>>0,o=(e-i*(1/p))*p;for(s=1-o,r=this._props.length;--r>-1;)n=this._props[r],a=this._beziers[n][i],h=(o*o*a.da+3*s*(o*a.ca+s*a.ba))*o+a.a,this._round[n]&&(h=Math.round(h)),f[n]?c[n](h):c[n]=h;if(this._autoRotate){var d,g,v,y,T,w,x,b=this._autoRotate;for(r=b.length;--r>-1;)n=b[r][2],w=b[r][3]||0,x=b[r][4]===!0?1:t,a=this._beziers[b[r][0]],d=this._beziers[b[r][1]],a&&d&&(a=a[i],d=d[i],g=a.a+(a.b-a.a)*o,y=a.b+(a.c-a.b)*o,g+=(y-g)*o,y+=(a.c+(a.d-a.c)*o-y)*o,v=d.a+(d.b-d.a)*o,T=d.b+(d.c-d.b)*o,v+=(T-v)*o,T+=(d.c+(d.d-d.c)*o-T)*o,h=m?Math.atan2(T-v,y-g)*x+w:this._initialRotations[r],f[n]?c[n](h):c[n]=h)}}}),d=m.prototype;m.bezierThrough=u,m.cubicToQuadratic=h,m._autoCSS=!0,m.quadraticToCubic=function(t,e,i){return new a(t,(2*e+t)/3,(2*e+i)/3,i)},m._cssRegister=function(){var t=n.CSSPlugin;if(t){var e=t._internals,i=e._parseToProxy,s=e._setPluginRatio,r=e.CSSPropTween;e._registerComplexSpecialProp("bezier",{parser:function(t,e,n,a,o,h){e instanceof Array&&(e={values:e}),h=new m;var l,_,u,p=e.values,f=p.length-1,c=[],d={};if(0>f)return o;for(l=0;f>=l;l++)u=i(t,p[l],a,o,h,f!==l),c[l]=u.end;for(_ in e)d[_]=e[_];return d.values=c,o=new r(t,"bezier",0,0,u.pt,2),o.data=u,o.plugin=h,o.setRatio=s,0===d.autoRotate&&(d.autoRotate=!0),!d.autoRotate||d.autoRotate instanceof Array||(l=d.autoRotate===!0?0:Number(d.autoRotate),d.autoRotate=null!=u.end.left?[["left","top","rotation",l,!1]]:null!=u.end.x?[["x","y","rotation",l,!1]]:!1),d.autoRotate&&(a._transform||a._enableTransforms(!1),u.autoRotate=a._target._gsTransform),h._onInitTween(u.proxy,d,a._tween),o}})}},d._roundProps=function(t,e){for(var i=this._overwriteProps,s=i.length;--s>-1;)(t[i[s]]||t.bezier||t.bezierThrough)&&(this._round[i[s]]=e)},d._kill=function(t){var e,i,s=this._props;for(e in this._beziers)if(e in t)for(delete this._beziers[e],delete this._func[e],i=s.length;--i>-1;)s[i]===e&&s.splice(i,1);return this._super._kill.call(this,t)}}(),_gsScope._gsDefine("plugins.CSSPlugin",["plugins.TweenPlugin","TweenLite"],function(t,e){var i,s,r,n,a=function(){t.call(this,"css"),this._overwriteProps.length=0,this.setRatio=a.prototype.setRatio},o=_gsScope._gsDefine.globals,h={},l=a.prototype=new t("css");l.constructor=a,a.version="1.16.1",a.API=2,a.defaultTransformPerspective=0,a.defaultSkewType="compensated",l="px",a.suffixMap={top:l,right:l,bottom:l,left:l,width:l,height:l,fontSize:l,padding:l,margin:l,perspective:l,lineHeight:""};var _,u,p,f,c,m,d=/(?:\d|\-\d|\.\d|\-\.\d)+/g,g=/(?:\d|\-\d|\.\d|\-\.\d|\+=\d|\-=\d|\+=.\d|\-=\.\d)+/g,v=/(?:\+=|\-=|\-|\b)[\d\-\.]+[a-zA-Z0-9]*(?:%|\b)/gi,y=/(?![+-]?\d*\.?\d+|[+-]|e[+-]\d+)[^0-9]/g,T=/(?:\d|\-|\+|=|#|\.)*/g,w=/opacity *= *([^)]*)/i,x=/opacity:([^;]*)/i,b=/alpha\(opacity *=.+?\)/i,P=/^(rgb|hsl)/,S=/([A-Z])/g,k=/-([a-z])/gi,R=/(^(?:url\(\"|url\())|(?:(\"\))$|\)$)/gi,A=function(t,e){return e.toUpperCase()},O=/(?:Left|Right|Width)/i,C=/(M11|M12|M21|M22)=[\d\-\.e]+/gi,D=/progid\:DXImageTransform\.Microsoft\.Matrix\(.+?\)/i,M=/,(?=[^\)]*(?:\(|$))/gi,z=Math.PI/180,I=180/Math.PI,F={},E=document,N=function(t){return E.createElementNS?E.createElementNS("http://www.w3.org/1999/xhtml",t):E.createElement(t)},L=N("div"),X=N("img"),U=a._internals={_specialProps:h},Y=navigator.userAgent,j=function(){var t=Y.indexOf("Android"),e=N("a");return p=-1!==Y.indexOf("Safari")&&-1===Y.indexOf("Chrome")&&(-1===t||Number(Y.substr(t+8,1))>3),c=p&&6>Number(Y.substr(Y.indexOf("Version/")+8,1)),f=-1!==Y.indexOf("Firefox"),(/MSIE ([0-9]{1,}[\.0-9]{0,})/.exec(Y)||/Trident\/.*rv:([0-9]{1,}[\.0-9]{0,})/.exec(Y))&&(m=parseFloat(RegExp.$1)),e?(e.style.cssText="top:1px;opacity:.55;",/^0.55/.test(e.style.opacity)):!1}(),B=function(t){return w.test("string"==typeof t?t:(t.currentStyle?t.currentStyle.filter:t.style.filter)||"")?parseFloat(RegExp.$1)/100:1},q=function(t){window.console&&console.log(t)},V="",G="",W=function(t,e){e=e||L;var i,s,r=e.style;if(void 0!==r[t])return t;for(t=t.charAt(0).toUpperCase()+t.substr(1),i=["O","Moz","ms","Ms","Webkit"],s=5;--s>-1&&void 0===r[i[s]+t];);return s>=0?(G=3===s?"ms":i[s],V="-"+G.toLowerCase()+"-",G+t):null},Z=E.defaultView?E.defaultView.getComputedStyle:function(){},Q=a.getStyle=function(t,e,i,s,r){var n;return j||"opacity"!==e?(!s&&t.style[e]?n=t.style[e]:(i=i||Z(t))?n=i[e]||i.getPropertyValue(e)||i.getPropertyValue(e.replace(S,"-$1").toLowerCase()):t.currentStyle&&(n=t.currentStyle[e]),null==r||n&&"none"!==n&&"auto"!==n&&"auto auto"!==n?n:r):B(t)},$=U.convertToPixels=function(t,i,s,r,n){if("px"===r||!r)return s;if("auto"===r||!s)return 0;var o,h,l,_=O.test(i),u=t,p=L.style,f=0>s;if(f&&(s=-s),"%"===r&&-1!==i.indexOf("border"))o=s/100*(_?t.clientWidth:t.clientHeight);else{if(p.cssText="border:0 solid red;position:"+Q(t,"position")+";line-height:0;","%"!==r&&u.appendChild)p[_?"borderLeftWidth":"borderTopWidth"]=s+r;else{if(u=t.parentNode||E.body,h=u._gsCache,l=e.ticker.frame,h&&_&&h.time===l)return h.width*s/100;p[_?"width":"height"]=s+r}u.appendChild(L),o=parseFloat(L[_?"offsetWidth":"offsetHeight"]),u.removeChild(L),_&&"%"===r&&a.cacheWidths!==!1&&(h=u._gsCache=u._gsCache||{},h.time=l,h.width=100*(o/s)),0!==o||n||(o=$(t,i,s,r,!0))}return f?-o:o},H=U.calculateOffset=function(t,e,i){if("absolute"!==Q(t,"position",i))return 0;var s="left"===e?"Left":"Top",r=Q(t,"margin"+s,i);return t["offset"+s]-($(t,e,parseFloat(r),r.replace(T,""))||0)},K=function(t,e){var i,s,r,n={};if(e=e||Z(t,null))if(i=e.length)for(;--i>-1;)r=e[i],(-1===r.indexOf("-transform")||be===r)&&(n[r.replace(k,A)]=e.getPropertyValue(r));else for(i in e)(-1===i.indexOf("Transform")||xe===i)&&(n[i]=e[i]);else if(e=t.currentStyle||t.style)for(i in e)"string"==typeof i&&void 0===n[i]&&(n[i.replace(k,A)]=e[i]);return j||(n.opacity=B(t)),s=Me(t,e,!1),n.rotation=s.rotation,n.skewX=s.skewX,n.scaleX=s.scaleX,n.scaleY=s.scaleY,n.x=s.x,n.y=s.y,Se&&(n.z=s.z,n.rotationX=s.rotationX,n.rotationY=s.rotationY,n.scaleZ=s.scaleZ),n.filters&&delete n.filters,n},J=function(t,e,i,s,r){var n,a,o,h={},l=t.style;for(a in i)"cssText"!==a&&"length"!==a&&isNaN(a)&&(e[a]!==(n=i[a])||r&&r[a])&&-1===a.indexOf("Origin")&&("number"==typeof n||"string"==typeof n)&&(h[a]="auto"!==n||"left"!==a&&"top"!==a?""!==n&&"auto"!==n&&"none"!==n||"string"!=typeof e[a]||""===e[a].replace(y,"")?n:0:H(t,a),void 0!==l[a]&&(o=new fe(l,a,l[a],o)));if(s)for(a in s)"className"!==a&&(h[a]=s[a]);return{difs:h,firstMPT:o}},te={width:["Left","Right"],height:["Top","Bottom"]},ee=["marginLeft","marginRight","marginTop","marginBottom"],ie=function(t,e,i){var s=parseFloat("width"===e?t.offsetWidth:t.offsetHeight),r=te[e],n=r.length;for(i=i||Z(t,null);--n>-1;)s-=parseFloat(Q(t,"padding"+r[n],i,!0))||0,s-=parseFloat(Q(t,"border"+r[n]+"Width",i,!0))||0;return s},se=function(t,e){(null==t||""===t||"auto"===t||"auto auto"===t)&&(t="0 0");var i=t.split(" "),s=-1!==t.indexOf("left")?"0%":-1!==t.indexOf("right")?"100%":i[0],r=-1!==t.indexOf("top")?"0%":-1!==t.indexOf("bottom")?"100%":i[1];return null==r?r="center"===s?"50%":"0":"center"===r&&(r="50%"),("center"===s||isNaN(parseFloat(s))&&-1===(s+"").indexOf("="))&&(s="50%"),t=s+" "+r+(i.length>2?" "+i[2]:""),e&&(e.oxp=-1!==s.indexOf("%"),e.oyp=-1!==r.indexOf("%"),e.oxr="="===s.charAt(1),e.oyr="="===r.charAt(1),e.ox=parseFloat(s.replace(y,"")),e.oy=parseFloat(r.replace(y,"")),e.v=t),e||t},re=function(t,e){return"string"==typeof t&&"="===t.charAt(1)?parseInt(t.charAt(0)+"1",10)*parseFloat(t.substr(2)):parseFloat(t)-parseFloat(e)},ne=function(t,e){return null==t?e:"string"==typeof t&&"="===t.charAt(1)?parseInt(t.charAt(0)+"1",10)*parseFloat(t.substr(2))+e:parseFloat(t)},ae=function(t,e,i,s){var r,n,a,o,h,l=1e-6;return null==t?o=e:"number"==typeof t?o=t:(r=360,n=t.split("_"),h="="===t.charAt(1),a=(h?parseInt(t.charAt(0)+"1",10)*parseFloat(n[0].substr(2)):parseFloat(n[0]))*(-1===t.indexOf("rad")?1:I)-(h?0:e),n.length&&(s&&(s[i]=e+a),-1!==t.indexOf("short")&&(a%=r,a!==a%(r/2)&&(a=0>a?a+r:a-r)),-1!==t.indexOf("_cw")&&0>a?a=(a+9999999999*r)%r-(0|a/r)*r:-1!==t.indexOf("ccw")&&a>0&&(a=(a-9999999999*r)%r-(0|a/r)*r)),o=e+a),l>o&&o>-l&&(o=0),o},oe={aqua:[0,255,255],lime:[0,255,0],silver:[192,192,192],black:[0,0,0],maroon:[128,0,0],teal:[0,128,128],blue:[0,0,255],navy:[0,0,128],white:[255,255,255],fuchsia:[255,0,255],olive:[128,128,0],yellow:[255,255,0],orange:[255,165,0],gray:[128,128,128],purple:[128,0,128],green:[0,128,0],red:[255,0,0],pink:[255,192,203],cyan:[0,255,255],transparent:[255,255,255,0]},he=function(t,e,i){return t=0>t?t+1:t>1?t-1:t,0|255*(1>6*t?e+6*(i-e)*t:.5>t?i:2>3*t?e+6*(i-e)*(2/3-t):e)+.5},le=a.parseColor=function(t){var e,i,s,r,n,a;return t&&""!==t?"number"==typeof t?[t>>16,255&t>>8,255&t]:(","===t.charAt(t.length-1)&&(t=t.substr(0,t.length-1)),oe[t]?oe[t]:"#"===t.charAt(0)?(4===t.length&&(e=t.charAt(1),i=t.charAt(2),s=t.charAt(3),t="#"+e+e+i+i+s+s),t=parseInt(t.substr(1),16),[t>>16,255&t>>8,255&t]):"hsl"===t.substr(0,3)?(t=t.match(d),r=Number(t[0])%360/360,n=Number(t[1])/100,a=Number(t[2])/100,i=.5>=a?a*(n+1):a+n-a*n,e=2*a-i,t.length>3&&(t[3]=Number(t[3])),t[0]=he(r+1/3,e,i),t[1]=he(r,e,i),t[2]=he(r-1/3,e,i),t):(t=t.match(d)||oe.transparent,t[0]=Number(t[0]),t[1]=Number(t[1]),t[2]=Number(t[2]),t.length>3&&(t[3]=Number(t[3])),t)):oe.black},_e="(?:\\b(?:(?:rgb|rgba|hsl|hsla)\\(.+?\\))|\\B#.+?\\b";for(l in oe)_e+="|"+l+"\\b";_e=RegExp(_e+")","gi");var ue=function(t,e,i,s){if(null==t)return function(t){return t};var r,n=e?(t.match(_e)||[""])[0]:"",a=t.split(n).join("").match(v)||[],o=t.substr(0,t.indexOf(a[0])),h=")"===t.charAt(t.length-1)?")":"",l=-1!==t.indexOf(" ")?" ":",",_=a.length,u=_>0?a[0].replace(d,""):"";return _?r=e?function(t){var e,p,f,c;if("number"==typeof t)t+=u;else if(s&&M.test(t)){for(c=t.replace(M,"|").split("|"),f=0;c.length>f;f++)c[f]=r(c[f]);return c.join(",")}if(e=(t.match(_e)||[n])[0],p=t.split(e).join("").match(v)||[],f=p.length,_>f--)for(;_>++f;)p[f]=i?p[0|(f-1)/2]:a[f];return o+p.join(l)+l+e+h+(-1!==t.indexOf("inset")?" inset":"")}:function(t){var e,n,p;if("number"==typeof t)t+=u;else if(s&&M.test(t)){for(n=t.replace(M,"|").split("|"),p=0;n.length>p;p++)n[p]=r(n[p]);return n.join(",")}if(e=t.match(v)||[],p=e.length,_>p--)for(;_>++p;)e[p]=i?e[0|(p-1)/2]:a[p];return o+e.join(l)+h}:function(t){return t}},pe=function(t){return t=t.split(","),function(e,i,s,r,n,a,o){var h,l=(i+"").split(" ");for(o={},h=0;4>h;h++)o[t[h]]=l[h]=l[h]||l[(h-1)/2>>0];return r.parse(e,o,n,a)}},fe=(U._setPluginRatio=function(t){this.plugin.setRatio(t);for(var e,i,s,r,n=this.data,a=n.proxy,o=n.firstMPT,h=1e-6;o;)e=a[o.v],o.r?e=Math.round(e):h>e&&e>-h&&(e=0),o.t[o.p]=e,o=o._next;if(n.autoRotate&&(n.autoRotate.rotation=a.rotation),1===t)for(o=n.firstMPT;o;){if(i=o.t,i.type){if(1===i.type){for(r=i.xs0+i.s+i.xs1,s=1;i.l>s;s++)r+=i["xn"+s]+i["xs"+(s+1)];i.e=r}}else i.e=i.s+i.xs0;o=o._next}},function(t,e,i,s,r){this.t=t,this.p=e,this.v=i,this.r=r,s&&(s._prev=this,this._next=s)}),ce=(U._parseToProxy=function(t,e,i,s,r,n){var a,o,h,l,_,u=s,p={},f={},c=i._transform,m=F;for(i._transform=null,F=e,s=_=i.parse(t,e,s,r),F=m,n&&(i._transform=c,u&&(u._prev=null,u._prev&&(u._prev._next=null)));s&&s!==u;){if(1>=s.type&&(o=s.p,f[o]=s.s+s.c,p[o]=s.s,n||(l=new fe(s,"s",o,l,s.r),s.c=0),1===s.type))for(a=s.l;--a>0;)h="xn"+a,o=s.p+"_"+h,f[o]=s.data[h],p[o]=s[h],n||(l=new fe(s,h,o,l,s.rxp[h]));s=s._next}return{proxy:p,end:f,firstMPT:l,pt:_}},U.CSSPropTween=function(t,e,s,r,a,o,h,l,_,u,p){this.t=t,this.p=e,this.s=s,this.c=r,this.n=h||e,t instanceof ce||n.push(this.n),this.r=l,this.type=o||0,_&&(this.pr=_,i=!0),this.b=void 0===u?s:u,this.e=void 0===p?s+r:p,a&&(this._next=a,a._prev=this)}),me=a.parseComplex=function(t,e,i,s,r,n,a,o,h,l){i=i||n||"",a=new ce(t,e,0,0,a,l?2:1,null,!1,o,i,s),s+="";var u,p,f,c,m,v,y,T,w,x,b,S,k=i.split(", ").join(",").split(" "),R=s.split(", ").join(",").split(" "),A=k.length,O=_!==!1;for((-1!==s.indexOf(",")||-1!==i.indexOf(","))&&(k=k.join(" ").replace(M,", ").split(" "),R=R.join(" ").replace(M,", ").split(" "),A=k.length),A!==R.length&&(k=(n||"").split(" "),A=k.length),a.plugin=h,a.setRatio=l,u=0;A>u;u++)if(c=k[u],m=R[u],T=parseFloat(c),T||0===T)a.appendXtra("",T,re(m,T),m.replace(g,""),O&&-1!==m.indexOf("px"),!0);else if(r&&("#"===c.charAt(0)||oe[c]||P.test(c)))S=","===m.charAt(m.length-1)?"),":")",c=le(c),m=le(m),w=c.length+m.length>6,w&&!j&&0===m[3]?(a["xs"+a.l]+=a.l?" transparent":"transparent",a.e=a.e.split(R[u]).join("transparent")):(j||(w=!1),a.appendXtra(w?"rgba(":"rgb(",c[0],m[0]-c[0],",",!0,!0).appendXtra("",c[1],m[1]-c[1],",",!0).appendXtra("",c[2],m[2]-c[2],w?",":S,!0),w&&(c=4>c.length?1:c[3],a.appendXtra("",c,(4>m.length?1:m[3])-c,S,!1)));else if(v=c.match(d)){if(y=m.match(g),!y||y.length!==v.length)return a;for(f=0,p=0;v.length>p;p++)b=v[p],x=c.indexOf(b,f),a.appendXtra(c.substr(f,x-f),Number(b),re(y[p],b),"",O&&"px"===c.substr(x+b.length,2),0===p),f=x+b.length;a["xs"+a.l]+=c.substr(f)}else a["xs"+a.l]+=a.l?" "+c:c;if(-1!==s.indexOf("=")&&a.data){for(S=a.xs0+a.data.s,u=1;a.l>u;u++)S+=a["xs"+u]+a.data["xn"+u];a.e=S+a["xs"+u]}return a.l||(a.type=-1,a.xs0=a.e),a.xfirst||a},de=9;for(l=ce.prototype,l.l=l.pr=0;--de>0;)l["xn"+de]=0,l["xs"+de]="";l.xs0="",l._next=l._prev=l.xfirst=l.data=l.plugin=l.setRatio=l.rxp=null,l.appendXtra=function(t,e,i,s,r,n){var a=this,o=a.l;return a["xs"+o]+=n&&o?" "+t:t||"",i||0===o||a.plugin?(a.l++,a.type=a.setRatio?2:1,a["xs"+a.l]=s||"",o>0?(a.data["xn"+o]=e+i,a.rxp["xn"+o]=r,a["xn"+o]=e,a.plugin||(a.xfirst=new ce(a,"xn"+o,e,i,a.xfirst||a,0,a.n,r,a.pr),a.xfirst.xs0=0),a):(a.data={s:e+i},a.rxp={},a.s=e,a.c=i,a.r=r,a)):(a["xs"+o]+=e+(s||""),a)};var ge=function(t,e){e=e||{},this.p=e.prefix?W(t)||t:t,h[t]=h[this.p]=this,this.format=e.formatter||ue(e.defaultValue,e.color,e.collapsible,e.multi),e.parser&&(this.parse=e.parser),this.clrs=e.color,this.multi=e.multi,this.keyword=e.keyword,this.dflt=e.defaultValue,this.pr=e.priority||0},ve=U._registerComplexSpecialProp=function(t,e,i){"object"!=typeof e&&(e={parser:i});var s,r,n=t.split(","),a=e.defaultValue;for(i=i||[a],s=0;n.length>s;s++)e.prefix=0===s&&e.prefix,e.defaultValue=i[s]||a,r=new ge(n[s],e)},ye=function(t){if(!h[t]){var e=t.charAt(0).toUpperCase()+t.substr(1)+"Plugin";ve(t,{parser:function(t,i,s,r,n,a,l){var _=o.com.greensock.plugins[e];return _?(_._cssRegister(),h[s].parse(t,i,s,r,n,a,l)):(q("Error: "+e+" js file not loaded."),n)}})}};l=ge.prototype,l.parseComplex=function(t,e,i,s,r,n){var a,o,h,l,_,u,p=this.keyword;if(this.multi&&(M.test(i)||M.test(e)?(o=e.replace(M,"|").split("|"),h=i.replace(M,"|").split("|")):p&&(o=[e],h=[i])),h){for(l=h.length>o.length?h.length:o.length,a=0;l>a;a++)e=o[a]=o[a]||this.dflt,i=h[a]=h[a]||this.dflt,p&&(_=e.indexOf(p),u=i.indexOf(p),_!==u&&(-1===u?o[a]=o[a].split(p).join(""):-1===_&&(o[a]+=" "+p)));e=o.join(", "),i=h.join(", ")}return me(t,this.p,e,i,this.clrs,this.dflt,s,this.pr,r,n)},l.parse=function(t,e,i,s,n,a){return this.parseComplex(t.style,this.format(Q(t,this.p,r,!1,this.dflt)),this.format(e),n,a)},a.registerSpecialProp=function(t,e,i){ve(t,{parser:function(t,s,r,n,a,o){var h=new ce(t,r,0,0,a,2,r,!1,i);return h.plugin=o,h.setRatio=e(t,s,n._tween,r),h},priority:i})},a.useSVGTransformAttr=p;var Te,we="scaleX,scaleY,scaleZ,x,y,z,skewX,skewY,rotation,rotationX,rotationY,perspective,xPercent,yPercent".split(","),xe=W("transform"),be=V+"transform",Pe=W("transformOrigin"),Se=null!==W("perspective"),ke=U.Transform=function(){this.perspective=parseFloat(a.defaultTransformPerspective)||0,this.force3D=a.defaultForce3D!==!1&&Se?a.defaultForce3D||"auto":!1},Re=window.SVGElement,Ae=function(t,e,i){var s,r=E.createElementNS("http://www.w3.org/2000/svg",t),n=/([a-z])([A-Z])/g;for(s in i)r.setAttributeNS(null,s.replace(n,"$1-$2").toLowerCase(),i[s]);return e.appendChild(r),r},Oe=E.documentElement,Ce=function(){var t,e,i,s=m||/Android/i.test(Y)&&!window.chrome;return E.createElementNS&&!s&&(t=Ae("svg",Oe),e=Ae("rect",t,{width:100,height:50,x:100}),i=e.getBoundingClientRect().width,e.style[Pe]="50% 50%",e.style[xe]="scaleX(0.5)",s=i===e.getBoundingClientRect().width&&!(f&&Se),Oe.removeChild(t)),s}(),De=function(t,e,i,s){var r,n;s&&(n=s.split(" ")).length||(r=t.getBBox(),e=se(e).split(" "),n=[(-1!==e[0].indexOf("%")?parseFloat(e[0])/100*r.width:parseFloat(e[0]))+r.x,(-1!==e[1].indexOf("%")?parseFloat(e[1])/100*r.height:parseFloat(e[1]))+r.y]),i.xOrigin=parseFloat(n[0]),i.yOrigin=parseFloat(n[1]),t.setAttribute("data-svg-origin",n.join(" "))},Me=U.getTransform=function(t,e,i,s){if(t._gsTransform&&i&&!s)return t._gsTransform;var n,o,h,l,_,u,p,f,c,m,d=i?t._gsTransform||new ke:new ke,g=0>d.scaleX,v=2e-5,y=1e5,T=Se?parseFloat(Q(t,Pe,e,!1,"0 0 0").split(" ")[2])||d.zOrigin||0:0,w=parseFloat(a.defaultTransformPerspective)||0;if(xe?o=Q(t,be,e,!0):t.currentStyle&&(o=t.currentStyle.filter.match(C),o=o&&4===o.length?[o[0].substr(4),Number(o[2].substr(4)),Number(o[1].substr(4)),o[3].substr(4),d.x||0,d.y||0].join(","):""),n=!o||"none"===o||"matrix(1, 0, 0, 1, 0, 0)"===o,d.svg=!!(Re&&"function"==typeof t.getBBox&&t.getCTM&&(!t.parentNode||t.parentNode.getBBox&&t.parentNode.getCTM)),d.svg&&(n&&-1!==(t.style[xe]+"").indexOf("matrix")&&(o=t.style[xe],n=!1),De(t,Q(t,Pe,r,!1,"50% 50%")+"",d,t.getAttribute("data-svg-origin")),Te=a.useSVGTransformAttr||Ce,h=t.getAttribute("transform"),n&&h&&-1!==h.indexOf("matrix")&&(o=h,n=0)),!n){for(h=(o||"").match(/(?:\-|\b)[\d\-\.e]+\b/gi)||[],l=h.length;--l>-1;)_=Number(h[l]),h[l]=(u=_-(_|=0))?(0|u*y+(0>u?-.5:.5))/y+_:_;if(16===h.length){var x,b,P,S,k,R=h[0],A=h[1],O=h[2],D=h[3],M=h[4],z=h[5],F=h[6],E=h[7],N=h[8],L=h[9],X=h[10],U=h[12],Y=h[13],j=h[14],B=h[11],q=Math.atan2(F,X);d.zOrigin&&(j=-d.zOrigin,U=N*j-h[12],Y=L*j-h[13],j=X*j+d.zOrigin-h[14]),d.rotationX=q*I,q&&(S=Math.cos(-q),k=Math.sin(-q),x=M*S+N*k,b=z*S+L*k,P=F*S+X*k,N=M*-k+N*S,L=z*-k+L*S,X=F*-k+X*S,B=E*-k+B*S,M=x,z=b,F=P),q=Math.atan2(N,X),d.rotationY=q*I,q&&(S=Math.cos(-q),k=Math.sin(-q),x=R*S-N*k,b=A*S-L*k,P=O*S-X*k,L=A*k+L*S,X=O*k+X*S,B=D*k+B*S,R=x,A=b,O=P),q=Math.atan2(A,R),d.rotation=q*I,q&&(S=Math.cos(-q),k=Math.sin(-q),R=R*S+M*k,b=A*S+z*k,z=A*-k+z*S,F=O*-k+F*S,A=b),d.rotationX&&Math.abs(d.rotationX)+Math.abs(d.rotation)>359.9&&(d.rotationX=d.rotation=0,d.rotationY+=180),d.scaleX=(0|Math.sqrt(R*R+A*A)*y+.5)/y,d.scaleY=(0|Math.sqrt(z*z+L*L)*y+.5)/y,d.scaleZ=(0|Math.sqrt(F*F+X*X)*y+.5)/y,d.skewX=0,d.perspective=B?1/(0>B?-B:B):0,d.x=U,d.y=Y,d.z=j,d.svg&&(d.x-=d.xOrigin-(d.xOrigin*R-d.yOrigin*M),d.y-=d.yOrigin-(d.yOrigin*A-d.xOrigin*z))}else if(!(Se&&!s&&h.length&&d.x===h[4]&&d.y===h[5]&&(d.rotationX||d.rotationY)||void 0!==d.x&&"none"===Q(t,"display",e))){var V=h.length>=6,G=V?h[0]:1,W=h[1]||0,Z=h[2]||0,$=V?h[3]:1;d.x=h[4]||0,d.y=h[5]||0,p=Math.sqrt(G*G+W*W),f=Math.sqrt($*$+Z*Z),c=G||W?Math.atan2(W,G)*I:d.rotation||0,m=Z||$?Math.atan2(Z,$)*I+c:d.skewX||0,Math.abs(m)>90&&270>Math.abs(m)&&(g?(p*=-1,m+=0>=c?180:-180,c+=0>=c?180:-180):(f*=-1,m+=0>=m?180:-180)),d.scaleX=p,d.scaleY=f,d.rotation=c,d.skewX=m,Se&&(d.rotationX=d.rotationY=d.z=0,d.perspective=w,d.scaleZ=1),d.svg&&(d.x-=d.xOrigin-(d.xOrigin*G-d.yOrigin*W),d.y-=d.yOrigin-(d.yOrigin*$-d.xOrigin*Z))}d.zOrigin=T;for(l in d)v>d[l]&&d[l]>-v&&(d[l]=0)}return i&&(t._gsTransform=d,d.svg&&(Te&&t.style[xe]?Ee(t.style,xe):!Te&&t.getAttribute("transform")&&t.removeAttribute("transform"))),d},ze=function(t){var e,i,s=this.data,r=-s.rotation*z,n=r+s.skewX*z,a=1e5,o=(0|Math.cos(r)*s.scaleX*a)/a,h=(0|Math.sin(r)*s.scaleX*a)/a,l=(0|Math.sin(n)*-s.scaleY*a)/a,_=(0|Math.cos(n)*s.scaleY*a)/a,u=this.t.style,p=this.t.currentStyle;if(p){i=h,h=-l,l=-i,e=p.filter,u.filter="";var f,c,d=this.t.offsetWidth,g=this.t.offsetHeight,v="absolute"!==p.position,y="progid:DXImageTransform.Microsoft.Matrix(M11="+o+", M12="+h+", M21="+l+", M22="+_,x=s.x+d*s.xPercent/100,b=s.y+g*s.yPercent/100;if(null!=s.ox&&(f=(s.oxp?.01*d*s.ox:s.ox)-d/2,c=(s.oyp?.01*g*s.oy:s.oy)-g/2,x+=f-(f*o+c*h),b+=c-(f*l+c*_)),v?(f=d/2,c=g/2,y+=", Dx="+(f-(f*o+c*h)+x)+", Dy="+(c-(f*l+c*_)+b)+")"):y+=", sizingMethod='auto expand')",u.filter=-1!==e.indexOf("DXImageTransform.Microsoft.Matrix(")?e.replace(D,y):y+" "+e,(0===t||1===t)&&1===o&&0===h&&0===l&&1===_&&(v&&-1===y.indexOf("Dx=0, Dy=0")||w.test(e)&&100!==parseFloat(RegExp.$1)||-1===e.indexOf("gradient("&&e.indexOf("Alpha"))&&u.removeAttribute("filter")),!v){var P,S,k,R=8>m?1:-1;for(f=s.ieOffsetX||0,c=s.ieOffsetY||0,s.ieOffsetX=Math.round((d-((0>o?-o:o)*d+(0>h?-h:h)*g))/2+x),s.ieOffsetY=Math.round((g-((0>_?-_:_)*g+(0>l?-l:l)*d))/2+b),de=0;4>de;de++)S=ee[de],P=p[S],i=-1!==P.indexOf("px")?parseFloat(P):$(this.t,S,parseFloat(P),P.replace(T,""))||0,k=i!==s[S]?2>de?-s.ieOffsetX:-s.ieOffsetY:2>de?f-s.ieOffsetX:c-s.ieOffsetY,u[S]=(s[S]=Math.round(i-k*(0===de||2===de?1:R)))+"px"}}},Ie=U.set3DTransformRatio=U.setTransformRatio=function(t){var e,i,s,r,n,a,o,h,l,_,u,p,c,m,d,g,v,y,T,w,x,b,P,S=this.data,k=this.t.style,R=S.rotation,A=S.rotationX,O=S.rotationY,C=S.scaleX,D=S.scaleY,M=S.scaleZ,I=S.x,F=S.y,E=S.z,N=S.svg,L=S.perspective,X=S.force3D;if(!(((1!==t&&0!==t||"auto"!==X||this.tween._totalTime!==this.tween._totalDuration&&this.tween._totalTime)&&X||E||L||O||A)&&(!Te||!N)&&Se))return R||S.skewX||N?(R*=z,b=S.skewX*z,P=1e5,e=Math.cos(R)*C,r=Math.sin(R)*C,i=Math.sin(R-b)*-D,n=Math.cos(R-b)*D,b&&"simple"===S.skewType&&(v=Math.tan(b),v=Math.sqrt(1+v*v),i*=v,n*=v,S.skewY&&(e*=v,r*=v)),N&&(I+=S.xOrigin-(S.xOrigin*e+S.yOrigin*i),F+=S.yOrigin-(S.xOrigin*r+S.yOrigin*n),m=1e-6,m>I&&I>-m&&(I=0),m>F&&F>-m&&(F=0)),T=(0|e*P)/P+","+(0|r*P)/P+","+(0|i*P)/P+","+(0|n*P)/P+","+I+","+F+")",N&&Te?this.t.setAttribute("transform","matrix("+T):k[xe]=(S.xPercent||S.yPercent?"translate("+S.xPercent+"%,"+S.yPercent+"%) matrix(":"matrix(")+T):k[xe]=(S.xPercent||S.yPercent?"translate("+S.xPercent+"%,"+S.yPercent+"%) matrix(":"matrix(")+C+",0,0,"+D+","+I+","+F+")",void 0;if(f&&(m=1e-4,m>C&&C>-m&&(C=M=2e-5),m>D&&D>-m&&(D=M=2e-5),!L||S.z||S.rotationX||S.rotationY||(L=0)),R||S.skewX)R*=z,d=e=Math.cos(R),g=r=Math.sin(R),S.skewX&&(R-=S.skewX*z,d=Math.cos(R),g=Math.sin(R),"simple"===S.skewType&&(v=Math.tan(S.skewX*z),v=Math.sqrt(1+v*v),d*=v,g*=v,S.skewY&&(e*=v,r*=v))),i=-g,n=d;else{if(!(O||A||1!==M||L||N))return k[xe]=(S.xPercent||S.yPercent?"translate("+S.xPercent+"%,"+S.yPercent+"%) translate3d(":"translate3d(")+I+"px,"+F+"px,"+E+"px)"+(1!==C||1!==D?" scale("+C+","+D+")":""),void 0;e=n=1,i=r=0}l=1,s=a=o=h=_=u=0,p=L?-1/L:0,c=S.zOrigin,m=1e-6,w=",",x="0",R=O*z,R&&(d=Math.cos(R),g=Math.sin(R),o=-g,_=p*-g,s=e*g,a=r*g,l=d,p*=d,e*=d,r*=d),R=A*z,R&&(d=Math.cos(R),g=Math.sin(R),v=i*d+s*g,y=n*d+a*g,h=l*g,u=p*g,s=i*-g+s*d,a=n*-g+a*d,l*=d,p*=d,i=v,n=y),1!==M&&(s*=M,a*=M,l*=M,p*=M),1!==D&&(i*=D,n*=D,h*=D,u*=D),1!==C&&(e*=C,r*=C,o*=C,_*=C),(c||N)&&(c&&(I+=s*-c,F+=a*-c,E+=l*-c+c),N&&(I+=S.xOrigin-(S.xOrigin*e+S.yOrigin*i),F+=S.yOrigin-(S.xOrigin*r+S.yOrigin*n)),m>I&&I>-m&&(I=x),m>F&&F>-m&&(F=x),m>E&&E>-m&&(E=0)),T=S.xPercent||S.yPercent?"translate("+S.xPercent+"%,"+S.yPercent+"%) matrix3d(":"matrix3d(",T+=(m>e&&e>-m?x:e)+w+(m>r&&r>-m?x:r)+w+(m>o&&o>-m?x:o),T+=w+(m>_&&_>-m?x:_)+w+(m>i&&i>-m?x:i)+w+(m>n&&n>-m?x:n),A||O?(T+=w+(m>h&&h>-m?x:h)+w+(m>u&&u>-m?x:u)+w+(m>s&&s>-m?x:s),T+=w+(m>a&&a>-m?x:a)+w+(m>l&&l>-m?x:l)+w+(m>p&&p>-m?x:p)+w):T+=",0,0,0,0,1,0,",T+=I+w+F+w+E+w+(L?1+-E/L:1)+")",k[xe]=T};l=ke.prototype,l.x=l.y=l.z=l.skewX=l.skewY=l.rotation=l.rotationX=l.rotationY=l.zOrigin=l.xPercent=l.yPercent=0,l.scaleX=l.scaleY=l.scaleZ=1,ve("transform,scale,scaleX,scaleY,scaleZ,x,y,z,rotation,rotationX,rotationY,rotationZ,skewX,skewY,shortRotation,shortRotationX,shortRotationY,shortRotationZ,transformOrigin,svgOrigin,transformPerspective,directionalRotation,parseTransform,force3D,skewType,xPercent,yPercent",{parser:function(t,e,i,s,n,o,h){if(s._lastParsedTransform===h)return n;s._lastParsedTransform=h;var l,_,u,p,f,c,m,d=s._transform=Me(t,r,!0,h.parseTransform),g=t.style,v=1e-6,y=we.length,T=h,w={};if("string"==typeof T.transform&&xe)u=L.style,u[xe]=T.transform,u.display="block",u.position="absolute",E.body.appendChild(L),l=Me(L,null,!1),E.body.removeChild(L);else if("object"==typeof T){if(l={scaleX:ne(null!=T.scaleX?T.scaleX:T.scale,d.scaleX),scaleY:ne(null!=T.scaleY?T.scaleY:T.scale,d.scaleY),scaleZ:ne(T.scaleZ,d.scaleZ),x:ne(T.x,d.x),y:ne(T.y,d.y),z:ne(T.z,d.z),xPercent:ne(T.xPercent,d.xPercent),yPercent:ne(T.yPercent,d.yPercent),perspective:ne(T.transformPerspective,d.perspective)},m=T.directionalRotation,null!=m)if("object"==typeof m)for(u in m)T[u]=m[u];else T.rotation=m;"string"==typeof T.x&&-1!==T.x.indexOf("%")&&(l.x=0,l.xPercent=ne(T.x,d.xPercent)),"string"==typeof T.y&&-1!==T.y.indexOf("%")&&(l.y=0,l.yPercent=ne(T.y,d.yPercent)),l.rotation=ae("rotation"in T?T.rotation:"shortRotation"in T?T.shortRotation+"_short":"rotationZ"in T?T.rotationZ:d.rotation,d.rotation,"rotation",w),Se&&(l.rotationX=ae("rotationX"in T?T.rotationX:"shortRotationX"in T?T.shortRotationX+"_short":d.rotationX||0,d.rotationX,"rotationX",w),l.rotationY=ae("rotationY"in T?T.rotationY:"shortRotationY"in T?T.shortRotationY+"_short":d.rotationY||0,d.rotationY,"rotationY",w)),l.skewX=null==T.skewX?d.skewX:ae(T.skewX,d.skewX),l.skewY=null==T.skewY?d.skewY:ae(T.skewY,d.skewY),(_=l.skewY-d.skewY)&&(l.skewX+=_,l.rotation+=_)}for(Se&&null!=T.force3D&&(d.force3D=T.force3D,c=!0),d.skewType=T.skewType||d.skewType||a.defaultSkewType,f=d.force3D||d.z||d.rotationX||d.rotationY||l.z||l.rotationX||l.rotationY||l.perspective,f||null==T.scale||(l.scaleZ=1);--y>-1;)i=we[y],p=l[i]-d[i],(p>v||-v>p||null!=T[i]||null!=F[i])&&(c=!0,n=new ce(d,i,d[i],p,n),i in w&&(n.e=w[i]),n.xs0=0,n.plugin=o,s._overwriteProps.push(n.n));return p=T.transformOrigin,d.svg&&(p||T.svgOrigin)&&(De(t,se(p),l,T.svgOrigin),n=new ce(d,"xOrigin",d.xOrigin,l.xOrigin-d.xOrigin,n,-1,"transformOrigin"),n.b=d.xOrigin,n.e=n.xs0=l.xOrigin,n=new ce(d,"yOrigin",d.yOrigin,l.yOrigin-d.yOrigin,n,-1,"transformOrigin"),n.b=d.yOrigin,n.e=n.xs0=l.yOrigin,p=Te?null:"0px 0px"),(p||Se&&f&&d.zOrigin)&&(xe?(c=!0,i=Pe,p=(p||Q(t,i,r,!1,"50% 50%"))+"",n=new ce(g,i,0,0,n,-1,"transformOrigin"),n.b=g[i],n.plugin=o,Se?(u=d.zOrigin,p=p.split(" "),d.zOrigin=(p.length>2&&(0===u||"0px"!==p[2])?parseFloat(p[2]):u)||0,n.xs0=n.e=p[0]+" "+(p[1]||"50%")+" 0px",n=new ce(d,"zOrigin",0,0,n,-1,n.n),n.b=u,n.xs0=n.e=d.zOrigin):n.xs0=n.e=p):se(p+"",d)),c&&(s._transformType=d.svg&&Te||!f&&3!==this._transformType?2:3),n},prefix:!0}),ve("boxShadow",{defaultValue:"0px 0px 0px 0px #999",prefix:!0,color:!0,multi:!0,keyword:"inset"}),ve("borderRadius",{defaultValue:"0px",parser:function(t,e,i,n,a){e=this.format(e);var o,h,l,_,u,p,f,c,m,d,g,v,y,T,w,x,b=["borderTopLeftRadius","borderTopRightRadius","borderBottomRightRadius","borderBottomLeftRadius"],P=t.style;for(m=parseFloat(t.offsetWidth),d=parseFloat(t.offsetHeight),o=e.split(" "),h=0;b.length>h;h++)this.p.indexOf("border")&&(b[h]=W(b[h])),u=_=Q(t,b[h],r,!1,"0px"),-1!==u.indexOf(" ")&&(_=u.split(" "),u=_[0],_=_[1]),p=l=o[h],f=parseFloat(u),v=u.substr((f+"").length),y="="===p.charAt(1),y?(c=parseInt(p.charAt(0)+"1",10),p=p.substr(2),c*=parseFloat(p),g=p.substr((c+"").length-(0>c?1:0))||""):(c=parseFloat(p),g=p.substr((c+"").length)),""===g&&(g=s[i]||v),g!==v&&(T=$(t,"borderLeft",f,v),w=$(t,"borderTop",f,v),"%"===g?(u=100*(T/m)+"%",_=100*(w/d)+"%"):"em"===g?(x=$(t,"borderLeft",1,"em"),u=T/x+"em",_=w/x+"em"):(u=T+"px",_=w+"px"),y&&(p=parseFloat(u)+c+g,l=parseFloat(_)+c+g)),a=me(P,b[h],u+" "+_,p+" "+l,!1,"0px",a);return a},prefix:!0,formatter:ue("0px 0px 0px 0px",!1,!0)}),ve("backgroundPosition",{defaultValue:"0 0",parser:function(t,e,i,s,n,a){var o,h,l,_,u,p,f="background-position",c=r||Z(t,null),d=this.format((c?m?c.getPropertyValue(f+"-x")+" "+c.getPropertyValue(f+"-y"):c.getPropertyValue(f):t.currentStyle.backgroundPositionX+" "+t.currentStyle.backgroundPositionY)||"0 0"),g=this.format(e);if(-1!==d.indexOf("%")!=(-1!==g.indexOf("%"))&&(p=Q(t,"backgroundImage").replace(R,""),p&&"none"!==p)){for(o=d.split(" "),h=g.split(" "),X.setAttribute("src",p),l=2;--l>-1;)d=o[l],_=-1!==d.indexOf("%"),_!==(-1!==h[l].indexOf("%"))&&(u=0===l?t.offsetWidth-X.width:t.offsetHeight-X.height,o[l]=_?parseFloat(d)/100*u+"px":100*(parseFloat(d)/u)+"%");d=o.join(" ")}return this.parseComplex(t.style,d,g,n,a)},formatter:se}),ve("backgroundSize",{defaultValue:"0 0",formatter:se}),ve("perspective",{defaultValue:"0px",prefix:!0}),ve("perspectiveOrigin",{defaultValue:"50% 50%",prefix:!0}),ve("transformStyle",{prefix:!0}),ve("backfaceVisibility",{prefix:!0}),ve("userSelect",{prefix:!0}),ve("margin",{parser:pe("marginTop,marginRight,marginBottom,marginLeft")}),ve("padding",{parser:pe("paddingTop,paddingRight,paddingBottom,paddingLeft")}),ve("clip",{defaultValue:"rect(0px,0px,0px,0px)",parser:function(t,e,i,s,n,a){var o,h,l;return 9>m?(h=t.currentStyle,l=8>m?" ":",",o="rect("+h.clipTop+l+h.clipRight+l+h.clipBottom+l+h.clipLeft+")",e=this.format(e).split(",").join(l)):(o=this.format(Q(t,this.p,r,!1,this.dflt)),e=this.format(e)),this.parseComplex(t.style,o,e,n,a)}}),ve("textShadow",{defaultValue:"0px 0px 0px #999",color:!0,multi:!0}),ve("autoRound,strictUnits",{parser:function(t,e,i,s,r){return r}}),ve("border",{defaultValue:"0px solid #000",parser:function(t,e,i,s,n,a){return this.parseComplex(t.style,this.format(Q(t,"borderTopWidth",r,!1,"0px")+" "+Q(t,"borderTopStyle",r,!1,"solid")+" "+Q(t,"borderTopColor",r,!1,"#000")),this.format(e),n,a)},color:!0,formatter:function(t){var e=t.split(" ");return e[0]+" "+(e[1]||"solid")+" "+(t.match(_e)||["#000"])[0]}}),ve("borderWidth",{parser:pe("borderTopWidth,borderRightWidth,borderBottomWidth,borderLeftWidth")}),ve("float,cssFloat,styleFloat",{parser:function(t,e,i,s,r){var n=t.style,a="cssFloat"in n?"cssFloat":"styleFloat";return new ce(n,a,0,0,r,-1,i,!1,0,n[a],e)}});var Fe=function(t){var e,i=this.t,s=i.filter||Q(this.data,"filter")||"",r=0|this.s+this.c*t;100===r&&(-1===s.indexOf("atrix(")&&-1===s.indexOf("radient(")&&-1===s.indexOf("oader(")?(i.removeAttribute("filter"),e=!Q(this.data,"filter")):(i.filter=s.replace(b,""),e=!0)),e||(this.xn1&&(i.filter=s=s||"alpha(opacity="+r+")"),-1===s.indexOf("pacity")?0===r&&this.xn1||(i.filter=s+" alpha(opacity="+r+")"):i.filter=s.replace(w,"opacity="+r))};ve("opacity,alpha,autoAlpha",{defaultValue:"1",parser:function(t,e,i,s,n,a){var o=parseFloat(Q(t,"opacity",r,!1,"1")),h=t.style,l="autoAlpha"===i;return"string"==typeof e&&"="===e.charAt(1)&&(e=("-"===e.charAt(0)?-1:1)*parseFloat(e.substr(2))+o),l&&1===o&&"hidden"===Q(t,"visibility",r)&&0!==e&&(o=0),j?n=new ce(h,"opacity",o,e-o,n):(n=new ce(h,"opacity",100*o,100*(e-o),n),n.xn1=l?1:0,h.zoom=1,n.type=2,n.b="alpha(opacity="+n.s+")",n.e="alpha(opacity="+(n.s+n.c)+")",n.data=t,n.plugin=a,n.setRatio=Fe),l&&(n=new ce(h,"visibility",0,0,n,-1,null,!1,0,0!==o?"inherit":"hidden",0===e?"hidden":"inherit"),n.xs0="inherit",s._overwriteProps.push(n.n),s._overwriteProps.push(i)),n}});var Ee=function(t,e){e&&(t.removeProperty?(("ms"===e.substr(0,2)||"webkit"===e.substr(0,6))&&(e="-"+e),t.removeProperty(e.replace(S,"-$1").toLowerCase())):t.removeAttribute(e))},Ne=function(t){if(this.t._gsClassPT=this,1===t||0===t){this.t.setAttribute("class",0===t?this.b:this.e);for(var e=this.data,i=this.t.style;e;)e.v?i[e.p]=e.v:Ee(i,e.p),e=e._next;1===t&&this.t._gsClassPT===this&&(this.t._gsClassPT=null)
-}else this.t.getAttribute("class")!==this.e&&this.t.setAttribute("class",this.e)};ve("className",{parser:function(t,e,s,n,a,o,h){var l,_,u,p,f,c=t.getAttribute("class")||"",m=t.style.cssText;if(a=n._classNamePT=new ce(t,s,0,0,a,2),a.setRatio=Ne,a.pr=-11,i=!0,a.b=c,_=K(t,r),u=t._gsClassPT){for(p={},f=u.data;f;)p[f.p]=1,f=f._next;u.setRatio(1)}return t._gsClassPT=a,a.e="="!==e.charAt(1)?e:c.replace(RegExp("\\s*\\b"+e.substr(2)+"\\b"),"")+("+"===e.charAt(0)?" "+e.substr(2):""),t.setAttribute("class",a.e),l=J(t,_,K(t),h,p),t.setAttribute("class",c),a.data=l.firstMPT,t.style.cssText=m,a=a.xfirst=n.parse(t,l.difs,a,o)}});var Le=function(t){if((1===t||0===t)&&this.data._totalTime===this.data._totalDuration&&"isFromStart"!==this.data.data){var e,i,s,r,n,a=this.t.style,o=h.transform.parse;if("all"===this.e)a.cssText="",r=!0;else for(e=this.e.split(" ").join("").split(","),s=e.length;--s>-1;)i=e[s],h[i]&&(h[i].parse===o?r=!0:i="transformOrigin"===i?Pe:h[i].p),Ee(a,i);r&&(Ee(a,xe),n=this.t._gsTransform,n&&(n.svg&&this.t.removeAttribute("data-svg-origin"),delete this.t._gsTransform))}};for(ve("clearProps",{parser:function(t,e,s,r,n){return n=new ce(t,s,0,0,n,2),n.setRatio=Le,n.e=e,n.pr=-10,n.data=r._tween,i=!0,n}}),l="bezier,throwProps,physicsProps,physics2D".split(","),de=l.length;de--;)ye(l[de]);l=a.prototype,l._firstPT=l._lastParsedTransform=l._transform=null,l._onInitTween=function(t,e,o){if(!t.nodeType)return!1;this._target=t,this._tween=o,this._vars=e,_=e.autoRound,i=!1,s=e.suffixMap||a.suffixMap,r=Z(t,""),n=this._overwriteProps;var l,f,m,d,g,v,y,T,w,b=t.style;if(u&&""===b.zIndex&&(l=Q(t,"zIndex",r),("auto"===l||""===l)&&this._addLazySet(b,"zIndex",0)),"string"==typeof e&&(d=b.cssText,l=K(t,r),b.cssText=d+";"+e,l=J(t,l,K(t)).difs,!j&&x.test(e)&&(l.opacity=parseFloat(RegExp.$1)),e=l,b.cssText=d),this._firstPT=f=e.className?h.className.parse(t,e.className,"className",this,null,null,e):this.parse(t,e,null),this._transformType){for(w=3===this._transformType,xe?p&&(u=!0,""===b.zIndex&&(y=Q(t,"zIndex",r),("auto"===y||""===y)&&this._addLazySet(b,"zIndex",0)),c&&this._addLazySet(b,"WebkitBackfaceVisibility",this._vars.WebkitBackfaceVisibility||(w?"visible":"hidden"))):b.zoom=1,m=f;m&&m._next;)m=m._next;T=new ce(t,"transform",0,0,null,2),this._linkCSSP(T,null,m),T.setRatio=xe?Ie:ze,T.data=this._transform||Me(t,r,!0),T.tween=o,T.pr=-1,n.pop()}if(i){for(;f;){for(v=f._next,m=d;m&&m.pr>f.pr;)m=m._next;(f._prev=m?m._prev:g)?f._prev._next=f:d=f,(f._next=m)?m._prev=f:g=f,f=v}this._firstPT=d}return!0},l.parse=function(t,e,i,n){var a,o,l,u,p,f,c,m,d,g,v=t.style;for(a in e)f=e[a],o=h[a],o?i=o.parse(t,f,a,this,i,n,e):(p=Q(t,a,r)+"",d="string"==typeof f,"color"===a||"fill"===a||"stroke"===a||-1!==a.indexOf("Color")||d&&P.test(f)?(d||(f=le(f),f=(f.length>3?"rgba(":"rgb(")+f.join(",")+")"),i=me(v,a,p,f,!0,"transparent",i,0,n)):!d||-1===f.indexOf(" ")&&-1===f.indexOf(",")?(l=parseFloat(p),c=l||0===l?p.substr((l+"").length):"",(""===p||"auto"===p)&&("width"===a||"height"===a?(l=ie(t,a,r),c="px"):"left"===a||"top"===a?(l=H(t,a,r),c="px"):(l="opacity"!==a?0:1,c="")),g=d&&"="===f.charAt(1),g?(u=parseInt(f.charAt(0)+"1",10),f=f.substr(2),u*=parseFloat(f),m=f.replace(T,"")):(u=parseFloat(f),m=d?f.replace(T,""):""),""===m&&(m=a in s?s[a]:c),f=u||0===u?(g?u+l:u)+m:e[a],c!==m&&""!==m&&(u||0===u)&&l&&(l=$(t,a,l,c),"%"===m?(l/=$(t,a,100,"%")/100,e.strictUnits!==!0&&(p=l+"%")):"em"===m?l/=$(t,a,1,"em"):"px"!==m&&(u=$(t,a,u,m),m="px"),g&&(u||0===u)&&(f=u+l+m)),g&&(u+=l),!l&&0!==l||!u&&0!==u?void 0!==v[a]&&(f||"NaN"!=f+""&&null!=f)?(i=new ce(v,a,u||l||0,0,i,-1,a,!1,0,p,f),i.xs0="none"!==f||"display"!==a&&-1===a.indexOf("Style")?f:p):q("invalid "+a+" tween value: "+e[a]):(i=new ce(v,a,l,u-l,i,0,a,_!==!1&&("px"===m||"zIndex"===a),0,p,f),i.xs0=m)):i=me(v,a,p,f,!0,null,i,0,n)),n&&i&&!i.plugin&&(i.plugin=n);return i},l.setRatio=function(t){var e,i,s,r=this._firstPT,n=1e-6;if(1!==t||this._tween._time!==this._tween._duration&&0!==this._tween._time)if(t||this._tween._time!==this._tween._duration&&0!==this._tween._time||this._tween._rawPrevTime===-1e-6)for(;r;){if(e=r.c*t+r.s,r.r?e=Math.round(e):n>e&&e>-n&&(e=0),r.type)if(1===r.type)if(s=r.l,2===s)r.t[r.p]=r.xs0+e+r.xs1+r.xn1+r.xs2;else if(3===s)r.t[r.p]=r.xs0+e+r.xs1+r.xn1+r.xs2+r.xn2+r.xs3;else if(4===s)r.t[r.p]=r.xs0+e+r.xs1+r.xn1+r.xs2+r.xn2+r.xs3+r.xn3+r.xs4;else if(5===s)r.t[r.p]=r.xs0+e+r.xs1+r.xn1+r.xs2+r.xn2+r.xs3+r.xn3+r.xs4+r.xn4+r.xs5;else{for(i=r.xs0+e+r.xs1,s=1;r.l>s;s++)i+=r["xn"+s]+r["xs"+(s+1)];r.t[r.p]=i}else-1===r.type?r.t[r.p]=r.xs0:r.setRatio&&r.setRatio(t);else r.t[r.p]=e+r.xs0;r=r._next}else for(;r;)2!==r.type?r.t[r.p]=r.b:r.setRatio(t),r=r._next;else for(;r;)2!==r.type?r.t[r.p]=r.e:r.setRatio(t),r=r._next},l._enableTransforms=function(t){this._transform=this._transform||Me(this._target,r,!0),this._transformType=this._transform.svg&&Te||!t&&3!==this._transformType?2:3};var Xe=function(){this.t[this.p]=this.e,this.data._linkCSSP(this,this._next,null,!0)};l._addLazySet=function(t,e,i){var s=this._firstPT=new ce(t,e,0,0,this._firstPT,2);s.e=i,s.setRatio=Xe,s.data=this},l._linkCSSP=function(t,e,i,s){return t&&(e&&(e._prev=t),t._next&&(t._next._prev=t._prev),t._prev?t._prev._next=t._next:this._firstPT===t&&(this._firstPT=t._next,s=!0),i?i._next=t:s||null!==this._firstPT||(this._firstPT=t),t._next=e,t._prev=i),t},l._kill=function(e){var i,s,r,n=e;if(e.autoAlpha||e.alpha){n={};for(s in e)n[s]=e[s];n.opacity=1,n.autoAlpha&&(n.visibility=1)}return e.className&&(i=this._classNamePT)&&(r=i.xfirst,r&&r._prev?this._linkCSSP(r._prev,i._next,r._prev._prev):r===this._firstPT&&(this._firstPT=i._next),i._next&&this._linkCSSP(i._next,i._next._next,r._prev),this._classNamePT=null),t.prototype._kill.call(this,n)};var Ue=function(t,e,i){var s,r,n,a;if(t.slice)for(r=t.length;--r>-1;)Ue(t[r],e,i);else for(s=t.childNodes,r=s.length;--r>-1;)n=s[r],a=n.type,n.style&&(e.push(K(n)),i&&i.push(n)),1!==a&&9!==a&&11!==a||!n.childNodes.length||Ue(n,e,i)};return a.cascadeTo=function(t,i,s){var r,n,a,o,h=e.to(t,i,s),l=[h],_=[],u=[],p=[],f=e._internals.reservedProps;for(t=h._targets||h.target,Ue(t,_,p),h.render(i,!0,!0),Ue(t,u),h.render(0,!0,!0),h._enabled(!0),r=p.length;--r>-1;)if(n=J(p[r],_[r],u[r]),n.firstMPT){n=n.difs;for(a in s)f[a]&&(n[a]=s[a]);o={};for(a in n)o[a]=_[r][a];l.push(e.fromTo(p[r],i,o,n))}return l},t.activate([a]),a},!0),function(){var t=_gsScope._gsDefine.plugin({propName:"roundProps",priority:-1,API:2,init:function(t,e,i){return this._tween=i,!0}}),e=t.prototype;e._onInitAllProps=function(){for(var t,e,i,s=this._tween,r=s.vars.roundProps instanceof Array?s.vars.roundProps:s.vars.roundProps.split(","),n=r.length,a={},o=s._propLookup.roundProps;--n>-1;)a[r[n]]=1;for(n=r.length;--n>-1;)for(t=r[n],e=s._firstPT;e;)i=e._next,e.pg?e.t._roundProps(a,!0):e.n===t&&(this._add(e.t,t,e.s,e.c),i&&(i._prev=e._prev),e._prev?e._prev._next=i:s._firstPT===e&&(s._firstPT=i),e._next=e._prev=null,s._propLookup[t]=o),e=i;return!1},e._add=function(t,e,i,s){this._addTween(t,e,i,i+s,e,!0),this._overwriteProps.push(e)}}(),_gsScope._gsDefine.plugin({propName:"attr",API:2,version:"0.3.3",init:function(t,e){var i,s,r;if("function"!=typeof t.setAttribute)return!1;this._target=t,this._proxy={},this._start={},this._end={};for(i in e)this._start[i]=this._proxy[i]=s=t.getAttribute(i),r=this._addTween(this._proxy,i,parseFloat(s),e[i],i),this._end[i]=r?r.s+r.c:e[i],this._overwriteProps.push(i);return!0},set:function(t){this._super.setRatio.call(this,t);for(var e,i=this._overwriteProps,s=i.length,r=1===t?this._end:t?this._proxy:this._start;--s>-1;)e=i[s],this._target.setAttribute(e,r[e]+"")}}),_gsScope._gsDefine.plugin({propName:"directionalRotation",version:"0.2.1",API:2,init:function(t,e){"object"!=typeof e&&(e={rotation:e}),this.finals={};var i,s,r,n,a,o,h=e.useRadians===!0?2*Math.PI:360,l=1e-6;for(i in e)"useRadians"!==i&&(o=(e[i]+"").split("_"),s=o[0],r=parseFloat("function"!=typeof t[i]?t[i]:t[i.indexOf("set")||"function"!=typeof t["get"+i.substr(3)]?i:"get"+i.substr(3)]()),n=this.finals[i]="string"==typeof s&&"="===s.charAt(1)?r+parseInt(s.charAt(0)+"1",10)*Number(s.substr(2)):Number(s)||0,a=n-r,o.length&&(s=o.join("_"),-1!==s.indexOf("short")&&(a%=h,a!==a%(h/2)&&(a=0>a?a+h:a-h)),-1!==s.indexOf("_cw")&&0>a?a=(a+9999999999*h)%h-(0|a/h)*h:-1!==s.indexOf("ccw")&&a>0&&(a=(a-9999999999*h)%h-(0|a/h)*h)),(a>l||-l>a)&&(this._addTween(t,i,r,r+a,i),this._overwriteProps.push(i)));return!0},set:function(t){var e;if(1!==t)this._super.setRatio.call(this,t);else for(e=this._firstPT;e;)e.f?e.t[e.p](this.finals[e.p]):e.t[e.p]=this.finals[e.p],e=e._next}})._autoCSS=!0,_gsScope._gsDefine("easing.Back",["easing.Ease"],function(t){var e,i,s,r=_gsScope.GreenSockGlobals||_gsScope,n=r.com.greensock,a=2*Math.PI,o=Math.PI/2,h=n._class,l=function(e,i){var s=h("easing."+e,function(){},!0),r=s.prototype=new t;return r.constructor=s,r.getRatio=i,s},_=t.register||function(){},u=function(t,e,i,s){var r=h("easing."+t,{easeOut:new e,easeIn:new i,easeInOut:new s},!0);return _(r,t),r},p=function(t,e,i){this.t=t,this.v=e,i&&(this.next=i,i.prev=this,this.c=i.v-e,this.gap=i.t-t)},f=function(e,i){var s=h("easing."+e,function(t){this._p1=t||0===t?t:1.70158,this._p2=1.525*this._p1},!0),r=s.prototype=new t;return r.constructor=s,r.getRatio=i,r.config=function(t){return new s(t)},s},c=u("Back",f("BackOut",function(t){return(t-=1)*t*((this._p1+1)*t+this._p1)+1}),f("BackIn",function(t){return t*t*((this._p1+1)*t-this._p1)}),f("BackInOut",function(t){return 1>(t*=2)?.5*t*t*((this._p2+1)*t-this._p2):.5*((t-=2)*t*((this._p2+1)*t+this._p2)+2)})),m=h("easing.SlowMo",function(t,e,i){e=e||0===e?e:.7,null==t?t=.7:t>1&&(t=1),this._p=1!==t?e:0,this._p1=(1-t)/2,this._p2=t,this._p3=this._p1+this._p2,this._calcEnd=i===!0},!0),d=m.prototype=new t;return d.constructor=m,d.getRatio=function(t){var e=t+(.5-t)*this._p;return this._p1>t?this._calcEnd?1-(t=1-t/this._p1)*t:e-(t=1-t/this._p1)*t*t*t*e:t>this._p3?this._calcEnd?1-(t=(t-this._p3)/this._p1)*t:e+(t-e)*(t=(t-this._p3)/this._p1)*t*t*t:this._calcEnd?1:e},m.ease=new m(.7,.7),d.config=m.config=function(t,e,i){return new m(t,e,i)},e=h("easing.SteppedEase",function(t){t=t||1,this._p1=1/t,this._p2=t+1},!0),d=e.prototype=new t,d.constructor=e,d.getRatio=function(t){return 0>t?t=0:t>=1&&(t=.999999999),(this._p2*t>>0)*this._p1},d.config=e.config=function(t){return new e(t)},i=h("easing.RoughEase",function(e){e=e||{};for(var i,s,r,n,a,o,h=e.taper||"none",l=[],_=0,u=0|(e.points||20),f=u,c=e.randomize!==!1,m=e.clamp===!0,d=e.template instanceof t?e.template:null,g="number"==typeof e.strength?.4*e.strength:.4;--f>-1;)i=c?Math.random():1/u*f,s=d?d.getRatio(i):i,"none"===h?r=g:"out"===h?(n=1-i,r=n*n*g):"in"===h?r=i*i*g:.5>i?(n=2*i,r=.5*n*n*g):(n=2*(1-i),r=.5*n*n*g),c?s+=Math.random()*r-.5*r:f%2?s+=.5*r:s-=.5*r,m&&(s>1?s=1:0>s&&(s=0)),l[_++]={x:i,y:s};for(l.sort(function(t,e){return t.x-e.x}),o=new p(1,1,null),f=u;--f>-1;)a=l[f],o=new p(a.x,a.y,o);this._prev=new p(0,0,0!==o.t?o:o.next)},!0),d=i.prototype=new t,d.constructor=i,d.getRatio=function(t){var e=this._prev;if(t>e.t){for(;e.next&&t>=e.t;)e=e.next;e=e.prev}else for(;e.prev&&e.t>=t;)e=e.prev;return this._prev=e,e.v+(t-e.t)/e.gap*e.c},d.config=function(t){return new i(t)},i.ease=new i,u("Bounce",l("BounceOut",function(t){return 1/2.75>t?7.5625*t*t:2/2.75>t?7.5625*(t-=1.5/2.75)*t+.75:2.5/2.75>t?7.5625*(t-=2.25/2.75)*t+.9375:7.5625*(t-=2.625/2.75)*t+.984375}),l("BounceIn",function(t){return 1/2.75>(t=1-t)?1-7.5625*t*t:2/2.75>t?1-(7.5625*(t-=1.5/2.75)*t+.75):2.5/2.75>t?1-(7.5625*(t-=2.25/2.75)*t+.9375):1-(7.5625*(t-=2.625/2.75)*t+.984375)}),l("BounceInOut",function(t){var e=.5>t;return t=e?1-2*t:2*t-1,t=1/2.75>t?7.5625*t*t:2/2.75>t?7.5625*(t-=1.5/2.75)*t+.75:2.5/2.75>t?7.5625*(t-=2.25/2.75)*t+.9375:7.5625*(t-=2.625/2.75)*t+.984375,e?.5*(1-t):.5*t+.5})),u("Circ",l("CircOut",function(t){return Math.sqrt(1-(t-=1)*t)}),l("CircIn",function(t){return-(Math.sqrt(1-t*t)-1)}),l("CircInOut",function(t){return 1>(t*=2)?-.5*(Math.sqrt(1-t*t)-1):.5*(Math.sqrt(1-(t-=2)*t)+1)})),s=function(e,i,s){var r=h("easing."+e,function(t,e){this._p1=t>=1?t:1,this._p2=(e||s)/(1>t?t:1),this._p3=this._p2/a*(Math.asin(1/this._p1)||0),this._p2=a/this._p2},!0),n=r.prototype=new t;return n.constructor=r,n.getRatio=i,n.config=function(t,e){return new r(t,e)},r},u("Elastic",s("ElasticOut",function(t){return this._p1*Math.pow(2,-10*t)*Math.sin((t-this._p3)*this._p2)+1},.3),s("ElasticIn",function(t){return-(this._p1*Math.pow(2,10*(t-=1))*Math.sin((t-this._p3)*this._p2))},.3),s("ElasticInOut",function(t){return 1>(t*=2)?-.5*this._p1*Math.pow(2,10*(t-=1))*Math.sin((t-this._p3)*this._p2):.5*this._p1*Math.pow(2,-10*(t-=1))*Math.sin((t-this._p3)*this._p2)+1},.45)),u("Expo",l("ExpoOut",function(t){return 1-Math.pow(2,-10*t)}),l("ExpoIn",function(t){return Math.pow(2,10*(t-1))-.001}),l("ExpoInOut",function(t){return 1>(t*=2)?.5*Math.pow(2,10*(t-1)):.5*(2-Math.pow(2,-10*(t-1)))})),u("Sine",l("SineOut",function(t){return Math.sin(t*o)}),l("SineIn",function(t){return-Math.cos(t*o)+1}),l("SineInOut",function(t){return-.5*(Math.cos(Math.PI*t)-1)})),h("easing.EaseLookup",{find:function(e){return t.map[e]}},!0),_(r.SlowMo,"SlowMo","ease,"),_(i,"RoughEase","ease,"),_(e,"SteppedEase","ease,"),c},!0)}),_gsScope._gsDefine&&_gsScope._gsQueue.pop()(),function(t,e){"use strict";var i=t.GreenSockGlobals=t.GreenSockGlobals||t;if(!i.TweenLite){var s,r,n,a,o,h=function(t){var e,s=t.split("."),r=i;for(e=0;s.length>e;e++)r[s[e]]=r=r[s[e]]||{};return r},l=h("com.greensock"),_=1e-10,u=function(t){var e,i=[],s=t.length;for(e=0;e!==s;i.push(t[e++]));return i},p=function(){},f=function(){var t=Object.prototype.toString,e=t.call([]);return function(i){return null!=i&&(i instanceof Array||"object"==typeof i&&!!i.push&&t.call(i)===e)}}(),c={},m=function(s,r,n,a){this.sc=c[s]?c[s].sc:[],c[s]=this,this.gsClass=null,this.func=n;var o=[];this.check=function(l){for(var _,u,p,f,d=r.length,g=d;--d>-1;)(_=c[r[d]]||new m(r[d],[])).gsClass?(o[d]=_.gsClass,g--):l&&_.sc.push(this);if(0===g&&n)for(u=("com.greensock."+s).split("."),p=u.pop(),f=h(u.join("."))[p]=this.gsClass=n.apply(n,o),a&&(i[p]=f,"function"==typeof define&&define.amd?define((t.GreenSockAMDPath?t.GreenSockAMDPath+"/":"")+s.split(".").pop(),[],function(){return f}):s===e&&"undefined"!=typeof module&&module.exports&&(module.exports=f)),d=0;this.sc.length>d;d++)this.sc[d].check()},this.check(!0)},d=t._gsDefine=function(t,e,i,s){return new m(t,e,i,s)},g=l._class=function(t,e,i){return e=e||function(){},d(t,[],function(){return e},i),e};d.globals=i;var v=[0,0,1,1],y=[],T=g("easing.Ease",function(t,e,i,s){this._func=t,this._type=i||0,this._power=s||0,this._params=e?v.concat(e):v},!0),w=T.map={},x=T.register=function(t,e,i,s){for(var r,n,a,o,h=e.split(","),_=h.length,u=(i||"easeIn,easeOut,easeInOut").split(",");--_>-1;)for(n=h[_],r=s?g("easing."+n,null,!0):l.easing[n]||{},a=u.length;--a>-1;)o=u[a],w[n+"."+o]=w[o+n]=r[o]=t.getRatio?t:t[o]||new t};for(n=T.prototype,n._calcEnd=!1,n.getRatio=function(t){if(this._func)return this._params[0]=t,this._func.apply(null,this._params);var e=this._type,i=this._power,s=1===e?1-t:2===e?t:.5>t?2*t:2*(1-t);return 1===i?s*=s:2===i?s*=s*s:3===i?s*=s*s*s:4===i&&(s*=s*s*s*s),1===e?1-s:2===e?s:.5>t?s/2:1-s/2},s=["Linear","Quad","Cubic","Quart","Quint,Strong"],r=s.length;--r>-1;)n=s[r]+",Power"+r,x(new T(null,null,1,r),n,"easeOut",!0),x(new T(null,null,2,r),n,"easeIn"+(0===r?",easeNone":"")),x(new T(null,null,3,r),n,"easeInOut");w.linear=l.easing.Linear.easeIn,w.swing=l.easing.Quad.easeInOut;var b=g("events.EventDispatcher",function(t){this._listeners={},this._eventTarget=t||this});n=b.prototype,n.addEventListener=function(t,e,i,s,r){r=r||0;var n,h,l=this._listeners[t],_=0;for(null==l&&(this._listeners[t]=l=[]),h=l.length;--h>-1;)n=l[h],n.c===e&&n.s===i?l.splice(h,1):0===_&&r>n.pr&&(_=h+1);l.splice(_,0,{c:e,s:i,up:s,pr:r}),this!==a||o||a.wake()},n.removeEventListener=function(t,e){var i,s=this._listeners[t];if(s)for(i=s.length;--i>-1;)if(s[i].c===e)return s.splice(i,1),void 0},n.dispatchEvent=function(t){var e,i,s,r=this._listeners[t];if(r)for(e=r.length,i=this._eventTarget;--e>-1;)s=r[e],s&&(s.up?s.c.call(s.s||i,{type:t,target:i}):s.c.call(s.s||i))};var P=t.requestAnimationFrame,S=t.cancelAnimationFrame,k=Date.now||function(){return(new Date).getTime()},R=k();for(s=["ms","moz","webkit","o"],r=s.length;--r>-1&&!P;)P=t[s[r]+"RequestAnimationFrame"],S=t[s[r]+"CancelAnimationFrame"]||t[s[r]+"CancelRequestAnimationFrame"];g("Ticker",function(t,e){var i,s,r,n,h,l=this,u=k(),f=e!==!1&&P,c=500,m=33,d="tick",g=function(t){var e,a,o=k()-R;o>c&&(u+=o-m),R+=o,l.time=(R-u)/1e3,e=l.time-h,(!i||e>0||t===!0)&&(l.frame++,h+=e+(e>=n?.004:n-e),a=!0),t!==!0&&(r=s(g)),a&&l.dispatchEvent(d)};b.call(l),l.time=l.frame=0,l.tick=function(){g(!0)},l.lagSmoothing=function(t,e){c=t||1/_,m=Math.min(e,c,0)},l.sleep=function(){null!=r&&(f&&S?S(r):clearTimeout(r),s=p,r=null,l===a&&(o=!1))},l.wake=function(){null!==r?l.sleep():l.frame>10&&(R=k()-c+5),s=0===i?p:f&&P?P:function(t){return setTimeout(t,0|1e3*(h-l.time)+1)},l===a&&(o=!0),g(2)},l.fps=function(t){return arguments.length?(i=t,n=1/(i||60),h=this.time+n,l.wake(),void 0):i},l.useRAF=function(t){return arguments.length?(l.sleep(),f=t,l.fps(i),void 0):f},l.fps(t),setTimeout(function(){f&&5>l.frame&&l.useRAF(!1)},1500)}),n=l.Ticker.prototype=new l.events.EventDispatcher,n.constructor=l.Ticker;var A=g("core.Animation",function(t,e){if(this.vars=e=e||{},this._duration=this._totalDuration=t||0,this._delay=Number(e.delay)||0,this._timeScale=1,this._active=e.immediateRender===!0,this.data=e.data,this._reversed=e.reversed===!0,B){o||a.wake();var i=this.vars.useFrames?j:B;i.add(this,i._time),this.vars.paused&&this.paused(!0)}});a=A.ticker=new l.Ticker,n=A.prototype,n._dirty=n._gc=n._initted=n._paused=!1,n._totalTime=n._time=0,n._rawPrevTime=-1,n._next=n._last=n._onUpdate=n._timeline=n.timeline=null,n._paused=!1;var O=function(){o&&k()-R>2e3&&a.wake(),setTimeout(O,2e3)};O(),n.play=function(t,e){return null!=t&&this.seek(t,e),this.reversed(!1).paused(!1)},n.pause=function(t,e){return null!=t&&this.seek(t,e),this.paused(!0)},n.resume=function(t,e){return null!=t&&this.seek(t,e),this.paused(!1)},n.seek=function(t,e){return this.totalTime(Number(t),e!==!1)},n.restart=function(t,e){return this.reversed(!1).paused(!1).totalTime(t?-this._delay:0,e!==!1,!0)},n.reverse=function(t,e){return null!=t&&this.seek(t||this.totalDuration(),e),this.reversed(!0).paused(!1)},n.render=function(){},n.invalidate=function(){return this._time=this._totalTime=0,this._initted=this._gc=!1,this._rawPrevTime=-1,(this._gc||!this.timeline)&&this._enabled(!0),this},n.isActive=function(){var t,e=this._timeline,i=this._startTime;return!e||!this._gc&&!this._paused&&e.isActive()&&(t=e.rawTime())>=i&&i+this.totalDuration()/this._timeScale>t},n._enabled=function(t,e){return o||a.wake(),this._gc=!t,this._active=this.isActive(),e!==!0&&(t&&!this.timeline?this._timeline.add(this,this._startTime-this._delay):!t&&this.timeline&&this._timeline._remove(this,!0)),!1},n._kill=function(){return this._enabled(!1,!1)},n.kill=function(t,e){return this._kill(t,e),this},n._uncache=function(t){for(var e=t?this:this.timeline;e;)e._dirty=!0,e=e.timeline;return this},n._swapSelfInParams=function(t){for(var e=t.length,i=t.concat();--e>-1;)"{self}"===t[e]&&(i[e]=this);return i},n.eventCallback=function(t,e,i,s){if("on"===(t||"").substr(0,2)){var r=this.vars;if(1===arguments.length)return r[t];null==e?delete r[t]:(r[t]=e,r[t+"Params"]=f(i)&&-1!==i.join("").indexOf("{self}")?this._swapSelfInParams(i):i,r[t+"Scope"]=s),"onUpdate"===t&&(this._onUpdate=e)}return this},n.delay=function(t){return arguments.length?(this._timeline.smoothChildTiming&&this.startTime(this._startTime+t-this._delay),this._delay=t,this):this._delay},n.duration=function(t){return arguments.length?(this._duration=this._totalDuration=t,this._uncache(!0),this._timeline.smoothChildTiming&&this._time>0&&this._time<this._duration&&0!==t&&this.totalTime(this._totalTime*(t/this._duration),!0),this):(this._dirty=!1,this._duration)},n.totalDuration=function(t){return this._dirty=!1,arguments.length?this.duration(t):this._totalDuration},n.time=function(t,e){return arguments.length?(this._dirty&&this.totalDuration(),this.totalTime(t>this._duration?this._duration:t,e)):this._time},n.totalTime=function(t,e,i){if(o||a.wake(),!arguments.length)return this._totalTime;if(this._timeline){if(0>t&&!i&&(t+=this.totalDuration()),this._timeline.smoothChildTiming){this._dirty&&this.totalDuration();var s=this._totalDuration,r=this._timeline;if(t>s&&!i&&(t=s),this._startTime=(this._paused?this._pauseTime:r._time)-(this._reversed?s-t:t)/this._timeScale,r._dirty||this._uncache(!1),r._timeline)for(;r._timeline;)r._timeline._time!==(r._startTime+r._totalTime)/r._timeScale&&r.totalTime(r._totalTime,!0),r=r._timeline}this._gc&&this._enabled(!0,!1),(this._totalTime!==t||0===this._duration)&&(this.render(t,e,!1),I.length&&V())}return this},n.progress=n.totalProgress=function(t,e){return arguments.length?this.totalTime(this.duration()*t,e):this._time/this.duration()},n.startTime=function(t){return arguments.length?(t!==this._startTime&&(this._startTime=t,this.timeline&&this.timeline._sortChildren&&this.timeline.add(this,t-this._delay)),this):this._startTime},n.endTime=function(t){return this._startTime+(0!=t?this.totalDuration():this.duration())/this._timeScale},n.timeScale=function(t){if(!arguments.length)return this._timeScale;if(t=t||_,this._timeline&&this._timeline.smoothChildTiming){var e=this._pauseTime,i=e||0===e?e:this._timeline.totalTime();this._startTime=i-(i-this._startTime)*this._timeScale/t}return this._timeScale=t,this._uncache(!1)},n.reversed=function(t){return arguments.length?(t!=this._reversed&&(this._reversed=t,this.totalTime(this._timeline&&!this._timeline.smoothChildTiming?this.totalDuration()-this._totalTime:this._totalTime,!0)),this):this._reversed},n.paused=function(t){if(!arguments.length)return this._paused;var e,i,s=this._timeline;return t!=this._paused&&s&&(o||t||a.wake(),e=s.rawTime(),i=e-this._pauseTime,!t&&s.smoothChildTiming&&(this._startTime+=i,this._uncache(!1)),this._pauseTime=t?e:null,this._paused=t,this._active=this.isActive(),!t&&0!==i&&this._initted&&this.duration()&&this.render(s.smoothChildTiming?this._totalTime:(e-this._startTime)/this._timeScale,!0,!0)),this._gc&&!t&&this._enabled(!0,!1),this};var C=g("core.SimpleTimeline",function(t){A.call(this,0,t),this.autoRemoveChildren=this.smoothChildTiming=!0});n=C.prototype=new A,n.constructor=C,n.kill()._gc=!1,n._first=n._last=n._recent=null,n._sortChildren=!1,n.add=n.insert=function(t,e){var i,s;if(t._startTime=Number(e||0)+t._delay,t._paused&&this!==t._timeline&&(t._pauseTime=t._startTime+(this.rawTime()-t._startTime)/t._timeScale),t.timeline&&t.timeline._remove(t,!0),t.timeline=t._timeline=this,t._gc&&t._enabled(!0,!0),i=this._last,this._sortChildren)for(s=t._startTime;i&&i._startTime>s;)i=i._prev;return i?(t._next=i._next,i._next=t):(t._next=this._first,this._first=t),t._next?t._next._prev=t:this._last=t,t._prev=i,this._recent=t,this._timeline&&this._uncache(!0),this},n._remove=function(t,e){return t.timeline===this&&(e||t._enabled(!1,!0),t._prev?t._prev._next=t._next:this._first===t&&(this._first=t._next),t._next?t._next._prev=t._prev:this._last===t&&(this._last=t._prev),t._next=t._prev=t.timeline=null,t===this._recent&&(this._recent=this._last),this._timeline&&this._uncache(!0)),this},n.render=function(t,e,i){var s,r=this._first;for(this._totalTime=this._time=this._rawPrevTime=t;r;)s=r._next,(r._active||t>=r._startTime&&!r._paused)&&(r._reversed?r.render((r._dirty?r.totalDuration():r._totalDuration)-(t-r._startTime)*r._timeScale,e,i):r.render((t-r._startTime)*r._timeScale,e,i)),r=s},n.rawTime=function(){return o||a.wake(),this._totalTime};var D=g("TweenLite",function(e,i,s){if(A.call(this,i,s),this.render=D.prototype.render,null==e)throw"Cannot tween a null target.";this.target=e="string"!=typeof e?e:D.selector(e)||e;var r,n,a,o=e.jquery||e.length&&e!==t&&e[0]&&(e[0]===t||e[0].nodeType&&e[0].style&&!e.nodeType),h=this.vars.overwrite;if(this._overwrite=h=null==h?Y[D.defaultOverwrite]:"number"==typeof h?h>>0:Y[h],(o||e instanceof Array||e.push&&f(e))&&"number"!=typeof e[0])for(this._targets=a=u(e),this._propLookup=[],this._siblings=[],r=0;a.length>r;r++)n=a[r],n?"string"!=typeof n?n.length&&n!==t&&n[0]&&(n[0]===t||n[0].nodeType&&n[0].style&&!n.nodeType)?(a.splice(r--,1),this._targets=a=a.concat(u(n))):(this._siblings[r]=G(n,this,!1),1===h&&this._siblings[r].length>1&&Z(n,this,null,1,this._siblings[r])):(n=a[r--]=D.selector(n),"string"==typeof n&&a.splice(r+1,1)):a.splice(r--,1);else this._propLookup={},this._siblings=G(e,this,!1),1===h&&this._siblings.length>1&&Z(e,this,null,1,this._siblings);(this.vars.immediateRender||0===i&&0===this._delay&&this.vars.immediateRender!==!1)&&(this._time=-_,this.render(-this._delay))},!0),M=function(e){return e&&e.length&&e!==t&&e[0]&&(e[0]===t||e[0].nodeType&&e[0].style&&!e.nodeType)},z=function(t,e){var i,s={};for(i in t)U[i]||i in e&&"transform"!==i&&"x"!==i&&"y"!==i&&"width"!==i&&"height"!==i&&"className"!==i&&"border"!==i||!(!N[i]||N[i]&&N[i]._autoCSS)||(s[i]=t[i],delete t[i]);t.css=s};n=D.prototype=new A,n.constructor=D,n.kill()._gc=!1,n.ratio=0,n._firstPT=n._targets=n._overwrittenProps=n._startAt=null,n._notifyPluginsOfEnabled=n._lazy=!1,D.version="1.16.1",D.defaultEase=n._ease=new T(null,null,1,1),D.defaultOverwrite="auto",D.ticker=a,D.autoSleep=120,D.lagSmoothing=function(t,e){a.lagSmoothing(t,e)},D.selector=t.$||t.jQuery||function(e){var i=t.$||t.jQuery;return i?(D.selector=i,i(e)):"undefined"==typeof document?e:document.querySelectorAll?document.querySelectorAll(e):document.getElementById("#"===e.charAt(0)?e.substr(1):e)};var I=[],F={},E=D._internals={isArray:f,isSelector:M,lazyTweens:I},N=D._plugins={},L=E.tweenLookup={},X=0,U=E.reservedProps={ease:1,delay:1,overwrite:1,onComplete:1,onCompleteParams:1,onCompleteScope:1,useFrames:1,runBackwards:1,startAt:1,onUpdate:1,onUpdateParams:1,onUpdateScope:1,onStart:1,onStartParams:1,onStartScope:1,onReverseComplete:1,onReverseCompleteParams:1,onReverseCompleteScope:1,onRepeat:1,onRepeatParams:1,onRepeatScope:1,easeParams:1,yoyo:1,immediateRender:1,repeat:1,repeatDelay:1,data:1,paused:1,reversed:1,autoCSS:1,lazy:1,onOverwrite:1},Y={none:0,all:1,auto:2,concurrent:3,allOnStart:4,preexisting:5,"true":1,"false":0},j=A._rootFramesTimeline=new C,B=A._rootTimeline=new C,q=30,V=E.lazyRender=function(){var t,e=I.length;for(F={};--e>-1;)t=I[e],t&&t._lazy!==!1&&(t.render(t._lazy[0],t._lazy[1],!0),t._lazy=!1);I.length=0};B._startTime=a.time,j._startTime=a.frame,B._active=j._active=!0,setTimeout(V,1),A._updateRoot=D.render=function(){var t,e,i;if(I.length&&V(),B.render((a.time-B._startTime)*B._timeScale,!1,!1),j.render((a.frame-j._startTime)*j._timeScale,!1,!1),I.length&&V(),a.frame>=q){q=a.frame+(parseInt(D.autoSleep,10)||120);for(i in L){for(e=L[i].tweens,t=e.length;--t>-1;)e[t]._gc&&e.splice(t,1);0===e.length&&delete L[i]}if(i=B._first,(!i||i._paused)&&D.autoSleep&&!j._first&&1===a._listeners.tick.length){for(;i&&i._paused;)i=i._next;i||a.sleep()}}},a.addEventListener("tick",A._updateRoot);var G=function(t,e,i){var s,r,n=t._gsTweenID;if(L[n||(t._gsTweenID=n="t"+X++)]||(L[n]={target:t,tweens:[]}),e&&(s=L[n].tweens,s[r=s.length]=e,i))for(;--r>-1;)s[r]===e&&s.splice(r,1);return L[n].tweens},W=function(t,e,i,s){var r,n,a=t.vars.onOverwrite;return a&&(r=a(t,e,i,s)),a=D.onOverwrite,a&&(n=a(t,e,i,s)),r!==!1&&n!==!1},Z=function(t,e,i,s,r){var n,a,o,h;if(1===s||s>=4){for(h=r.length,n=0;h>n;n++)if((o=r[n])!==e)o._gc||W(o,e)&&o._enabled(!1,!1)&&(a=!0);else if(5===s)break;return a}var l,u=e._startTime+_,p=[],f=0,c=0===e._duration;for(n=r.length;--n>-1;)(o=r[n])===e||o._gc||o._paused||(o._timeline!==e._timeline?(l=l||Q(e,0,c),0===Q(o,l,c)&&(p[f++]=o)):u>=o._startTime&&o._startTime+o.totalDuration()/o._timeScale>u&&((c||!o._initted)&&2e-10>=u-o._startTime||(p[f++]=o)));for(n=f;--n>-1;)if(o=p[n],2===s&&o._kill(i,t,e)&&(a=!0),2!==s||!o._firstPT&&o._initted){if(2!==s&&!W(o,e))continue;o._enabled(!1,!1)&&(a=!0)}return a},Q=function(t,e,i){for(var s=t._timeline,r=s._timeScale,n=t._startTime;s._timeline;){if(n+=s._startTime,r*=s._timeScale,s._paused)return-100;s=s._timeline}return n/=r,n>e?n-e:i&&n===e||!t._initted&&2*_>n-e?_:(n+=t.totalDuration()/t._timeScale/r)>e+_?0:n-e-_};n._init=function(){var t,e,i,s,r,n=this.vars,a=this._overwrittenProps,o=this._duration,h=!!n.immediateRender,l=n.ease;if(n.startAt){this._startAt&&(this._startAt.render(-1,!0),this._startAt.kill()),r={};for(s in n.startAt)r[s]=n.startAt[s];if(r.overwrite=!1,r.immediateRender=!0,r.lazy=h&&n.lazy!==!1,r.startAt=r.delay=null,this._startAt=D.to(this.target,0,r),h)if(this._time>0)this._startAt=null;else if(0!==o)return}else if(n.runBackwards&&0!==o)if(this._startAt)this._startAt.render(-1,!0),this._startAt.kill(),this._startAt=null;else{0!==this._time&&(h=!1),i={};for(s in n)U[s]&&"autoCSS"!==s||(i[s]=n[s]);if(i.overwrite=0,i.data="isFromStart",i.lazy=h&&n.lazy!==!1,i.immediateRender=h,this._startAt=D.to(this.target,0,i),h){if(0===this._time)return}else this._startAt._init(),this._startAt._enabled(!1),this.vars.immediateRender&&(this._startAt=null)}if(this._ease=l=l?l instanceof T?l:"function"==typeof l?new T(l,n.easeParams):w[l]||D.defaultEase:D.defaultEase,n.easeParams instanceof Array&&l.config&&(this._ease=l.config.apply(l,n.easeParams)),this._easeType=this._ease._type,this._easePower=this._ease._power,this._firstPT=null,this._targets)for(t=this._targets.length;--t>-1;)this._initProps(this._targets[t],this._propLookup[t]={},this._siblings[t],a?a[t]:null)&&(e=!0);else e=this._initProps(this.target,this._propLookup,this._siblings,a);if(e&&D._onPluginEvent("_onInitAllProps",this),a&&(this._firstPT||"function"!=typeof this.target&&this._enabled(!1,!1)),n.runBackwards)for(i=this._firstPT;i;)i.s+=i.c,i.c=-i.c,i=i._next;this._onUpdate=n.onUpdate,this._initted=!0},n._initProps=function(e,i,s,r){var n,a,o,h,l,_;if(null==e)return!1;F[e._gsTweenID]&&V(),this.vars.css||e.style&&e!==t&&e.nodeType&&N.css&&this.vars.autoCSS!==!1&&z(this.vars,e);for(n in this.vars){if(_=this.vars[n],U[n])_&&(_ instanceof Array||_.push&&f(_))&&-1!==_.join("").indexOf("{self}")&&(this.vars[n]=_=this._swapSelfInParams(_,this));else if(N[n]&&(h=new N[n])._onInitTween(e,this.vars[n],this)){for(this._firstPT=l={_next:this._firstPT,t:h,p:"setRatio",s:0,c:1,f:!0,n:n,pg:!0,pr:h._priority},a=h._overwriteProps.length;--a>-1;)i[h._overwriteProps[a]]=this._firstPT;(h._priority||h._onInitAllProps)&&(o=!0),(h._onDisable||h._onEnable)&&(this._notifyPluginsOfEnabled=!0)}else this._firstPT=i[n]=l={_next:this._firstPT,t:e,p:n,f:"function"==typeof e[n],n:n,pg:!1,pr:0},l.s=l.f?e[n.indexOf("set")||"function"!=typeof e["get"+n.substr(3)]?n:"get"+n.substr(3)]():parseFloat(e[n]),l.c="string"==typeof _&&"="===_.charAt(1)?parseInt(_.charAt(0)+"1",10)*Number(_.substr(2)):Number(_)-l.s||0;l&&l._next&&(l._next._prev=l)}return r&&this._kill(r,e)?this._initProps(e,i,s,r):this._overwrite>1&&this._firstPT&&s.length>1&&Z(e,this,i,this._overwrite,s)?(this._kill(i,e),this._initProps(e,i,s,r)):(this._firstPT&&(this.vars.lazy!==!1&&this._duration||this.vars.lazy&&!this._duration)&&(F[e._gsTweenID]=!0),o)},n.render=function(t,e,i){var s,r,n,a,o=this._time,h=this._duration,l=this._rawPrevTime;if(t>=h)this._totalTime=this._time=h,this.ratio=this._ease._calcEnd?this._ease.getRatio(1):1,this._reversed||(s=!0,r="onComplete",i=i||this._timeline.autoRemoveChildren),0===h&&(this._initted||!this.vars.lazy||i)&&(this._startTime===this._timeline._duration&&(t=0),(0===t||0>l||l===_&&"isPause"!==this.data)&&l!==t&&(i=!0,l>_&&(r="onReverseComplete")),this._rawPrevTime=a=!e||t||l===t?t:_);else if(1e-7>t)this._totalTime=this._time=0,this.ratio=this._ease._calcEnd?this._ease.getRatio(0):0,(0!==o||0===h&&l>0)&&(r="onReverseComplete",s=this._reversed),0>t&&(this._active=!1,0===h&&(this._initted||!this.vars.lazy||i)&&(l>=0&&(l!==_||"isPause"!==this.data)&&(i=!0),this._rawPrevTime=a=!e||t||l===t?t:_)),this._initted||(i=!0);
-else if(this._totalTime=this._time=t,this._easeType){var u=t/h,p=this._easeType,f=this._easePower;(1===p||3===p&&u>=.5)&&(u=1-u),3===p&&(u*=2),1===f?u*=u:2===f?u*=u*u:3===f?u*=u*u*u:4===f&&(u*=u*u*u*u),this.ratio=1===p?1-u:2===p?u:.5>t/h?u/2:1-u/2}else this.ratio=this._ease.getRatio(t/h);if(this._time!==o||i){if(!this._initted){if(this._init(),!this._initted||this._gc)return;if(!i&&this._firstPT&&(this.vars.lazy!==!1&&this._duration||this.vars.lazy&&!this._duration))return this._time=this._totalTime=o,this._rawPrevTime=l,I.push(this),this._lazy=[t,e],void 0;this._time&&!s?this.ratio=this._ease.getRatio(this._time/h):s&&this._ease._calcEnd&&(this.ratio=this._ease.getRatio(0===this._time?0:1))}for(this._lazy!==!1&&(this._lazy=!1),this._active||!this._paused&&this._time!==o&&t>=0&&(this._active=!0),0===o&&(this._startAt&&(t>=0?this._startAt.render(t,e,i):r||(r="_dummyGS")),this.vars.onStart&&(0!==this._time||0===h)&&(e||this.vars.onStart.apply(this.vars.onStartScope||this,this.vars.onStartParams||y))),n=this._firstPT;n;)n.f?n.t[n.p](n.c*this.ratio+n.s):n.t[n.p]=n.c*this.ratio+n.s,n=n._next;this._onUpdate&&(0>t&&this._startAt&&t!==-1e-4&&this._startAt.render(t,e,i),e||(this._time!==o||s)&&this._onUpdate.apply(this.vars.onUpdateScope||this,this.vars.onUpdateParams||y)),r&&(!this._gc||i)&&(0>t&&this._startAt&&!this._onUpdate&&t!==-1e-4&&this._startAt.render(t,e,i),s&&(this._timeline.autoRemoveChildren&&this._enabled(!1,!1),this._active=!1),!e&&this.vars[r]&&this.vars[r].apply(this.vars[r+"Scope"]||this,this.vars[r+"Params"]||y),0===h&&this._rawPrevTime===_&&a!==_&&(this._rawPrevTime=0))}},n._kill=function(t,e,i){if("all"===t&&(t=null),null==t&&(null==e||e===this.target))return this._lazy=!1,this._enabled(!1,!1);e="string"!=typeof e?e||this._targets||this.target:D.selector(e)||e;var s,r,n,a,o,h,l,_,u;if((f(e)||M(e))&&"number"!=typeof e[0])for(s=e.length;--s>-1;)this._kill(t,e[s])&&(h=!0);else{if(this._targets){for(s=this._targets.length;--s>-1;)if(e===this._targets[s]){o=this._propLookup[s]||{},this._overwrittenProps=this._overwrittenProps||[],r=this._overwrittenProps[s]=t?this._overwrittenProps[s]||{}:"all";break}}else{if(e!==this.target)return!1;o=this._propLookup,r=this._overwrittenProps=t?this._overwrittenProps||{}:"all"}if(o){if(l=t||o,_=t!==r&&"all"!==r&&t!==o&&("object"!=typeof t||!t._tempKill),i&&(D.onOverwrite||this.vars.onOverwrite)){for(n in l)o[n]&&(u||(u=[]),u.push(n));if(!W(this,i,e,u))return!1}for(n in l)(a=o[n])&&(a.pg&&a.t._kill(l)&&(h=!0),a.pg&&0!==a.t._overwriteProps.length||(a._prev?a._prev._next=a._next:a===this._firstPT&&(this._firstPT=a._next),a._next&&(a._next._prev=a._prev),a._next=a._prev=null),delete o[n]),_&&(r[n]=1);!this._firstPT&&this._initted&&this._enabled(!1,!1)}}return h},n.invalidate=function(){return this._notifyPluginsOfEnabled&&D._onPluginEvent("_onDisable",this),this._firstPT=this._overwrittenProps=this._startAt=this._onUpdate=null,this._notifyPluginsOfEnabled=this._active=this._lazy=!1,this._propLookup=this._targets?{}:[],A.prototype.invalidate.call(this),this.vars.immediateRender&&(this._time=-_,this.render(-this._delay)),this},n._enabled=function(t,e){if(o||a.wake(),t&&this._gc){var i,s=this._targets;if(s)for(i=s.length;--i>-1;)this._siblings[i]=G(s[i],this,!0);else this._siblings=G(this.target,this,!0)}return A.prototype._enabled.call(this,t,e),this._notifyPluginsOfEnabled&&this._firstPT?D._onPluginEvent(t?"_onEnable":"_onDisable",this):!1},D.to=function(t,e,i){return new D(t,e,i)},D.from=function(t,e,i){return i.runBackwards=!0,i.immediateRender=0!=i.immediateRender,new D(t,e,i)},D.fromTo=function(t,e,i,s){return s.startAt=i,s.immediateRender=0!=s.immediateRender&&0!=i.immediateRender,new D(t,e,s)},D.delayedCall=function(t,e,i,s,r){return new D(e,0,{delay:t,onComplete:e,onCompleteParams:i,onCompleteScope:s,onReverseComplete:e,onReverseCompleteParams:i,onReverseCompleteScope:s,immediateRender:!1,lazy:!1,useFrames:r,overwrite:0})},D.set=function(t,e){return new D(t,0,e)},D.getTweensOf=function(t,e){if(null==t)return[];t="string"!=typeof t?t:D.selector(t)||t;var i,s,r,n;if((f(t)||M(t))&&"number"!=typeof t[0]){for(i=t.length,s=[];--i>-1;)s=s.concat(D.getTweensOf(t[i],e));for(i=s.length;--i>-1;)for(n=s[i],r=i;--r>-1;)n===s[r]&&s.splice(i,1)}else for(s=G(t).concat(),i=s.length;--i>-1;)(s[i]._gc||e&&!s[i].isActive())&&s.splice(i,1);return s},D.killTweensOf=D.killDelayedCallsTo=function(t,e,i){"object"==typeof e&&(i=e,e=!1);for(var s=D.getTweensOf(t,e),r=s.length;--r>-1;)s[r]._kill(i,t)};var $=g("plugins.TweenPlugin",function(t,e){this._overwriteProps=(t||"").split(","),this._propName=this._overwriteProps[0],this._priority=e||0,this._super=$.prototype},!0);if(n=$.prototype,$.version="1.10.1",$.API=2,n._firstPT=null,n._addTween=function(t,e,i,s,r,n){var a,o;return null!=s&&(a="number"==typeof s||"="!==s.charAt(1)?Number(s)-i:parseInt(s.charAt(0)+"1",10)*Number(s.substr(2)))?(this._firstPT=o={_next:this._firstPT,t:t,p:e,s:i,c:a,f:"function"==typeof t[e],n:r||e,r:n},o._next&&(o._next._prev=o),o):void 0},n.setRatio=function(t){for(var e,i=this._firstPT,s=1e-6;i;)e=i.c*t+i.s,i.r?e=Math.round(e):s>e&&e>-s&&(e=0),i.f?i.t[i.p](e):i.t[i.p]=e,i=i._next},n._kill=function(t){var e,i=this._overwriteProps,s=this._firstPT;if(null!=t[this._propName])this._overwriteProps=[];else for(e=i.length;--e>-1;)null!=t[i[e]]&&i.splice(e,1);for(;s;)null!=t[s.n]&&(s._next&&(s._next._prev=s._prev),s._prev?(s._prev._next=s._next,s._prev=null):this._firstPT===s&&(this._firstPT=s._next)),s=s._next;return!1},n._roundProps=function(t,e){for(var i=this._firstPT;i;)(t[this._propName]||null!=i.n&&t[i.n.split(this._propName+"_").join("")])&&(i.r=e),i=i._next},D._onPluginEvent=function(t,e){var i,s,r,n,a,o=e._firstPT;if("_onInitAllProps"===t){for(;o;){for(a=o._next,s=r;s&&s.pr>o.pr;)s=s._next;(o._prev=s?s._prev:n)?o._prev._next=o:r=o,(o._next=s)?s._prev=o:n=o,o=a}o=e._firstPT=r}for(;o;)o.pg&&"function"==typeof o.t[t]&&o.t[t]()&&(i=!0),o=o._next;return i},$.activate=function(t){for(var e=t.length;--e>-1;)t[e].API===$.API&&(N[(new t[e])._propName]=t[e]);return!0},d.plugin=function(t){if(!(t&&t.propName&&t.init&&t.API))throw"illegal plugin definition.";var e,i=t.propName,s=t.priority||0,r=t.overwriteProps,n={init:"_onInitTween",set:"setRatio",kill:"_kill",round:"_roundProps",initAll:"_onInitAllProps"},a=g("plugins."+i.charAt(0).toUpperCase()+i.substr(1)+"Plugin",function(){$.call(this,i,s),this._overwriteProps=r||[]},t.global===!0),o=a.prototype=new $(i);o.constructor=a,a.API=t.API;for(e in n)"function"==typeof t[e]&&(o[n[e]]=t[e]);return a.version=t.version,$.activate([a]),a},s=t._gsQueue){for(r=0;s.length>r;r++)s[r]();for(n in c)c[n].func||t.console.log("GSAP encountered missing dependency: com.greensock."+n)}o=!1}}("undefined"!=typeof module&&module.exports&&"undefined"!=typeof global?global:this||window,"TweenMax");
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],82:[function(require,module,exports){
+(function (global){
+"use strict";var _gsScope="undefined" != typeof module && module.exports && "undefined" != typeof global?global:undefined || window;(_gsScope._gsQueue || (_gsScope._gsQueue = [])).push(function(){"use strict";_gsScope._gsDefine("TweenMax", ["core.Animation", "core.SimpleTimeline", "TweenLite"], function(t, e, i){var s=function s(t){var e, i=[], s=t.length;for(e = 0; e !== s; i.push(t[e++]));return i;}, r=(function(_r){function r(_x, _x2, _x3){return _r.apply(this, arguments);}r.toString = function(){return _r.toString();};return r;})(function(t, e, s){i.call(this, t, e, s), this._cycle = 0, this._yoyo = this.vars.yoyo === !0, this._repeat = this.vars.repeat || 0, this._repeatDelay = this.vars.repeatDelay || 0, this._dirty = !0, this.render = r.prototype.render;}), n=1e-10, a=i._internals, o=a.isSelector, h=a.isArray, l=r.prototype = i.to({}, 0.1, {}), _=[];r.version = "1.16.1", l.constructor = r, l.kill()._gc = !1, r.killTweensOf = r.killDelayedCallsTo = i.killTweensOf, r.getTweensOf = i.getTweensOf, r.lagSmoothing = i.lagSmoothing, r.ticker = i.ticker, r.render = i.render, l.invalidate = function(){return (this._yoyo = this.vars.yoyo === !0, this._repeat = this.vars.repeat || 0, this._repeatDelay = this.vars.repeatDelay || 0, this._uncache(!0), i.prototype.invalidate.call(this));}, l.updateTo = function(t, e){var s, r=this.ratio, n=this.vars.immediateRender || t.immediateRender;e && this._startTime < this._timeline._time && (this._startTime = this._timeline._time, this._uncache(!1), this._gc?this._enabled(!0, !1):this._timeline.insert(this, this._startTime - this._delay));for(s in t) this.vars[s] = t[s];if(this._initted || n)if(e)this._initted = !1, n && this.render(0, !0, !0);else if((this._gc && this._enabled(!0, !1), this._notifyPluginsOfEnabled && this._firstPT && i._onPluginEvent("_onDisable", this), this._time / this._duration > 0.998)){var a=this._time;this.render(0, !0, !1), this._initted = !1, this.render(a, !0, !1);}else if(this._time > 0 || n){this._initted = !1, this._init();for(var o, h=1 / (1 - r), l=this._firstPT; l;) o = l.s + l.c, l.c *= h, l.s = o - l.c, l = l._next;}return this;}, l.render = function(t, e, i){this._initted || 0 === this._duration && this.vars.repeat && this.invalidate();var s, r, o, h, l, u, p, f, c=this._dirty?this.totalDuration():this._totalDuration, m=this._time, d=this._totalTime, g=this._cycle, v=this._duration, y=this._rawPrevTime;if((t >= c?(this._totalTime = c, this._cycle = this._repeat, this._yoyo && 0 !== (1 & this._cycle)?(this._time = 0, this.ratio = this._ease._calcEnd?this._ease.getRatio(0):0):(this._time = v, this.ratio = this._ease._calcEnd?this._ease.getRatio(1):1), this._reversed || (s = !0, r = "onComplete", i = i || this._timeline.autoRemoveChildren), 0 === v && (this._initted || !this.vars.lazy || i) && (this._startTime === this._timeline._duration && (t = 0), (0 === t || 0 > y || y === n) && y !== t && (i = !0, y > n && (r = "onReverseComplete")), this._rawPrevTime = f = !e || t || y === t?t:n)):1e-7 > t?(this._totalTime = this._time = this._cycle = 0, this.ratio = this._ease._calcEnd?this._ease.getRatio(0):0, (0 !== d || 0 === v && y > 0) && (r = "onReverseComplete", s = this._reversed), 0 > t && (this._active = !1, 0 === v && (this._initted || !this.vars.lazy || i) && (y >= 0 && (i = !0), this._rawPrevTime = f = !e || t || y === t?t:n)), this._initted || (i = !0)):(this._totalTime = this._time = t, 0 !== this._repeat && (h = v + this._repeatDelay, this._cycle = this._totalTime / h >> 0, 0 !== this._cycle && this._cycle === this._totalTime / h && this._cycle--, this._time = this._totalTime - this._cycle * h, this._yoyo && 0 !== (1 & this._cycle) && (this._time = v - this._time), this._time > v?this._time = v:0 > this._time && (this._time = 0)), this._easeType?(l = this._time / v, u = this._easeType, p = this._easePower, (1 === u || 3 === u && l >= 0.5) && (l = 1 - l), 3 === u && (l *= 2), 1 === p?l *= l:2 === p?l *= l * l:3 === p?l *= l * l * l:4 === p && (l *= l * l * l * l), this.ratio = 1 === u?1 - l:2 === u?l:0.5 > this._time / v?l / 2:1 - l / 2):this.ratio = this._ease.getRatio(this._time / v)), m === this._time && !i && g === this._cycle))return (d !== this._totalTime && this._onUpdate && (e || this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || _)), void 0);if(!this._initted){if((this._init(), !this._initted || this._gc))return;if(!i && this._firstPT && (this.vars.lazy !== !1 && this._duration || this.vars.lazy && !this._duration))return (this._time = m, this._totalTime = d, this._rawPrevTime = y, this._cycle = g, a.lazyTweens.push(this), this._lazy = [t, e], void 0);this._time && !s?this.ratio = this._ease.getRatio(this._time / v):s && this._ease._calcEnd && (this.ratio = this._ease.getRatio(0 === this._time?0:1));}for(this._lazy !== !1 && (this._lazy = !1), this._active || !this._paused && this._time !== m && t >= 0 && (this._active = !0), 0 === d && (2 === this._initted && t > 0 && this._init(), this._startAt && (t >= 0?this._startAt.render(t, e, i):r || (r = "_dummyGS")), this.vars.onStart && (0 !== this._totalTime || 0 === v) && (e || this.vars.onStart.apply(this.vars.onStartScope || this, this.vars.onStartParams || _))), o = this._firstPT; o;) o.f?o.t[o.p](o.c * this.ratio + o.s):o.t[o.p] = o.c * this.ratio + o.s, o = o._next;this._onUpdate && (0 > t && this._startAt && this._startTime && this._startAt.render(t, e, i), e || (this._totalTime !== d || s) && this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || _)), this._cycle !== g && (e || this._gc || this.vars.onRepeat && this.vars.onRepeat.apply(this.vars.onRepeatScope || this, this.vars.onRepeatParams || _)), r && (!this._gc || i) && (0 > t && this._startAt && !this._onUpdate && this._startTime && this._startAt.render(t, e, i), s && (this._timeline.autoRemoveChildren && this._enabled(!1, !1), this._active = !1), !e && this.vars[r] && this.vars[r].apply(this.vars[r + "Scope"] || this, this.vars[r + "Params"] || _), 0 === v && this._rawPrevTime === n && f !== n && (this._rawPrevTime = 0));}, r.to = function(t, e, i){return new r(t, e, i);}, r.from = function(t, e, i){return (i.runBackwards = !0, i.immediateRender = 0 != i.immediateRender, new r(t, e, i));}, r.fromTo = function(t, e, i, s){return (s.startAt = i, s.immediateRender = 0 != s.immediateRender && 0 != i.immediateRender, new r(t, e, s));}, r.staggerTo = r.allTo = function(t, e, n, a, l, u, p){a = a || 0;var f, c, m, d, g=n.delay || 0, v=[], y=function y(){n.onComplete && n.onComplete.apply(n.onCompleteScope || this, arguments), l.apply(p || this, u || _);};for(h(t) || ("string" == typeof t && (t = i.selector(t) || t), o(t) && (t = s(t))), t = t || [], 0 > a && (t = s(t), t.reverse(), a *= -1), f = t.length - 1, m = 0; f >= m; m++) {c = {};for(d in n) c[d] = n[d];c.delay = g, m === f && l && (c.onComplete = y), v[m] = new r(t[m], e, c), g += a;}return v;}, r.staggerFrom = r.allFrom = function(t, e, i, s, n, a, o){return (i.runBackwards = !0, i.immediateRender = 0 != i.immediateRender, r.staggerTo(t, e, i, s, n, a, o));}, r.staggerFromTo = r.allFromTo = function(t, e, i, s, n, a, o, h){return (s.startAt = i, s.immediateRender = 0 != s.immediateRender && 0 != i.immediateRender, r.staggerTo(t, e, s, n, a, o, h));}, r.delayedCall = function(t, e, i, s, n){return new r(e, 0, {delay:t, onComplete:e, onCompleteParams:i, onCompleteScope:s, onReverseComplete:e, onReverseCompleteParams:i, onReverseCompleteScope:s, immediateRender:!1, useFrames:n, overwrite:0});}, r.set = function(t, e){return new r(t, 0, e);}, r.isTweening = function(t){return i.getTweensOf(t, !0).length > 0;};var u=(function(_u){function u(_x4, _x5){return _u.apply(this, arguments);}u.toString = function(){return _u.toString();};return u;})(function(t, e){for(var s=[], r=0, n=t._first; n;) n instanceof i?s[r++] = n:(e && (s[r++] = n), s = s.concat(u(n, e)), r = s.length), n = n._next;return s;}), p=r.getAllTweens = function(e){return u(t._rootTimeline, e).concat(u(t._rootFramesTimeline, e));};r.killAll = function(t, i, s, r){null == i && (i = !0), null == s && (s = !0);var n, a, o, h=p(0 != r), l=h.length, _=i && s && r;for(o = 0; l > o; o++) a = h[o], (_ || a instanceof e || (n = a.target === a.vars.onComplete) && s || i && !n) && (t?a.totalTime(a._reversed?0:a.totalDuration()):a._enabled(!1, !1));}, r.killChildTweensOf = function(t, e){if(null != t){var n, l, _, u, p, f=a.tweenLookup;if(("string" == typeof t && (t = i.selector(t) || t), o(t) && (t = s(t)), h(t)))for(u = t.length; --u > -1;) r.killChildTweensOf(t[u], e);else {n = [];for(_ in f) for(l = f[_].target.parentNode; l;) l === t && (n = n.concat(f[_].tweens)), l = l.parentNode;for(p = n.length, u = 0; p > u; u++) e && n[u].totalTime(n[u].totalDuration()), n[u]._enabled(!1, !1);}}};var f=function f(t, i, s, r){i = i !== !1, s = s !== !1, r = r !== !1;for(var n, a, o=p(r), h=i && s && r, l=o.length; --l > -1;) a = o[l], (h || a instanceof e || (n = a.target === a.vars.onComplete) && s || i && !n) && a.paused(t);};return (r.pauseAll = function(t, e, i){f(!0, t, e, i);}, r.resumeAll = function(t, e, i){f(!1, t, e, i);}, r.globalTimeScale = function(e){var s=t._rootTimeline, r=i.ticker.time;return arguments.length?(e = e || n, s._startTime = r - (r - s._startTime) * s._timeScale / e, s = t._rootFramesTimeline, r = i.ticker.frame, s._startTime = r - (r - s._startTime) * s._timeScale / e, s._timeScale = t._rootTimeline._timeScale = e, e):s._timeScale;}, l.progress = function(t){return arguments.length?this.totalTime(this.duration() * (this._yoyo && 0 !== (1 & this._cycle)?1 - t:t) + this._cycle * (this._duration + this._repeatDelay), !1):this._time / this.duration();}, l.totalProgress = function(t){return arguments.length?this.totalTime(this.totalDuration() * t, !1):this._totalTime / this.totalDuration();}, l.time = function(t, e){return arguments.length?(this._dirty && this.totalDuration(), t > this._duration && (t = this._duration), this._yoyo && 0 !== (1 & this._cycle)?t = this._duration - t + this._cycle * (this._duration + this._repeatDelay):0 !== this._repeat && (t += this._cycle * (this._duration + this._repeatDelay)), this.totalTime(t, e)):this._time;}, l.duration = function(e){return arguments.length?t.prototype.duration.call(this, e):this._duration;}, l.totalDuration = function(t){return arguments.length?-1 === this._repeat?this:this.duration((t - this._repeat * this._repeatDelay) / (this._repeat + 1)):(this._dirty && (this._totalDuration = -1 === this._repeat?999999999999:this._duration * (this._repeat + 1) + this._repeatDelay * this._repeat, this._dirty = !1), this._totalDuration);}, l.repeat = function(t){return arguments.length?(this._repeat = t, this._uncache(!0)):this._repeat;}, l.repeatDelay = function(t){return arguments.length?(this._repeatDelay = t, this._uncache(!0)):this._repeatDelay;}, l.yoyo = function(t){return arguments.length?(this._yoyo = t, this):this._yoyo;}, r);}, !0), _gsScope._gsDefine("TimelineLite", ["core.Animation", "core.SimpleTimeline", "TweenLite"], function(t, e, i){var s=function s(t){e.call(this, t), this._labels = {}, this.autoRemoveChildren = this.vars.autoRemoveChildren === !0, this.smoothChildTiming = this.vars.smoothChildTiming === !0, this._sortChildren = !0, this._onUpdate = this.vars.onUpdate;var i, s, r=this.vars;for(s in r) i = r[s], h(i) && -1 !== i.join("").indexOf("{self}") && (r[s] = this._swapSelfInParams(i));h(r.tweens) && this.add(r.tweens, 0, r.align, r.stagger);}, r=1e-10, n=i._internals, a=s._internals = {}, o=n.isSelector, h=n.isArray, l=n.lazyTweens, _=n.lazyRender, u=[], p=_gsScope._gsDefine.globals, f=function f(t){var e, i={};for(e in t) i[e] = t[e];return i;}, c=a.pauseCallback = function(t, e, i, s){var n, a=t._timeline, o=a._totalTime, h=t._startTime, l=0 > t._rawPrevTime || 0 === t._rawPrevTime && a._reversed, _=l?0:r, p=l?r:0;if(e || !this._forcingPlayhead){for(a.pause(h), n = t._prev; n && n._startTime === h;) n._rawPrevTime = p, n = n._prev;for(n = t._next; n && n._startTime === h;) n._rawPrevTime = _, n = n._next;e && e.apply(s || a, i || u), (this._forcingPlayhead || !a._paused) && a.seek(o);}}, m=function m(t){var e, i=[], s=t.length;for(e = 0; e !== s; i.push(t[e++]));return i;}, d=s.prototype = new e();return (s.version = "1.16.1", d.constructor = s, d.kill()._gc = d._forcingPlayhead = !1, d.to = function(t, e, s, r){var n=s.repeat && p.TweenMax || i;return e?this.add(new n(t, e, s), r):this.set(t, s, r);}, d.from = function(t, e, s, r){return this.add((s.repeat && p.TweenMax || i).from(t, e, s), r);}, d.fromTo = function(t, e, s, r, n){var a=r.repeat && p.TweenMax || i;return e?this.add(a.fromTo(t, e, s, r), n):this.set(t, r, n);}, d.staggerTo = function(t, e, r, n, a, h, l, _){var u, p=new s({onComplete:h, onCompleteParams:l, onCompleteScope:_, smoothChildTiming:this.smoothChildTiming});for("string" == typeof t && (t = i.selector(t) || t), t = t || [], o(t) && (t = m(t)), n = n || 0, 0 > n && (t = m(t), t.reverse(), n *= -1), u = 0; t.length > u; u++) r.startAt && (r.startAt = f(r.startAt)), p.to(t[u], e, f(r), u * n);return this.add(p, a);}, d.staggerFrom = function(t, e, i, s, r, n, a, o){return (i.immediateRender = 0 != i.immediateRender, i.runBackwards = !0, this.staggerTo(t, e, i, s, r, n, a, o));}, d.staggerFromTo = function(t, e, i, s, r, n, a, o, h){return (s.startAt = i, s.immediateRender = 0 != s.immediateRender && 0 != i.immediateRender, this.staggerTo(t, e, s, r, n, a, o, h));}, d.call = function(t, e, s, r){return this.add(i.delayedCall(0, t, e, s), r);}, d.set = function(t, e, s){return (s = this._parseTimeOrLabel(s, 0, !0), null == e.immediateRender && (e.immediateRender = s === this._time && !this._paused), this.add(new i(t, 0, e), s));}, s.exportRoot = function(t, e){t = t || {}, null == t.smoothChildTiming && (t.smoothChildTiming = !0);var r, n, a=new s(t), o=a._timeline;for(null == e && (e = !0), o._remove(a, !0), a._startTime = 0, a._rawPrevTime = a._time = a._totalTime = o._time, r = o._first; r;) n = r._next, e && r instanceof i && r.target === r.vars.onComplete || a.add(r, r._startTime - r._delay), r = n;return (o.add(a, 0), a);}, d.add = function(r, n, a, o){var l, _, u, p, f, c;if(("number" != typeof n && (n = this._parseTimeOrLabel(n, 0, !0, r)), !(r instanceof t))){if(r instanceof Array || r && r.push && h(r)){for(a = a || "normal", o = o || 0, l = n, _ = r.length, u = 0; _ > u; u++) h(p = r[u]) && (p = new s({tweens:p})), this.add(p, l), "string" != typeof p && "function" != typeof p && ("sequence" === a?l = p._startTime + p.totalDuration() / p._timeScale:"start" === a && (p._startTime -= p.delay())), l += o;return this._uncache(!0);}if("string" == typeof r)return this.addLabel(r, n);if("function" != typeof r)throw "Cannot add " + r + " into the timeline; it is not a tween, timeline, function, or string.";r = i.delayedCall(0, r);}if((e.prototype.add.call(this, r, n), (this._gc || this._time === this._duration) && !this._paused && this._duration < this.duration()))for(f = this, c = f.rawTime() > r._startTime; f._timeline;) c && f._timeline.smoothChildTiming?f.totalTime(f._totalTime, !0):f._gc && f._enabled(!0, !1), f = f._timeline;return this;}, d.remove = function(e){if(e instanceof t)return this._remove(e, !1);if(e instanceof Array || e && e.push && h(e)){for(var i=e.length; --i > -1;) this.remove(e[i]);return this;}return "string" == typeof e?this.removeLabel(e):this.kill(null, e);}, d._remove = function(t, i){e.prototype._remove.call(this, t, i);var s=this._last;return (s?this._time > s._startTime + s._totalDuration / s._timeScale && (this._time = this.duration(), this._totalTime = this._totalDuration):this._time = this._totalTime = this._duration = this._totalDuration = 0, this);}, d.append = function(t, e){return this.add(t, this._parseTimeOrLabel(null, e, !0, t));}, d.insert = d.insertMultiple = function(t, e, i, s){return this.add(t, e || 0, i, s);}, d.appendMultiple = function(t, e, i, s){return this.add(t, this._parseTimeOrLabel(null, e, !0, t), i, s);}, d.addLabel = function(t, e){return (this._labels[t] = this._parseTimeOrLabel(e), this);}, d.addPause = function(t, e, s, r){var n=i.delayedCall(0, c, ["{self}", e, s, r], this);return (n.data = "isPause", this.add(n, t));}, d.removeLabel = function(t){return (delete this._labels[t], this);}, d.getLabelTime = function(t){return null != this._labels[t]?this._labels[t]:-1;}, d._parseTimeOrLabel = function(e, i, s, r){var n;if(r instanceof t && r.timeline === this)this.remove(r);else if(r && (r instanceof Array || r.push && h(r)))for(n = r.length; --n > -1;) r[n] instanceof t && r[n].timeline === this && this.remove(r[n]);if("string" == typeof i)return this._parseTimeOrLabel(i, s && "number" == typeof e && null == this._labels[i]?e - this.duration():0, s);if((i = i || 0, "string" != typeof e || !isNaN(e) && null == this._labels[e]))null == e && (e = this.duration());else {if((n = e.indexOf("="), -1 === n))return null == this._labels[e]?s?this._labels[e] = this.duration() + i:i:this._labels[e] + i;i = parseInt(e.charAt(n - 1) + "1", 10) * Number(e.substr(n + 1)), e = n > 1?this._parseTimeOrLabel(e.substr(0, n - 1), 0, s):this.duration();}return Number(e) + i;}, d.seek = function(t, e){return this.totalTime("number" == typeof t?t:this._parseTimeOrLabel(t), e !== !1);}, d.stop = function(){return this.paused(!0);}, d.gotoAndPlay = function(t, e){return this.play(t, e);}, d.gotoAndStop = function(t, e){return this.pause(t, e);}, d.render = function(t, e, i){this._gc && this._enabled(!0, !1);var s, n, a, o, h, p=this._dirty?this.totalDuration():this._totalDuration, f=this._time, c=this._startTime, m=this._timeScale, d=this._paused;if(t >= p)this._totalTime = this._time = p, this._reversed || this._hasPausedChild() || (n = !0, o = "onComplete", h = !!this._timeline.autoRemoveChildren, 0 === this._duration && (0 === t || 0 > this._rawPrevTime || this._rawPrevTime === r) && this._rawPrevTime !== t && this._first && (h = !0, this._rawPrevTime > r && (o = "onReverseComplete"))), this._rawPrevTime = this._duration || !e || t || this._rawPrevTime === t?t:r, t = p + 0.0001;else if(1e-7 > t)if((this._totalTime = this._time = 0, (0 !== f || 0 === this._duration && this._rawPrevTime !== r && (this._rawPrevTime > 0 || 0 > t && this._rawPrevTime >= 0)) && (o = "onReverseComplete", n = this._reversed), 0 > t))this._active = !1, this._timeline.autoRemoveChildren && this._reversed?(h = n = !0, o = "onReverseComplete"):this._rawPrevTime >= 0 && this._first && (h = !0), this._rawPrevTime = t;else {if((this._rawPrevTime = this._duration || !e || t || this._rawPrevTime === t?t:r, 0 === t && n))for(s = this._first; s && 0 === s._startTime;) s._duration || (n = !1), s = s._next;t = 0, this._initted || (h = !0);}else this._totalTime = this._time = this._rawPrevTime = t;if(this._time !== f && this._first || i || h){if((this._initted || (this._initted = !0), this._active || !this._paused && this._time !== f && t > 0 && (this._active = !0), 0 === f && this.vars.onStart && 0 !== this._time && (e || this.vars.onStart.apply(this.vars.onStartScope || this, this.vars.onStartParams || u)), this._time >= f))for(s = this._first; s && (a = s._next, !this._paused || d);) (s._active || s._startTime <= this._time && !s._paused && !s._gc) && (s._reversed?s.render((s._dirty?s.totalDuration():s._totalDuration) - (t - s._startTime) * s._timeScale, e, i):s.render((t - s._startTime) * s._timeScale, e, i)), s = a;else for(s = this._last; s && (a = s._prev, !this._paused || d);) (s._active || f >= s._startTime && !s._paused && !s._gc) && (s._reversed?s.render((s._dirty?s.totalDuration():s._totalDuration) - (t - s._startTime) * s._timeScale, e, i):s.render((t - s._startTime) * s._timeScale, e, i)), s = a;this._onUpdate && (e || (l.length && _(), this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || u))), o && (this._gc || (c === this._startTime || m !== this._timeScale) && (0 === this._time || p >= this.totalDuration()) && (n && (l.length && _(), this._timeline.autoRemoveChildren && this._enabled(!1, !1), this._active = !1), !e && this.vars[o] && this.vars[o].apply(this.vars[o + "Scope"] || this, this.vars[o + "Params"] || u)));}}, d._hasPausedChild = function(){for(var t=this._first; t;) {if(t._paused || t instanceof s && t._hasPausedChild())return !0;t = t._next;}return !1;}, d.getChildren = function(t, e, s, r){r = r || -9999999999;for(var n=[], a=this._first, o=0; a;) r > a._startTime || (a instanceof i?e !== !1 && (n[o++] = a):(s !== !1 && (n[o++] = a), t !== !1 && (n = n.concat(a.getChildren(!0, e, s)), o = n.length))), a = a._next;return n;}, d.getTweensOf = function(t, e){var s, r, n=this._gc, a=[], o=0;for(n && this._enabled(!0, !0), s = i.getTweensOf(t), r = s.length; --r > -1;) (s[r].timeline === this || e && this._contains(s[r])) && (a[o++] = s[r]);return (n && this._enabled(!1, !0), a);}, d.recent = function(){return this._recent;}, d._contains = function(t){for(var e=t.timeline; e;) {if(e === this)return !0;e = e.timeline;}return !1;}, d.shiftChildren = function(t, e, i){i = i || 0;for(var s, r=this._first, n=this._labels; r;) r._startTime >= i && (r._startTime += t), r = r._next;if(e)for(s in n) n[s] >= i && (n[s] += t);return this._uncache(!0);}, d._kill = function(t, e){if(!t && !e)return this._enabled(!1, !1);for(var i=e?this.getTweensOf(e):this.getChildren(!0, !0, !1), s=i.length, r=!1; --s > -1;) i[s]._kill(t, e) && (r = !0);return r;}, d.clear = function(t){var e=this.getChildren(!1, !0, !0), i=e.length;for(this._time = this._totalTime = 0; --i > -1;) e[i]._enabled(!1, !1);return (t !== !1 && (this._labels = {}), this._uncache(!0));}, d.invalidate = function(){for(var e=this._first; e;) e.invalidate(), e = e._next;return t.prototype.invalidate.call(this);}, d._enabled = function(t, i){if(t === this._gc)for(var s=this._first; s;) s._enabled(t, !0), s = s._next;return e.prototype._enabled.call(this, t, i);}, d.totalTime = function(){this._forcingPlayhead = !0;var e=t.prototype.totalTime.apply(this, arguments);return (this._forcingPlayhead = !1, e);}, d.duration = function(t){return arguments.length?(0 !== this.duration() && 0 !== t && this.timeScale(this._duration / t), this):(this._dirty && this.totalDuration(), this._duration);}, d.totalDuration = function(t){if(!arguments.length){if(this._dirty){for(var e, i, s=0, r=this._last, n=999999999999; r;) e = r._prev, r._dirty && r.totalDuration(), r._startTime > n && this._sortChildren && !r._paused?this.add(r, r._startTime - r._delay):n = r._startTime, 0 > r._startTime && !r._paused && (s -= r._startTime, this._timeline.smoothChildTiming && (this._startTime += r._startTime / this._timeScale), this.shiftChildren(-r._startTime, !1, -9999999999), n = 0), i = r._startTime + r._totalDuration / r._timeScale, i > s && (s = i), r = e;this._duration = this._totalDuration = s, this._dirty = !1;}return this._totalDuration;}return (0 !== this.totalDuration() && 0 !== t && this.timeScale(this._totalDuration / t), this);}, d.paused = function(e){if(!e)for(var i=this._first, s=this._time; i;) i._startTime === s && "isPause" === i.data && (i._rawPrevTime = 0), i = i._next;return t.prototype.paused.apply(this, arguments);}, d.usesFrames = function(){for(var e=this._timeline; e._timeline;) e = e._timeline;return e === t._rootFramesTimeline;}, d.rawTime = function(){return this._paused?this._totalTime:(this._timeline.rawTime() - this._startTime) * this._timeScale;}, s);}, !0), _gsScope._gsDefine("TimelineMax", ["TimelineLite", "TweenLite", "easing.Ease"], function(t, e, i){var s=function s(e){t.call(this, e), this._repeat = this.vars.repeat || 0, this._repeatDelay = this.vars.repeatDelay || 0, this._cycle = 0, this._yoyo = this.vars.yoyo === !0, this._dirty = !0;}, r=1e-10, n=[], a=e._internals, o=a.lazyTweens, h=a.lazyRender, l=new i(null, null, 1, 0), _=s.prototype = new t();return (_.constructor = s, _.kill()._gc = !1, s.version = "1.16.1", _.invalidate = function(){return (this._yoyo = this.vars.yoyo === !0, this._repeat = this.vars.repeat || 0, this._repeatDelay = this.vars.repeatDelay || 0, this._uncache(!0), t.prototype.invalidate.call(this));}, _.addCallback = function(t, i, s, r){return this.add(e.delayedCall(0, t, s, r), i);}, _.removeCallback = function(t, e){if(t)if(null == e)this._kill(null, t);else for(var i=this.getTweensOf(t, !1), s=i.length, r=this._parseTimeOrLabel(e); --s > -1;) i[s]._startTime === r && i[s]._enabled(!1, !1);return this;}, _.removePause = function(e){return this.removeCallback(t._internals.pauseCallback, e);}, _.tweenTo = function(t, i){i = i || {};var s, r, a, o={ease:l, useFrames:this.usesFrames(), immediateRender:!1};for(r in i) o[r] = i[r];return (o.time = this._parseTimeOrLabel(t), s = Math.abs(Number(o.time) - this._time) / this._timeScale || 0.001, a = new e(this, s, o), o.onStart = function(){a.target.paused(!0), a.vars.time !== a.target.time() && s === a.duration() && a.duration(Math.abs(a.vars.time - a.target.time()) / a.target._timeScale), i.onStart && i.onStart.apply(i.onStartScope || a, i.onStartParams || n);}, a);}, _.tweenFromTo = function(t, e, i){i = i || {}, t = this._parseTimeOrLabel(t), i.startAt = {onComplete:this.seek, onCompleteParams:[t], onCompleteScope:this}, i.immediateRender = i.immediateRender !== !1;var s=this.tweenTo(e, i);return s.duration(Math.abs(s.vars.time - t) / this._timeScale || 0.001);}, _.render = function(t, e, i){this._gc && this._enabled(!0, !1);var s, a, l, _, u, p, f=this._dirty?this.totalDuration():this._totalDuration, c=this._duration, m=this._time, d=this._totalTime, g=this._startTime, v=this._timeScale, y=this._rawPrevTime, T=this._paused, w=this._cycle;if(t >= f)this._locked || (this._totalTime = f, this._cycle = this._repeat), this._reversed || this._hasPausedChild() || (a = !0, _ = "onComplete", u = !!this._timeline.autoRemoveChildren, 0 === this._duration && (0 === t || 0 > y || y === r) && y !== t && this._first && (u = !0, y > r && (_ = "onReverseComplete"))), this._rawPrevTime = this._duration || !e || t || this._rawPrevTime === t?t:r, this._yoyo && 0 !== (1 & this._cycle)?this._time = t = 0:(this._time = c, t = c + 0.0001);else if(1e-7 > t)if((this._locked || (this._totalTime = this._cycle = 0), this._time = 0, (0 !== m || 0 === c && y !== r && (y > 0 || 0 > t && y >= 0) && !this._locked) && (_ = "onReverseComplete", a = this._reversed), 0 > t))this._active = !1, this._timeline.autoRemoveChildren && this._reversed?(u = a = !0, _ = "onReverseComplete"):y >= 0 && this._first && (u = !0), this._rawPrevTime = t;else {if((this._rawPrevTime = c || !e || t || this._rawPrevTime === t?t:r, 0 === t && a))for(s = this._first; s && 0 === s._startTime;) s._duration || (a = !1), s = s._next;t = 0, this._initted || (u = !0);}else 0 === c && 0 > y && (u = !0), this._time = this._rawPrevTime = t, this._locked || (this._totalTime = t, 0 !== this._repeat && (p = c + this._repeatDelay, this._cycle = this._totalTime / p >> 0, 0 !== this._cycle && this._cycle === this._totalTime / p && this._cycle--, this._time = this._totalTime - this._cycle * p, this._yoyo && 0 !== (1 & this._cycle) && (this._time = c - this._time), this._time > c?(this._time = c, t = c + 0.0001):0 > this._time?this._time = t = 0:t = this._time));if(this._cycle !== w && !this._locked){var x=this._yoyo && 0 !== (1 & w), b=x === (this._yoyo && 0 !== (1 & this._cycle)), P=this._totalTime, S=this._cycle, k=this._rawPrevTime, R=this._time;if((this._totalTime = w * c, w > this._cycle?x = !x:this._totalTime += c, this._time = m, this._rawPrevTime = 0 === c?y - 0.0001:y, this._cycle = w, this._locked = !0, m = x?0:c, this.render(m, e, 0 === c), e || this._gc || this.vars.onRepeat && this.vars.onRepeat.apply(this.vars.onRepeatScope || this, this.vars.onRepeatParams || n), b && (m = x?c + 0.0001:-0.0001, this.render(m, !0, !1)), this._locked = !1, this._paused && !T))return;this._time = R, this._totalTime = P, this._cycle = S, this._rawPrevTime = k;}if(!(this._time !== m && this._first || i || u))return (d !== this._totalTime && this._onUpdate && (e || this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || n)), void 0);if((this._initted || (this._initted = !0), this._active || !this._paused && this._totalTime !== d && t > 0 && (this._active = !0), 0 === d && this.vars.onStart && 0 !== this._totalTime && (e || this.vars.onStart.apply(this.vars.onStartScope || this, this.vars.onStartParams || n)), this._time >= m))for(s = this._first; s && (l = s._next, !this._paused || T);) (s._active || s._startTime <= this._time && !s._paused && !s._gc) && (s._reversed?s.render((s._dirty?s.totalDuration():s._totalDuration) - (t - s._startTime) * s._timeScale, e, i):s.render((t - s._startTime) * s._timeScale, e, i)), s = l;else for(s = this._last; s && (l = s._prev, !this._paused || T);) (s._active || m >= s._startTime && !s._paused && !s._gc) && (s._reversed?s.render((s._dirty?s.totalDuration():s._totalDuration) - (t - s._startTime) * s._timeScale, e, i):s.render((t - s._startTime) * s._timeScale, e, i)), s = l;this._onUpdate && (e || (o.length && h(), this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || n))), _ && (this._locked || this._gc || (g === this._startTime || v !== this._timeScale) && (0 === this._time || f >= this.totalDuration()) && (a && (o.length && h(), this._timeline.autoRemoveChildren && this._enabled(!1, !1), this._active = !1), !e && this.vars[_] && this.vars[_].apply(this.vars[_ + "Scope"] || this, this.vars[_ + "Params"] || n)));}, _.getActive = function(t, e, i){null == t && (t = !0), null == e && (e = !0), null == i && (i = !1);var s, r, n=[], a=this.getChildren(t, e, i), o=0, h=a.length;for(s = 0; h > s; s++) r = a[s], r.isActive() && (n[o++] = r);return n;}, _.getLabelAfter = function(t){t || 0 !== t && (t = this._time);var e, i=this.getLabelsArray(), s=i.length;for(e = 0; s > e; e++) if(i[e].time > t)return i[e].name;return null;}, _.getLabelBefore = function(t){null == t && (t = this._time);for(var e=this.getLabelsArray(), i=e.length; --i > -1;) if(t > e[i].time)return e[i].name;return null;}, _.getLabelsArray = function(){var t, e=[], i=0;for(t in this._labels) e[i++] = {time:this._labels[t], name:t};return (e.sort(function(t, e){return t.time - e.time;}), e);}, _.progress = function(t, e){return arguments.length?this.totalTime(this.duration() * (this._yoyo && 0 !== (1 & this._cycle)?1 - t:t) + this._cycle * (this._duration + this._repeatDelay), e):this._time / this.duration();}, _.totalProgress = function(t, e){return arguments.length?this.totalTime(this.totalDuration() * t, e):this._totalTime / this.totalDuration();}, _.totalDuration = function(e){return arguments.length?-1 === this._repeat?this:this.duration((e - this._repeat * this._repeatDelay) / (this._repeat + 1)):(this._dirty && (t.prototype.totalDuration.call(this), this._totalDuration = -1 === this._repeat?999999999999:this._duration * (this._repeat + 1) + this._repeatDelay * this._repeat), this._totalDuration);}, _.time = function(t, e){return arguments.length?(this._dirty && this.totalDuration(), t > this._duration && (t = this._duration), this._yoyo && 0 !== (1 & this._cycle)?t = this._duration - t + this._cycle * (this._duration + this._repeatDelay):0 !== this._repeat && (t += this._cycle * (this._duration + this._repeatDelay)), this.totalTime(t, e)):this._time;}, _.repeat = function(t){return arguments.length?(this._repeat = t, this._uncache(!0)):this._repeat;}, _.repeatDelay = function(t){return arguments.length?(this._repeatDelay = t, this._uncache(!0)):this._repeatDelay;}, _.yoyo = function(t){return arguments.length?(this._yoyo = t, this):this._yoyo;}, _.currentLabel = function(t){return arguments.length?this.seek(t, !0):this.getLabelBefore(this._time + 1e-8);}, s);}, !0), (function(){var t=180 / Math.PI, e=[], i=[], s=[], r={}, n=_gsScope._gsDefine.globals, a=function a(t, e, i, s){this.a = t, this.b = e, this.c = i, this.d = s, this.da = s - t, this.ca = i - t, this.ba = e - t;}, o=",x,y,z,left,top,right,bottom,marginTop,marginLeft,marginRight,marginBottom,paddingLeft,paddingTop,paddingRight,paddingBottom,backgroundPosition,backgroundPosition_y,", h=function h(t, e, i, s){var r={a:t}, n={}, a={}, o={c:s}, h=(t + e) / 2, l=(e + i) / 2, _=(i + s) / 2, u=(h + l) / 2, p=(l + _) / 2, f=(p - u) / 8;return (r.b = h + (t - h) / 4, n.b = u + f, r.c = n.a = (r.b + n.b) / 2, n.c = a.a = (u + p) / 2, a.b = p - f, o.b = _ + (s - _) / 4, a.c = o.a = (a.b + o.b) / 2, [r, n, a, o]);}, l=function l(t, r, n, a, o){var l, _, u, p, f, c, m, d, g, v, y, T, w, x=t.length - 1, b=0, P=t[0].a;for(l = 0; x > l; l++) f = t[b], _ = f.a, u = f.d, p = t[b + 1].d, o?(y = e[l], T = i[l], w = 0.25 * (T + y) * r / (a?0.5:s[l] || 0.5), c = u - (u - _) * (a?0.5 * r:0 !== y?w / y:0), m = u + (p - u) * (a?0.5 * r:0 !== T?w / T:0), d = u - (c + ((m - c) * (3 * y / (y + T) + 0.5) / 4 || 0))):(c = u - 0.5 * (u - _) * r, m = u + 0.5 * (p - u) * r, d = u - (c + m) / 2), c += d, m += d, f.c = g = c, f.b = 0 !== l?P:P = f.a + 0.6 * (f.c - f.a), f.da = u - _, f.ca = g - _, f.ba = P - _, n?(v = h(_, P, g, u), t.splice(b, 1, v[0], v[1], v[2], v[3]), b += 4):b++, P = m;f = t[b], f.b = P, f.c = P + 0.4 * (f.d - P), f.da = f.d - f.a, f.ca = f.c - f.a, f.ba = P - f.a, n && (v = h(f.a, P, f.c, f.d), t.splice(b, 1, v[0], v[1], v[2], v[3]));}, _=function _(t, s, r, n){var o, h, l, _, u, p, f=[];if(n)for(t = [n].concat(t), h = t.length; --h > -1;) "string" == typeof (p = t[h][s]) && "=" === p.charAt(1) && (t[h][s] = n[s] + Number(p.charAt(0) + p.substr(2)));if((o = t.length - 2, 0 > o)){return (f[0] = new a(t[0][s], 0, 0, t[-1 > o?0:1][s]), f);}for(h = 0; o > h; h++) l = t[h][s], _ = t[h + 1][s], f[h] = new a(l, 0, 0, _), r && (u = t[h + 2][s], e[h] = (e[h] || 0) + (_ - l) * (_ - l), i[h] = (i[h] || 0) + (u - _) * (u - _));return (f[h] = new a(t[h][s], 0, 0, t[h + 1][s]), f);}, u=(function(_u2){function u(_x6, _x7, _x8, _x9, _x10, _x11){return _u2.apply(this, arguments);}u.toString = function(){return _u2.toString();};return u;})(function(t, n, a, h, u, p){var f, c, m, d, g, v, y, T, w={}, x=[], b=p || t[0];u = "string" == typeof u?"," + u + ",":o, null == n && (n = 1);for(c in t[0]) x.push(c);if(t.length > 1){for(T = t[t.length - 1], y = !0, f = x.length; --f > -1;) if((c = x[f], Math.abs(b[c] - T[c]) > 0.05)){y = !1;break;}y && (t = t.concat(), p && t.unshift(p), t.push(t[1]), p = t[t.length - 3]);}for(e.length = i.length = s.length = 0, f = x.length; --f > -1;) c = x[f], r[c] = -1 !== u.indexOf("," + c + ","), w[c] = _(t, c, r[c], p);for(f = e.length; --f > -1;) e[f] = Math.sqrt(e[f]), i[f] = Math.sqrt(i[f]);if(!h){for(f = x.length; --f > -1;) if(r[c])for(m = w[x[f]], v = m.length - 1, d = 0; v > d; d++) g = m[d + 1].da / i[d] + m[d].da / e[d], s[d] = (s[d] || 0) + g * g;for(f = s.length; --f > -1;) s[f] = Math.sqrt(s[f]);}for(f = x.length, d = a?4:1; --f > -1;) c = x[f], m = w[c], l(m, n, a, h, r[c]), y && (m.splice(0, d), m.splice(m.length - d, d));return w;}), p=function p(t, e, i){e = e || "soft";var s, r, n, o, h, l, _, u, p, f, c, m={}, d="cubic" === e?3:2, g="soft" === e, v=[];if((g && i && (t = [i].concat(t)), null == t || d + 1 > t.length))throw "invalid Bezier data";for(p in t[0]) v.push(p);for(l = v.length; --l > -1;) {for(p = v[l], m[p] = h = [], f = 0, u = t.length, _ = 0; u > _; _++) s = null == i?t[_][p]:"string" == typeof (c = t[_][p]) && "=" === c.charAt(1)?i[p] + Number(c.charAt(0) + c.substr(2)):Number(c), g && _ > 1 && u - 1 > _ && (h[f++] = (s + h[f - 2]) / 2), h[f++] = s;for(u = f - d + 1, f = 0, _ = 0; u > _; _ += d) s = h[_], r = h[_ + 1], n = h[_ + 2], o = 2 === d?0:h[_ + 3], h[f++] = c = 3 === d?new a(s, r, n, o):new a(s, (2 * r + s) / 3, (2 * r + n) / 3, n);h.length = f;}return m;}, f=function f(t, e, i){for(var s, r, n, a, o, h, l, _, u, p, f, c=1 / i, m=t.length; --m > -1;) for(p = t[m], n = p.a, a = p.d - n, o = p.c - n, h = p.b - n, s = r = 0, _ = 1; i >= _; _++) l = c * _, u = 1 - l, s = r - (r = (l * l * a + 3 * u * (l * o + u * h)) * l), f = m * i + _ - 1, e[f] = (e[f] || 0) + s * s;}, c=function c(t, e){e = e >> 0 || 6;var i, s, r, n, a=[], o=[], h=0, l=0, _=e - 1, u=[], p=[];for(i in t) f(t[i], a, e);for(r = a.length, s = 0; r > s; s++) h += Math.sqrt(a[s]), n = s % e, p[n] = h, n === _ && (l += h, n = s / e >> 0, u[n] = p, o[n] = l, h = 0, p = []);return {length:l, lengths:o, segments:u};}, m=_gsScope._gsDefine.plugin({propName:"bezier", priority:-1, version:"1.3.4", API:2, global:!0, init:function init(t, e, i){this._target = t, e instanceof Array && (e = {values:e}), this._func = {}, this._round = {}, this._props = [], this._timeRes = null == e.timeResolution?6:parseInt(e.timeResolution, 10);var s, r, n, a, o, h=e.values || [], l={}, _=h[0], f=e.autoRotate || i.vars.orientToBezier;this._autoRotate = f?f instanceof Array?f:[["x", "y", "rotation", f === !0?0:Number(f) || 0]]:null;for(s in _) this._props.push(s);for(n = this._props.length; --n > -1;) s = this._props[n], this._overwriteProps.push(s), r = this._func[s] = "function" == typeof t[s], l[s] = r?t[s.indexOf("set") || "function" != typeof t["get" + s.substr(3)]?s:"get" + s.substr(3)]():parseFloat(t[s]), o || l[s] !== h[0][s] && (o = l);if((this._beziers = "cubic" !== e.type && "quadratic" !== e.type && "soft" !== e.type?u(h, isNaN(e.curviness)?1:e.curviness, !1, "thruBasic" === e.type, e.correlate, o):p(h, e.type, l), this._segCount = this._beziers[s].length, this._timeRes)){var m=c(this._beziers, this._timeRes);this._length = m.length, this._lengths = m.lengths, this._segments = m.segments, this._l1 = this._li = this._s1 = this._si = 0, this._l2 = this._lengths[0], this._curSeg = this._segments[0], this._s2 = this._curSeg[0], this._prec = 1 / this._curSeg.length;}if(f = this._autoRotate)for(this._initialRotations = [], f[0] instanceof Array || (this._autoRotate = f = [f]), n = f.length; --n > -1;) {for(a = 0; 3 > a; a++) s = f[n][a], this._func[s] = "function" == typeof t[s]?t[s.indexOf("set") || "function" != typeof t["get" + s.substr(3)]?s:"get" + s.substr(3)]:!1;s = f[n][2], this._initialRotations[n] = this._func[s]?this._func[s].call(this._target):this._target[s];}return (this._startRatio = i.vars.runBackwards?1:0, !0);}, set:function set(e){var i, s, r, n, a, o, h, l, _, u, p=this._segCount, f=this._func, c=this._target, m=e !== this._startRatio;if(this._timeRes){if((_ = this._lengths, u = this._curSeg, e *= this._length, r = this._li, e > this._l2 && p - 1 > r)){for(l = p - 1; l > r && e >= (this._l2 = _[++r]););this._l1 = _[r - 1], this._li = r, this._curSeg = u = this._segments[r], this._s2 = u[this._s1 = this._si = 0];}else if(this._l1 > e && r > 0){for(; r > 0 && (this._l1 = _[--r]) >= e;);0 === r && this._l1 > e?this._l1 = 0:r++, this._l2 = _[r], this._li = r, this._curSeg = u = this._segments[r], this._s1 = u[(this._si = u.length - 1) - 1] || 0, this._s2 = u[this._si];}if((i = r, e -= this._l1, r = this._si, e > this._s2 && u.length - 1 > r)){for(l = u.length - 1; l > r && e >= (this._s2 = u[++r]););this._s1 = u[r - 1], this._si = r;}else if(this._s1 > e && r > 0){for(; r > 0 && (this._s1 = u[--r]) >= e;);0 === r && this._s1 > e?this._s1 = 0:r++, this._s2 = u[r], this._si = r;}o = (r + (e - this._s1) / (this._s2 - this._s1)) * this._prec;}else i = 0 > e?0:e >= 1?p - 1:p * e >> 0, o = (e - i * (1 / p)) * p;for(s = 1 - o, r = this._props.length; --r > -1;) n = this._props[r], a = this._beziers[n][i], h = (o * o * a.da + 3 * s * (o * a.ca + s * a.ba)) * o + a.a, this._round[n] && (h = Math.round(h)), f[n]?c[n](h):c[n] = h;if(this._autoRotate){var d, g, v, y, T, w, x, b=this._autoRotate;for(r = b.length; --r > -1;) n = b[r][2], w = b[r][3] || 0, x = b[r][4] === !0?1:t, a = this._beziers[b[r][0]], d = this._beziers[b[r][1]], a && d && (a = a[i], d = d[i], g = a.a + (a.b - a.a) * o, y = a.b + (a.c - a.b) * o, g += (y - g) * o, y += (a.c + (a.d - a.c) * o - y) * o, v = d.a + (d.b - d.a) * o, T = d.b + (d.c - d.b) * o, v += (T - v) * o, T += (d.c + (d.d - d.c) * o - T) * o, h = m?Math.atan2(T - v, y - g) * x + w:this._initialRotations[r], f[n]?c[n](h):c[n] = h);}}}), d=m.prototype;m.bezierThrough = u, m.cubicToQuadratic = h, m._autoCSS = !0, m.quadraticToCubic = function(t, e, i){return new a(t, (2 * e + t) / 3, (2 * e + i) / 3, i);}, m._cssRegister = function(){var t=n.CSSPlugin;if(t){var e=t._internals, i=e._parseToProxy, s=e._setPluginRatio, r=e.CSSPropTween;e._registerComplexSpecialProp("bezier", {parser:function parser(t, e, n, a, o, h){e instanceof Array && (e = {values:e}), h = new m();var l, _, u, p=e.values, f=p.length - 1, c=[], d={};if(0 > f){return o;}for(l = 0; f >= l; l++) u = i(t, p[l], a, o, h, f !== l), c[l] = u.end;for(_ in e) d[_] = e[_];return (d.values = c, o = new r(t, "bezier", 0, 0, u.pt, 2), o.data = u, o.plugin = h, o.setRatio = s, 0 === d.autoRotate && (d.autoRotate = !0), !d.autoRotate || d.autoRotate instanceof Array || (l = d.autoRotate === !0?0:Number(d.autoRotate), d.autoRotate = null != u.end.left?[["left", "top", "rotation", l, !1]]:null != u.end.x?[["x", "y", "rotation", l, !1]]:!1), d.autoRotate && (a._transform || a._enableTransforms(!1), u.autoRotate = a._target._gsTransform), h._onInitTween(u.proxy, d, a._tween), o);}});}}, d._roundProps = function(t, e){for(var i=this._overwriteProps, s=i.length; --s > -1;) (t[i[s]] || t.bezier || t.bezierThrough) && (this._round[i[s]] = e);}, d._kill = function(t){var e, i, s=this._props;for(e in this._beziers) if(e in t)for(delete this._beziers[e], delete this._func[e], i = s.length; --i > -1;) s[i] === e && s.splice(i, 1);return this._super._kill.call(this, t);};})(), _gsScope._gsDefine("plugins.CSSPlugin", ["plugins.TweenPlugin", "TweenLite"], function(t, e){var i, s, r, n, a=(function(_a){function a(){return _a.apply(this, arguments);}a.toString = function(){return _a.toString();};return a;})(function(){t.call(this, "css"), this._overwriteProps.length = 0, this.setRatio = a.prototype.setRatio;}), o=_gsScope._gsDefine.globals, h={}, l=a.prototype = new t("css");l.constructor = a, a.version = "1.16.1", a.API = 2, a.defaultTransformPerspective = 0, a.defaultSkewType = "compensated", l = "px", a.suffixMap = {top:l, right:l, bottom:l, left:l, width:l, height:l, fontSize:l, padding:l, margin:l, perspective:l, lineHeight:""};var _, u, p, f, c, m, d=/(?:\d|\-\d|\.\d|\-\.\d)+/g, g=/(?:\d|\-\d|\.\d|\-\.\d|\+=\d|\-=\d|\+=.\d|\-=\.\d)+/g, v=/(?:\+=|\-=|\-|\b)[\d\-\.]+[a-zA-Z0-9]*(?:%|\b)/gi, y=/(?![+-]?\d*\.?\d+|[+-]|e[+-]\d+)[^0-9]/g, T=/(?:\d|\-|\+|=|#|\.)*/g, w=/opacity *= *([^)]*)/i, x=/opacity:([^;]*)/i, b=/alpha\(opacity *=.+?\)/i, P=/^(rgb|hsl)/, S=/([A-Z])/g, k=/-([a-z])/gi, R=/(^(?:url\(\"|url\())|(?:(\"\))$|\)$)/gi, A=function A(t, e){return e.toUpperCase();}, O=/(?:Left|Right|Width)/i, C=/(M11|M12|M21|M22)=[\d\-\.e]+/gi, D=/progid\:DXImageTransform\.Microsoft\.Matrix\(.+?\)/i, M=/,(?=[^\)]*(?:\(|$))/gi, z=Math.PI / 180, I=180 / Math.PI, F={}, E=document, N=function N(t){return E.createElementNS?E.createElementNS("http://www.w3.org/1999/xhtml", t):E.createElement(t);}, L=N("div"), X=N("img"), U=a._internals = {_specialProps:h}, Y=navigator.userAgent, j=(function(){var t=Y.indexOf("Android"), e=N("a");return (p = -1 !== Y.indexOf("Safari") && -1 === Y.indexOf("Chrome") && (-1 === t || Number(Y.substr(t + 8, 1)) > 3), c = p && 6 > Number(Y.substr(Y.indexOf("Version/") + 8, 1)), f = -1 !== Y.indexOf("Firefox"), (/MSIE ([0-9]{1,}[\.0-9]{0,})/.exec(Y) || /Trident\/.*rv:([0-9]{1,}[\.0-9]{0,})/.exec(Y)) && (m = parseFloat(RegExp.$1)), e?(e.style.cssText = "top:1px;opacity:.55;", /^0.55/.test(e.style.opacity)):!1);})(), B=function B(t){return w.test("string" == typeof t?t:(t.currentStyle?t.currentStyle.filter:t.style.filter) || "")?parseFloat(RegExp.$1) / 100:1;}, q=function q(t){window.console && console.log(t);}, V="", G="", W=function W(t, e){e = e || L;var i, s, r=e.style;if(void 0 !== r[t]){return t;}for(t = t.charAt(0).toUpperCase() + t.substr(1), i = ["O", "Moz", "ms", "Ms", "Webkit"], s = 5; --s > -1 && void 0 === r[i[s] + t];);return s >= 0?(G = 3 === s?"ms":i[s], V = "-" + G.toLowerCase() + "-", G + t):null;}, Z=E.defaultView?E.defaultView.getComputedStyle:function(){}, Q=a.getStyle = function(t, e, i, s, r){var n;return j || "opacity" !== e?(!s && t.style[e]?n = t.style[e]:(i = i || Z(t))?n = i[e] || i.getPropertyValue(e) || i.getPropertyValue(e.replace(S, "-$1").toLowerCase()):t.currentStyle && (n = t.currentStyle[e]), null == r || n && "none" !== n && "auto" !== n && "auto auto" !== n?n:r):B(t);}, $=U.convertToPixels = function(t, i, s, r, n){if("px" === r || !r)return s;if("auto" === r || !s)return 0;var o, h, l, _=O.test(i), u=t, p=L.style, f=0 > s;if((f && (s = -s), "%" === r && -1 !== i.indexOf("border")))o = s / 100 * (_?t.clientWidth:t.clientHeight);else {if((p.cssText = "border:0 solid red;position:" + Q(t, "position") + ";line-height:0;", "%" !== r && u.appendChild))p[_?"borderLeftWidth":"borderTopWidth"] = s + r;else {if((u = t.parentNode || E.body, h = u._gsCache, l = e.ticker.frame, h && _ && h.time === l))return h.width * s / 100;p[_?"width":"height"] = s + r;}u.appendChild(L), o = parseFloat(L[_?"offsetWidth":"offsetHeight"]), u.removeChild(L), _ && "%" === r && a.cacheWidths !== !1 && (h = u._gsCache = u._gsCache || {}, h.time = l, h.width = 100 * (o / s)), 0 !== o || n || (o = $(t, i, s, r, !0));}return f?-o:o;}, H=U.calculateOffset = function(t, e, i){if("absolute" !== Q(t, "position", i))return 0;var s="left" === e?"Left":"Top", r=Q(t, "margin" + s, i);return t["offset" + s] - ($(t, e, parseFloat(r), r.replace(T, "")) || 0);}, K=function K(t, e){var i, s, r, n={};if(e = e || Z(t, null))if(i = e.length)for(; --i > -1;) r = e[i], (-1 === r.indexOf("-transform") || be === r) && (n[r.replace(k, A)] = e.getPropertyValue(r));else for(i in e) (-1 === i.indexOf("Transform") || xe === i) && (n[i] = e[i]);else if(e = t.currentStyle || t.style)for(i in e) "string" == typeof i && void 0 === n[i] && (n[i.replace(k, A)] = e[i]);return (j || (n.opacity = B(t)), s = Me(t, e, !1), n.rotation = s.rotation, n.skewX = s.skewX, n.scaleX = s.scaleX, n.scaleY = s.scaleY, n.x = s.x, n.y = s.y, Se && (n.z = s.z, n.rotationX = s.rotationX, n.rotationY = s.rotationY, n.scaleZ = s.scaleZ), n.filters && delete n.filters, n);}, J=function J(t, e, i, s, r){var n, a, o, h={}, l=t.style;for(a in i) "cssText" !== a && "length" !== a && isNaN(a) && (e[a] !== (n = i[a]) || r && r[a]) && -1 === a.indexOf("Origin") && ("number" == typeof n || "string" == typeof n) && (h[a] = "auto" !== n || "left" !== a && "top" !== a?"" !== n && "auto" !== n && "none" !== n || "string" != typeof e[a] || "" === e[a].replace(y, "")?n:0:H(t, a), void 0 !== l[a] && (o = new fe(l, a, l[a], o)));if(s)for(a in s) "className" !== a && (h[a] = s[a]);return {difs:h, firstMPT:o};}, te={width:["Left", "Right"], height:["Top", "Bottom"]}, ee=["marginLeft", "marginRight", "marginTop", "marginBottom"], ie=function ie(t, e, i){var s=parseFloat("width" === e?t.offsetWidth:t.offsetHeight), r=te[e], n=r.length;for(i = i || Z(t, null); --n > -1;) s -= parseFloat(Q(t, "padding" + r[n], i, !0)) || 0, s -= parseFloat(Q(t, "border" + r[n] + "Width", i, !0)) || 0;return s;}, se=function se(t, e){(null == t || "" === t || "auto" === t || "auto auto" === t) && (t = "0 0");var i=t.split(" "), s=-1 !== t.indexOf("left")?"0%":-1 !== t.indexOf("right")?"100%":i[0], r=-1 !== t.indexOf("top")?"0%":-1 !== t.indexOf("bottom")?"100%":i[1];return (null == r?r = "center" === s?"50%":"0":"center" === r && (r = "50%"), ("center" === s || isNaN(parseFloat(s)) && -1 === (s + "").indexOf("=")) && (s = "50%"), t = s + " " + r + (i.length > 2?" " + i[2]:""), e && (e.oxp = -1 !== s.indexOf("%"), e.oyp = -1 !== r.indexOf("%"), e.oxr = "=" === s.charAt(1), e.oyr = "=" === r.charAt(1), e.ox = parseFloat(s.replace(y, "")), e.oy = parseFloat(r.replace(y, "")), e.v = t), e || t);}, re=function re(t, e){return "string" == typeof t && "=" === t.charAt(1)?parseInt(t.charAt(0) + "1", 10) * parseFloat(t.substr(2)):parseFloat(t) - parseFloat(e);}, ne=function ne(t, e){return null == t?e:"string" == typeof t && "=" === t.charAt(1)?parseInt(t.charAt(0) + "1", 10) * parseFloat(t.substr(2)) + e:parseFloat(t);}, ae=function ae(t, e, i, s){var r, n, a, o, h, l=0.000001;return (null == t?o = e:"number" == typeof t?o = t:(r = 360, n = t.split("_"), h = "=" === t.charAt(1), a = (h?parseInt(t.charAt(0) + "1", 10) * parseFloat(n[0].substr(2)):parseFloat(n[0])) * (-1 === t.indexOf("rad")?1:I) - (h?0:e), n.length && (s && (s[i] = e + a), -1 !== t.indexOf("short") && (a %= r, a !== a % (r / 2) && (a = 0 > a?a + r:a - r)), -1 !== t.indexOf("_cw") && 0 > a?a = (a + 9999999999 * r) % r - (0 | a / r) * r:-1 !== t.indexOf("ccw") && a > 0 && (a = (a - 9999999999 * r) % r - (0 | a / r) * r)), o = e + a), l > o && o > -l && (o = 0), o);}, oe={aqua:[0, 255, 255], lime:[0, 255, 0], silver:[192, 192, 192], black:[0, 0, 0], maroon:[128, 0, 0], teal:[0, 128, 128], blue:[0, 0, 255], navy:[0, 0, 128], white:[255, 255, 255], fuchsia:[255, 0, 255], olive:[128, 128, 0], yellow:[255, 255, 0], orange:[255, 165, 0], gray:[128, 128, 128], purple:[128, 0, 128], green:[0, 128, 0], red:[255, 0, 0], pink:[255, 192, 203], cyan:[0, 255, 255], transparent:[255, 255, 255, 0]}, he=function he(t, e, i){return (t = 0 > t?t + 1:t > 1?t - 1:t, 0 | 255 * (1 > 6 * t?e + 6 * (i - e) * t:0.5 > t?i:2 > 3 * t?e + 6 * (i - e) * (2 / 3 - t):e) + 0.5);}, le=a.parseColor = function(t){var e, i, s, r, n, a;return t && "" !== t?"number" == typeof t?[t >> 16, 255 & t >> 8, 255 & t]:("," === t.charAt(t.length - 1) && (t = t.substr(0, t.length - 1)), oe[t]?oe[t]:"#" === t.charAt(0)?(4 === t.length && (e = t.charAt(1), i = t.charAt(2), s = t.charAt(3), t = "#" + e + e + i + i + s + s), t = parseInt(t.substr(1), 16), [t >> 16, 255 & t >> 8, 255 & t]):"hsl" === t.substr(0, 3)?(t = t.match(d), r = Number(t[0]) % 360 / 360, n = Number(t[1]) / 100, a = Number(t[2]) / 100, i = 0.5 >= a?a * (n + 1):a + n - a * n, e = 2 * a - i, t.length > 3 && (t[3] = Number(t[3])), t[0] = he(r + 1 / 3, e, i), t[1] = he(r, e, i), t[2] = he(r - 1 / 3, e, i), t):(t = t.match(d) || oe.transparent, t[0] = Number(t[0]), t[1] = Number(t[1]), t[2] = Number(t[2]), t.length > 3 && (t[3] = Number(t[3])), t)):oe.black;}, _e="(?:\\b(?:(?:rgb|rgba|hsl|hsla)\\(.+?\\))|\\B#.+?\\b";for(l in oe) _e += "|" + l + "\\b";_e = RegExp(_e + ")", "gi");var ue=function ue(t, e, i, s){if(null == t){return function(t){return t;};}var r, n=e?(t.match(_e) || [""])[0]:"", a=t.split(n).join("").match(v) || [], o=t.substr(0, t.indexOf(a[0])), h=")" === t.charAt(t.length - 1)?")":"", l=-1 !== t.indexOf(" ")?" ":",", _=a.length, u=_ > 0?a[0].replace(d, ""):"";return _?r = e?function(t){var e, p, f, c;if("number" == typeof t)t += u;else if(s && M.test(t)){for(c = t.replace(M, "|").split("|"), f = 0; c.length > f; f++) c[f] = r(c[f]);return c.join(",");}if((e = (t.match(_e) || [n])[0], p = t.split(e).join("").match(v) || [], f = p.length, _ > f--))for(; _ > ++f;) p[f] = i?p[0 | (f - 1) / 2]:a[f];return o + p.join(l) + l + e + h + (-1 !== t.indexOf("inset")?" inset":"");}:function(t){var e, n, p;if("number" == typeof t)t += u;else if(s && M.test(t)){for(n = t.replace(M, "|").split("|"), p = 0; n.length > p; p++) n[p] = r(n[p]);return n.join(",");}if((e = t.match(v) || [], p = e.length, _ > p--))for(; _ > ++p;) e[p] = i?e[0 | (p - 1) / 2]:a[p];return o + e.join(l) + h;}:function(t){return t;};}, pe=function pe(t){return (t = t.split(","), function(e, i, s, r, n, a, o){var h, l=(i + "").split(" ");for(o = {}, h = 0; 4 > h; h++) o[t[h]] = l[h] = l[h] || l[(h - 1) / 2 >> 0];return r.parse(e, o, n, a);});}, fe=(U._setPluginRatio = function(t){this.plugin.setRatio(t);for(var e, i, s, r, n=this.data, a=n.proxy, o=n.firstMPT, h=0.000001; o;) e = a[o.v], o.r?e = Math.round(e):h > e && e > -h && (e = 0), o.t[o.p] = e, o = o._next;if((n.autoRotate && (n.autoRotate.rotation = a.rotation), 1 === t))for(o = n.firstMPT; o;) {if((i = o.t, i.type)){if(1 === i.type){for(r = i.xs0 + i.s + i.xs1, s = 1; i.l > s; s++) r += i["xn" + s] + i["xs" + (s + 1)];i.e = r;}}else i.e = i.s + i.xs0;o = o._next;}}, function(t, e, i, s, r){this.t = t, this.p = e, this.v = i, this.r = r, s && (s._prev = this, this._next = s);}), ce=(U._parseToProxy = function(t, e, i, s, r, n){var a, o, h, l, _, u=s, p={}, f={}, c=i._transform, m=F;for(i._transform = null, F = e, s = _ = i.parse(t, e, s, r), F = m, n && (i._transform = c, u && (u._prev = null, u._prev && (u._prev._next = null))); s && s !== u;) {if(1 >= s.type && (o = s.p, f[o] = s.s + s.c, p[o] = s.s, n || (l = new fe(s, "s", o, l, s.r), s.c = 0), 1 === s.type))for(a = s.l; --a > 0;) h = "xn" + a, o = s.p + "_" + h, f[o] = s.data[h], p[o] = s[h], n || (l = new fe(s, h, o, l, s.rxp[h]));s = s._next;}return {proxy:p, end:f, firstMPT:l, pt:_};}, U.CSSPropTween = function(t, e, s, r, a, o, h, l, _, u, p){this.t = t, this.p = e, this.s = s, this.c = r, this.n = h || e, t instanceof ce || n.push(this.n), this.r = l, this.type = o || 0, _ && (this.pr = _, i = !0), this.b = void 0 === u?s:u, this.e = void 0 === p?s + r:p, a && (this._next = a, a._prev = this);}), me=a.parseComplex = function(t, e, i, s, r, n, a, o, h, l){i = i || n || "", a = new ce(t, e, 0, 0, a, l?2:1, null, !1, o, i, s), s += "";var u, p, f, c, m, v, y, T, w, x, b, S, k=i.split(", ").join(",").split(" "), R=s.split(", ").join(",").split(" "), A=k.length, O=_ !== !1;for((-1 !== s.indexOf(",") || -1 !== i.indexOf(",")) && (k = k.join(" ").replace(M, ", ").split(" "), R = R.join(" ").replace(M, ", ").split(" "), A = k.length), A !== R.length && (k = (n || "").split(" "), A = k.length), a.plugin = h, a.setRatio = l, u = 0; A > u; u++) if((c = k[u], m = R[u], T = parseFloat(c), T || 0 === T))a.appendXtra("", T, re(m, T), m.replace(g, ""), O && -1 !== m.indexOf("px"), !0);else if(r && ("#" === c.charAt(0) || oe[c] || P.test(c)))S = "," === m.charAt(m.length - 1)?"),":")", c = le(c), m = le(m), w = c.length + m.length > 6, w && !j && 0 === m[3]?(a["xs" + a.l] += a.l?" transparent":"transparent", a.e = a.e.split(R[u]).join("transparent")):(j || (w = !1), a.appendXtra(w?"rgba(":"rgb(", c[0], m[0] - c[0], ",", !0, !0).appendXtra("", c[1], m[1] - c[1], ",", !0).appendXtra("", c[2], m[2] - c[2], w?",":S, !0), w && (c = 4 > c.length?1:c[3], a.appendXtra("", c, (4 > m.length?1:m[3]) - c, S, !1)));else if(v = c.match(d)){if((y = m.match(g), !y || y.length !== v.length))return a;for(f = 0, p = 0; v.length > p; p++) b = v[p], x = c.indexOf(b, f), a.appendXtra(c.substr(f, x - f), Number(b), re(y[p], b), "", O && "px" === c.substr(x + b.length, 2), 0 === p), f = x + b.length;a["xs" + a.l] += c.substr(f);}else a["xs" + a.l] += a.l?" " + c:c;if(-1 !== s.indexOf("=") && a.data){for(S = a.xs0 + a.data.s, u = 1; a.l > u; u++) S += a["xs" + u] + a.data["xn" + u];a.e = S + a["xs" + u];}return (a.l || (a.type = -1, a.xs0 = a.e), a.xfirst || a);}, de=9;for(l = ce.prototype, l.l = l.pr = 0; --de > 0;) l["xn" + de] = 0, l["xs" + de] = "";l.xs0 = "", l._next = l._prev = l.xfirst = l.data = l.plugin = l.setRatio = l.rxp = null, l.appendXtra = function(t, e, i, s, r, n){var a=this, o=a.l;return (a["xs" + o] += n && o?" " + t:t || "", i || 0 === o || a.plugin?(a.l++, a.type = a.setRatio?2:1, a["xs" + a.l] = s || "", o > 0?(a.data["xn" + o] = e + i, a.rxp["xn" + o] = r, a["xn" + o] = e, a.plugin || (a.xfirst = new ce(a, "xn" + o, e, i, a.xfirst || a, 0, a.n, r, a.pr), a.xfirst.xs0 = 0), a):(a.data = {s:e + i}, a.rxp = {}, a.s = e, a.c = i, a.r = r, a)):(a["xs" + o] += e + (s || ""), a));};var ge=function ge(t, e){e = e || {}, this.p = e.prefix?W(t) || t:t, h[t] = h[this.p] = this, this.format = e.formatter || ue(e.defaultValue, e.color, e.collapsible, e.multi), e.parser && (this.parse = e.parser), this.clrs = e.color, this.multi = e.multi, this.keyword = e.keyword, this.dflt = e.defaultValue, this.pr = e.priority || 0;}, ve=U._registerComplexSpecialProp = function(t, e, i){"object" != typeof e && (e = {parser:i});var s, r, n=t.split(","), a=e.defaultValue;for(i = i || [a], s = 0; n.length > s; s++) e.prefix = 0 === s && e.prefix, e.defaultValue = i[s] || a, r = new ge(n[s], e);}, ye=function ye(t){if(!h[t]){var e=t.charAt(0).toUpperCase() + t.substr(1) + "Plugin";ve(t, {parser:function parser(t, i, s, r, n, a, l){var _=o.com.greensock.plugins[e];return _?(_._cssRegister(), h[s].parse(t, i, s, r, n, a, l)):(q("Error: " + e + " js file not loaded."), n);}});}};l = ge.prototype, l.parseComplex = function(t, e, i, s, r, n){var a, o, h, l, _, u, p=this.keyword;if((this.multi && (M.test(i) || M.test(e)?(o = e.replace(M, "|").split("|"), h = i.replace(M, "|").split("|")):p && (o = [e], h = [i])), h)){for(l = h.length > o.length?h.length:o.length, a = 0; l > a; a++) e = o[a] = o[a] || this.dflt, i = h[a] = h[a] || this.dflt, p && (_ = e.indexOf(p), u = i.indexOf(p), _ !== u && (-1 === u?o[a] = o[a].split(p).join(""):-1 === _ && (o[a] += " " + p)));e = o.join(", "), i = h.join(", ");}return me(t, this.p, e, i, this.clrs, this.dflt, s, this.pr, r, n);}, l.parse = function(t, e, i, s, n, a){return this.parseComplex(t.style, this.format(Q(t, this.p, r, !1, this.dflt)), this.format(e), n, a);}, a.registerSpecialProp = function(t, e, i){ve(t, {parser:function parser(t, s, r, n, a, o){var h=new ce(t, r, 0, 0, a, 2, r, !1, i);return (h.plugin = o, h.setRatio = e(t, s, n._tween, r), h);}, priority:i});}, a.useSVGTransformAttr = p;var Te, we="scaleX,scaleY,scaleZ,x,y,z,skewX,skewY,rotation,rotationX,rotationY,perspective,xPercent,yPercent".split(","), xe=W("transform"), be=V + "transform", Pe=W("transformOrigin"), Se=null !== W("perspective"), ke=U.Transform = function(){this.perspective = parseFloat(a.defaultTransformPerspective) || 0, this.force3D = a.defaultForce3D !== !1 && Se?a.defaultForce3D || "auto":!1;}, Re=window.SVGElement, Ae=function Ae(t, e, i){var s, r=E.createElementNS("http://www.w3.org/2000/svg", t), n=/([a-z])([A-Z])/g;for(s in i) r.setAttributeNS(null, s.replace(n, "$1-$2").toLowerCase(), i[s]);return (e.appendChild(r), r);}, Oe=E.documentElement, Ce=(function(){var t, e, i, s=m || /Android/i.test(Y) && !window.chrome;return (E.createElementNS && !s && (t = Ae("svg", Oe), e = Ae("rect", t, {width:100, height:50, x:100}), i = e.getBoundingClientRect().width, e.style[Pe] = "50% 50%", e.style[xe] = "scaleX(0.5)", s = i === e.getBoundingClientRect().width && !(f && Se), Oe.removeChild(t)), s);})(), De=function De(t, e, i, s){var r, n;s && (n = s.split(" ")).length || (r = t.getBBox(), e = se(e).split(" "), n = [(-1 !== e[0].indexOf("%")?parseFloat(e[0]) / 100 * r.width:parseFloat(e[0])) + r.x, (-1 !== e[1].indexOf("%")?parseFloat(e[1]) / 100 * r.height:parseFloat(e[1])) + r.y]), i.xOrigin = parseFloat(n[0]), i.yOrigin = parseFloat(n[1]), t.setAttribute("data-svg-origin", n.join(" "));}, Me=U.getTransform = function(t, e, i, s){if(t._gsTransform && i && !s)return t._gsTransform;var n, o, h, l, _, u, p, f, c, m, d=i?t._gsTransform || new ke():new ke(), g=0 > d.scaleX, v=0.00002, y=100000, T=Se?parseFloat(Q(t, Pe, e, !1, "0 0 0").split(" ")[2]) || d.zOrigin || 0:0, w=parseFloat(a.defaultTransformPerspective) || 0;if((xe?o = Q(t, be, e, !0):t.currentStyle && (o = t.currentStyle.filter.match(C), o = o && 4 === o.length?[o[0].substr(4), Number(o[2].substr(4)), Number(o[1].substr(4)), o[3].substr(4), d.x || 0, d.y || 0].join(","):""), n = !o || "none" === o || "matrix(1, 0, 0, 1, 0, 0)" === o, d.svg = !!(Re && "function" == typeof t.getBBox && t.getCTM && (!t.parentNode || t.parentNode.getBBox && t.parentNode.getCTM)), d.svg && (n && -1 !== (t.style[xe] + "").indexOf("matrix") && (o = t.style[xe], n = !1), De(t, Q(t, Pe, r, !1, "50% 50%") + "", d, t.getAttribute("data-svg-origin")), Te = a.useSVGTransformAttr || Ce, h = t.getAttribute("transform"), n && h && -1 !== h.indexOf("matrix") && (o = h, n = 0)), !n)){for(h = (o || "").match(/(?:\-|\b)[\d\-\.e]+\b/gi) || [], l = h.length; --l > -1;) _ = Number(h[l]), h[l] = (u = _ - (_ |= 0))?(0 | u * y + (0 > u?-0.5:0.5)) / y + _:_;if(16 === h.length){var x, b, P, S, k, R=h[0], A=h[1], O=h[2], D=h[3], M=h[4], z=h[5], F=h[6], E=h[7], N=h[8], L=h[9], X=h[10], U=h[12], Y=h[13], j=h[14], B=h[11], q=Math.atan2(F, X);d.zOrigin && (j = -d.zOrigin, U = N * j - h[12], Y = L * j - h[13], j = X * j + d.zOrigin - h[14]), d.rotationX = q * I, q && (S = Math.cos(-q), k = Math.sin(-q), x = M * S + N * k, b = z * S + L * k, P = F * S + X * k, N = M * -k + N * S, L = z * -k + L * S, X = F * -k + X * S, B = E * -k + B * S, M = x, z = b, F = P), q = Math.atan2(N, X), d.rotationY = q * I, q && (S = Math.cos(-q), k = Math.sin(-q), x = R * S - N * k, b = A * S - L * k, P = O * S - X * k, L = A * k + L * S, X = O * k + X * S, B = D * k + B * S, R = x, A = b, O = P), q = Math.atan2(A, R), d.rotation = q * I, q && (S = Math.cos(-q), k = Math.sin(-q), R = R * S + M * k, b = A * S + z * k, z = A * -k + z * S, F = O * -k + F * S, A = b), d.rotationX && Math.abs(d.rotationX) + Math.abs(d.rotation) > 359.9 && (d.rotationX = d.rotation = 0, d.rotationY += 180), d.scaleX = (0 | Math.sqrt(R * R + A * A) * y + 0.5) / y, d.scaleY = (0 | Math.sqrt(z * z + L * L) * y + 0.5) / y, d.scaleZ = (0 | Math.sqrt(F * F + X * X) * y + 0.5) / y, d.skewX = 0, d.perspective = B?1 / (0 > B?-B:B):0, d.x = U, d.y = Y, d.z = j, d.svg && (d.x -= d.xOrigin - (d.xOrigin * R - d.yOrigin * M), d.y -= d.yOrigin - (d.yOrigin * A - d.xOrigin * z));}else if(!(Se && !s && h.length && d.x === h[4] && d.y === h[5] && (d.rotationX || d.rotationY) || void 0 !== d.x && "none" === Q(t, "display", e))){var V=h.length >= 6, G=V?h[0]:1, W=h[1] || 0, Z=h[2] || 0, $=V?h[3]:1;d.x = h[4] || 0, d.y = h[5] || 0, p = Math.sqrt(G * G + W * W), f = Math.sqrt($ * $ + Z * Z), c = G || W?Math.atan2(W, G) * I:d.rotation || 0, m = Z || $?Math.atan2(Z, $) * I + c:d.skewX || 0, Math.abs(m) > 90 && 270 > Math.abs(m) && (g?(p *= -1, m += 0 >= c?180:-180, c += 0 >= c?180:-180):(f *= -1, m += 0 >= m?180:-180)), d.scaleX = p, d.scaleY = f, d.rotation = c, d.skewX = m, Se && (d.rotationX = d.rotationY = d.z = 0, d.perspective = w, d.scaleZ = 1), d.svg && (d.x -= d.xOrigin - (d.xOrigin * G - d.yOrigin * W), d.y -= d.yOrigin - (d.yOrigin * $ - d.xOrigin * Z));}d.zOrigin = T;for(l in d) v > d[l] && d[l] > -v && (d[l] = 0);}return (i && (t._gsTransform = d, d.svg && (Te && t.style[xe]?Ee(t.style, xe):!Te && t.getAttribute("transform") && t.removeAttribute("transform"))), d);}, ze=function ze(t){var e, i, s=this.data, r=-s.rotation * z, n=r + s.skewX * z, a=100000, o=(0 | Math.cos(r) * s.scaleX * a) / a, h=(0 | Math.sin(r) * s.scaleX * a) / a, l=(0 | Math.sin(n) * -s.scaleY * a) / a, _=(0 | Math.cos(n) * s.scaleY * a) / a, u=this.t.style, p=this.t.currentStyle;if(p){i = h, h = -l, l = -i, e = p.filter, u.filter = "";var f, c, d=this.t.offsetWidth, g=this.t.offsetHeight, v="absolute" !== p.position, y="progid:DXImageTransform.Microsoft.Matrix(M11=" + o + ", M12=" + h + ", M21=" + l + ", M22=" + _, x=s.x + d * s.xPercent / 100, b=s.y + g * s.yPercent / 100;if((null != s.ox && (f = (s.oxp?0.01 * d * s.ox:s.ox) - d / 2, c = (s.oyp?0.01 * g * s.oy:s.oy) - g / 2, x += f - (f * o + c * h), b += c - (f * l + c * _)), v?(f = d / 2, c = g / 2, y += ", Dx=" + (f - (f * o + c * h) + x) + ", Dy=" + (c - (f * l + c * _) + b) + ")"):y += ", sizingMethod='auto expand')", u.filter = -1 !== e.indexOf("DXImageTransform.Microsoft.Matrix(")?e.replace(D, y):y + " " + e, (0 === t || 1 === t) && 1 === o && 0 === h && 0 === l && 1 === _ && (v && -1 === y.indexOf("Dx=0, Dy=0") || w.test(e) && 100 !== parseFloat(RegExp.$1) || -1 === e.indexOf("gradient(" && e.indexOf("Alpha")) && u.removeAttribute("filter")), !v)){var P, S, k, R=8 > m?1:-1;for(f = s.ieOffsetX || 0, c = s.ieOffsetY || 0, s.ieOffsetX = Math.round((d - ((0 > o?-o:o) * d + (0 > h?-h:h) * g)) / 2 + x), s.ieOffsetY = Math.round((g - ((0 > _?-_:_) * g + (0 > l?-l:l) * d)) / 2 + b), de = 0; 4 > de; de++) S = ee[de], P = p[S], i = -1 !== P.indexOf("px")?parseFloat(P):$(this.t, S, parseFloat(P), P.replace(T, "")) || 0, k = i !== s[S]?2 > de?-s.ieOffsetX:-s.ieOffsetY:2 > de?f - s.ieOffsetX:c - s.ieOffsetY, u[S] = (s[S] = Math.round(i - k * (0 === de || 2 === de?1:R))) + "px";}}}, Ie=U.set3DTransformRatio = U.setTransformRatio = function(t){var e, i, s, r, n, a, o, h, l, _, u, p, c, m, d, g, v, y, T, w, x, b, P, S=this.data, k=this.t.style, R=S.rotation, A=S.rotationX, O=S.rotationY, C=S.scaleX, D=S.scaleY, M=S.scaleZ, I=S.x, F=S.y, E=S.z, N=S.svg, L=S.perspective, X=S.force3D;if(!(((1 !== t && 0 !== t || "auto" !== X || this.tween._totalTime !== this.tween._totalDuration && this.tween._totalTime) && X || E || L || O || A) && (!Te || !N) && Se))return (R || S.skewX || N?(R *= z, b = S.skewX * z, P = 100000, e = Math.cos(R) * C, r = Math.sin(R) * C, i = Math.sin(R - b) * -D, n = Math.cos(R - b) * D, b && "simple" === S.skewType && (v = Math.tan(b), v = Math.sqrt(1 + v * v), i *= v, n *= v, S.skewY && (e *= v, r *= v)), N && (I += S.xOrigin - (S.xOrigin * e + S.yOrigin * i), F += S.yOrigin - (S.xOrigin * r + S.yOrigin * n), m = 0.000001, m > I && I > -m && (I = 0), m > F && F > -m && (F = 0)), T = (0 | e * P) / P + "," + (0 | r * P) / P + "," + (0 | i * P) / P + "," + (0 | n * P) / P + "," + I + "," + F + ")", N && Te?this.t.setAttribute("transform", "matrix(" + T):k[xe] = (S.xPercent || S.yPercent?"translate(" + S.xPercent + "%," + S.yPercent + "%) matrix(":"matrix(") + T):k[xe] = (S.xPercent || S.yPercent?"translate(" + S.xPercent + "%," + S.yPercent + "%) matrix(":"matrix(") + C + ",0,0," + D + "," + I + "," + F + ")", void 0);if((f && (m = 0.0001, m > C && C > -m && (C = M = 0.00002), m > D && D > -m && (D = M = 0.00002), !L || S.z || S.rotationX || S.rotationY || (L = 0)), R || S.skewX))R *= z, d = e = Math.cos(R), g = r = Math.sin(R), S.skewX && (R -= S.skewX * z, d = Math.cos(R), g = Math.sin(R), "simple" === S.skewType && (v = Math.tan(S.skewX * z), v = Math.sqrt(1 + v * v), d *= v, g *= v, S.skewY && (e *= v, r *= v))), i = -g, n = d;else {if(!(O || A || 1 !== M || L || N))return (k[xe] = (S.xPercent || S.yPercent?"translate(" + S.xPercent + "%," + S.yPercent + "%) translate3d(":"translate3d(") + I + "px," + F + "px," + E + "px)" + (1 !== C || 1 !== D?" scale(" + C + "," + D + ")":""), void 0);e = n = 1, i = r = 0;}l = 1, s = a = o = h = _ = u = 0, p = L?-1 / L:0, c = S.zOrigin, m = 0.000001, w = ",", x = "0", R = O * z, R && (d = Math.cos(R), g = Math.sin(R), o = -g, _ = p * -g, s = e * g, a = r * g, l = d, p *= d, e *= d, r *= d), R = A * z, R && (d = Math.cos(R), g = Math.sin(R), v = i * d + s * g, y = n * d + a * g, h = l * g, u = p * g, s = i * -g + s * d, a = n * -g + a * d, l *= d, p *= d, i = v, n = y), 1 !== M && (s *= M, a *= M, l *= M, p *= M), 1 !== D && (i *= D, n *= D, h *= D, u *= D), 1 !== C && (e *= C, r *= C, o *= C, _ *= C), (c || N) && (c && (I += s * -c, F += a * -c, E += l * -c + c), N && (I += S.xOrigin - (S.xOrigin * e + S.yOrigin * i), F += S.yOrigin - (S.xOrigin * r + S.yOrigin * n)), m > I && I > -m && (I = x), m > F && F > -m && (F = x), m > E && E > -m && (E = 0)), T = S.xPercent || S.yPercent?"translate(" + S.xPercent + "%," + S.yPercent + "%) matrix3d(":"matrix3d(", T += (m > e && e > -m?x:e) + w + (m > r && r > -m?x:r) + w + (m > o && o > -m?x:o), T += w + (m > _ && _ > -m?x:_) + w + (m > i && i > -m?x:i) + w + (m > n && n > -m?x:n), A || O?(T += w + (m > h && h > -m?x:h) + w + (m > u && u > -m?x:u) + w + (m > s && s > -m?x:s), T += w + (m > a && a > -m?x:a) + w + (m > l && l > -m?x:l) + w + (m > p && p > -m?x:p) + w):T += ",0,0,0,0,1,0,", T += I + w + F + w + E + w + (L?1 + -E / L:1) + ")", k[xe] = T;};l = ke.prototype, l.x = l.y = l.z = l.skewX = l.skewY = l.rotation = l.rotationX = l.rotationY = l.zOrigin = l.xPercent = l.yPercent = 0, l.scaleX = l.scaleY = l.scaleZ = 1, ve("transform,scale,scaleX,scaleY,scaleZ,x,y,z,rotation,rotationX,rotationY,rotationZ,skewX,skewY,shortRotation,shortRotationX,shortRotationY,shortRotationZ,transformOrigin,svgOrigin,transformPerspective,directionalRotation,parseTransform,force3D,skewType,xPercent,yPercent", {parser:function parser(t, e, i, s, n, o, h){if(s._lastParsedTransform === h){return n;}s._lastParsedTransform = h;var l, _, u, p, f, c, m, d=s._transform = Me(t, r, !0, h.parseTransform), g=t.style, v=0.000001, y=we.length, T=h, w={};if("string" == typeof T.transform && xe)u = L.style, u[xe] = T.transform, u.display = "block", u.position = "absolute", E.body.appendChild(L), l = Me(L, null, !1), E.body.removeChild(L);else if("object" == typeof T){if((l = {scaleX:ne(null != T.scaleX?T.scaleX:T.scale, d.scaleX), scaleY:ne(null != T.scaleY?T.scaleY:T.scale, d.scaleY), scaleZ:ne(T.scaleZ, d.scaleZ), x:ne(T.x, d.x), y:ne(T.y, d.y), z:ne(T.z, d.z), xPercent:ne(T.xPercent, d.xPercent), yPercent:ne(T.yPercent, d.yPercent), perspective:ne(T.transformPerspective, d.perspective)}, m = T.directionalRotation, null != m))if("object" == typeof m)for(u in m) T[u] = m[u];else T.rotation = m;"string" == typeof T.x && -1 !== T.x.indexOf("%") && (l.x = 0, l.xPercent = ne(T.x, d.xPercent)), "string" == typeof T.y && -1 !== T.y.indexOf("%") && (l.y = 0, l.yPercent = ne(T.y, d.yPercent)), l.rotation = ae("rotation" in T?T.rotation:"shortRotation" in T?T.shortRotation + "_short":"rotationZ" in T?T.rotationZ:d.rotation, d.rotation, "rotation", w), Se && (l.rotationX = ae("rotationX" in T?T.rotationX:"shortRotationX" in T?T.shortRotationX + "_short":d.rotationX || 0, d.rotationX, "rotationX", w), l.rotationY = ae("rotationY" in T?T.rotationY:"shortRotationY" in T?T.shortRotationY + "_short":d.rotationY || 0, d.rotationY, "rotationY", w)), l.skewX = null == T.skewX?d.skewX:ae(T.skewX, d.skewX), l.skewY = null == T.skewY?d.skewY:ae(T.skewY, d.skewY), (_ = l.skewY - d.skewY) && (l.skewX += _, l.rotation += _);}for(Se && null != T.force3D && (d.force3D = T.force3D, c = !0), d.skewType = T.skewType || d.skewType || a.defaultSkewType, f = d.force3D || d.z || d.rotationX || d.rotationY || l.z || l.rotationX || l.rotationY || l.perspective, f || null == T.scale || (l.scaleZ = 1); --y > -1;) i = we[y], p = l[i] - d[i], (p > v || -v > p || null != T[i] || null != F[i]) && (c = !0, n = new ce(d, i, d[i], p, n), i in w && (n.e = w[i]), n.xs0 = 0, n.plugin = o, s._overwriteProps.push(n.n));return (p = T.transformOrigin, d.svg && (p || T.svgOrigin) && (De(t, se(p), l, T.svgOrigin), n = new ce(d, "xOrigin", d.xOrigin, l.xOrigin - d.xOrigin, n, -1, "transformOrigin"), n.b = d.xOrigin, n.e = n.xs0 = l.xOrigin, n = new ce(d, "yOrigin", d.yOrigin, l.yOrigin - d.yOrigin, n, -1, "transformOrigin"), n.b = d.yOrigin, n.e = n.xs0 = l.yOrigin, p = Te?null:"0px 0px"), (p || Se && f && d.zOrigin) && (xe?(c = !0, i = Pe, p = (p || Q(t, i, r, !1, "50% 50%")) + "", n = new ce(g, i, 0, 0, n, -1, "transformOrigin"), n.b = g[i], n.plugin = o, Se?(u = d.zOrigin, p = p.split(" "), d.zOrigin = (p.length > 2 && (0 === u || "0px" !== p[2])?parseFloat(p[2]):u) || 0, n.xs0 = n.e = p[0] + " " + (p[1] || "50%") + " 0px", n = new ce(d, "zOrigin", 0, 0, n, -1, n.n), n.b = u, n.xs0 = n.e = d.zOrigin):n.xs0 = n.e = p):se(p + "", d)), c && (s._transformType = d.svg && Te || !f && 3 !== this._transformType?2:3), n);}, prefix:!0}), ve("boxShadow", {defaultValue:"0px 0px 0px 0px #999", prefix:!0, color:!0, multi:!0, keyword:"inset"}), ve("borderRadius", {defaultValue:"0px", parser:function parser(t, e, i, n, a){e = this.format(e);var o, h, l, _, u, p, f, c, m, d, g, v, y, T, w, x, b=["borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius"], P=t.style;for(m = parseFloat(t.offsetWidth), d = parseFloat(t.offsetHeight), o = e.split(" "), h = 0; b.length > h; h++) this.p.indexOf("border") && (b[h] = W(b[h])), u = _ = Q(t, b[h], r, !1, "0px"), -1 !== u.indexOf(" ") && (_ = u.split(" "), u = _[0], _ = _[1]), p = l = o[h], f = parseFloat(u), v = u.substr((f + "").length), y = "=" === p.charAt(1), y?(c = parseInt(p.charAt(0) + "1", 10), p = p.substr(2), c *= parseFloat(p), g = p.substr((c + "").length - (0 > c?1:0)) || ""):(c = parseFloat(p), g = p.substr((c + "").length)), "" === g && (g = s[i] || v), g !== v && (T = $(t, "borderLeft", f, v), w = $(t, "borderTop", f, v), "%" === g?(u = 100 * (T / m) + "%", _ = 100 * (w / d) + "%"):"em" === g?(x = $(t, "borderLeft", 1, "em"), u = T / x + "em", _ = w / x + "em"):(u = T + "px", _ = w + "px"), y && (p = parseFloat(u) + c + g, l = parseFloat(_) + c + g)), a = me(P, b[h], u + " " + _, p + " " + l, !1, "0px", a);return a;}, prefix:!0, formatter:ue("0px 0px 0px 0px", !1, !0)}), ve("backgroundPosition", {defaultValue:"0 0", parser:function parser(t, e, i, s, n, a){var o, h, l, _, u, p, f="background-position", c=r || Z(t, null), d=this.format((c?m?c.getPropertyValue(f + "-x") + " " + c.getPropertyValue(f + "-y"):c.getPropertyValue(f):t.currentStyle.backgroundPositionX + " " + t.currentStyle.backgroundPositionY) || "0 0"), g=this.format(e);if(-1 !== d.indexOf("%") != (-1 !== g.indexOf("%")) && (p = Q(t, "backgroundImage").replace(R, ""), p && "none" !== p)){for(o = d.split(" "), h = g.split(" "), X.setAttribute("src", p), l = 2; --l > -1;) d = o[l], _ = -1 !== d.indexOf("%"), _ !== (-1 !== h[l].indexOf("%")) && (u = 0 === l?t.offsetWidth - X.width:t.offsetHeight - X.height, o[l] = _?parseFloat(d) / 100 * u + "px":100 * (parseFloat(d) / u) + "%");d = o.join(" ");}return this.parseComplex(t.style, d, g, n, a);}, formatter:se}), ve("backgroundSize", {defaultValue:"0 0", formatter:se}), ve("perspective", {defaultValue:"0px", prefix:!0}), ve("perspectiveOrigin", {defaultValue:"50% 50%", prefix:!0}), ve("transformStyle", {prefix:!0}), ve("backfaceVisibility", {prefix:!0}), ve("userSelect", {prefix:!0}), ve("margin", {parser:pe("marginTop,marginRight,marginBottom,marginLeft")}), ve("padding", {parser:pe("paddingTop,paddingRight,paddingBottom,paddingLeft")}), ve("clip", {defaultValue:"rect(0px,0px,0px,0px)", parser:function parser(t, e, i, s, n, a){var o, h, l;return (9 > m?(h = t.currentStyle, l = 8 > m?" ":",", o = "rect(" + h.clipTop + l + h.clipRight + l + h.clipBottom + l + h.clipLeft + ")", e = this.format(e).split(",").join(l)):(o = this.format(Q(t, this.p, r, !1, this.dflt)), e = this.format(e)), this.parseComplex(t.style, o, e, n, a));}}), ve("textShadow", {defaultValue:"0px 0px 0px #999", color:!0, multi:!0}), ve("autoRound,strictUnits", {parser:function parser(t, e, i, s, r){return r;}}), ve("border", {defaultValue:"0px solid #000", parser:function parser(t, e, i, s, n, a){return this.parseComplex(t.style, this.format(Q(t, "borderTopWidth", r, !1, "0px") + " " + Q(t, "borderTopStyle", r, !1, "solid") + " " + Q(t, "borderTopColor", r, !1, "#000")), this.format(e), n, a);}, color:!0, formatter:function formatter(t){var e=t.split(" ");return e[0] + " " + (e[1] || "solid") + " " + (t.match(_e) || ["#000"])[0];}}), ve("borderWidth", {parser:pe("borderTopWidth,borderRightWidth,borderBottomWidth,borderLeftWidth")}), ve("float,cssFloat,styleFloat", {parser:function parser(t, e, i, s, r){var n=t.style, a="cssFloat" in n?"cssFloat":"styleFloat";return new ce(n, a, 0, 0, r, -1, i, !1, 0, n[a], e);}});var Fe=function Fe(t){var e, i=this.t, s=i.filter || Q(this.data, "filter") || "", r=0 | this.s + this.c * t;100 === r && (-1 === s.indexOf("atrix(") && -1 === s.indexOf("radient(") && -1 === s.indexOf("oader(")?(i.removeAttribute("filter"), e = !Q(this.data, "filter")):(i.filter = s.replace(b, ""), e = !0)), e || (this.xn1 && (i.filter = s = s || "alpha(opacity=" + r + ")"), -1 === s.indexOf("pacity")?0 === r && this.xn1 || (i.filter = s + " alpha(opacity=" + r + ")"):i.filter = s.replace(w, "opacity=" + r));};ve("opacity,alpha,autoAlpha", {defaultValue:"1", parser:function parser(t, e, i, s, n, a){var o=parseFloat(Q(t, "opacity", r, !1, "1")), h=t.style, l="autoAlpha" === i;return ("string" == typeof e && "=" === e.charAt(1) && (e = ("-" === e.charAt(0)?-1:1) * parseFloat(e.substr(2)) + o), l && 1 === o && "hidden" === Q(t, "visibility", r) && 0 !== e && (o = 0), j?n = new ce(h, "opacity", o, e - o, n):(n = new ce(h, "opacity", 100 * o, 100 * (e - o), n), n.xn1 = l?1:0, h.zoom = 1, n.type = 2, n.b = "alpha(opacity=" + n.s + ")", n.e = "alpha(opacity=" + (n.s + n.c) + ")", n.data = t, n.plugin = a, n.setRatio = Fe), l && (n = new ce(h, "visibility", 0, 0, n, -1, null, !1, 0, 0 !== o?"inherit":"hidden", 0 === e?"hidden":"inherit"), n.xs0 = "inherit", s._overwriteProps.push(n.n), s._overwriteProps.push(i)), n);}});var Ee=function Ee(t, e){e && (t.removeProperty?(("ms" === e.substr(0, 2) || "webkit" === e.substr(0, 6)) && (e = "-" + e), t.removeProperty(e.replace(S, "-$1").toLowerCase())):t.removeAttribute(e));}, Ne=function Ne(t){if((this.t._gsClassPT = this, 1 === t || 0 === t)){this.t.setAttribute("class", 0 === t?this.b:this.e);for(var e=this.data, i=this.t.style; e;) e.v?i[e.p] = e.v:Ee(i, e.p), e = e._next;1 === t && this.t._gsClassPT === this && (this.t._gsClassPT = null);}else this.t.getAttribute("class") !== this.e && this.t.setAttribute("class", this.e);};ve("className", {parser:function parser(t, e, s, n, a, o, h){var l, _, u, p, f, c=t.getAttribute("class") || "", m=t.style.cssText;if((a = n._classNamePT = new ce(t, s, 0, 0, a, 2), a.setRatio = Ne, a.pr = -11, i = !0, a.b = c, _ = K(t, r), u = t._gsClassPT)){for(p = {}, f = u.data; f;) p[f.p] = 1, f = f._next;u.setRatio(1);}return (t._gsClassPT = a, a.e = "=" !== e.charAt(1)?e:c.replace(RegExp("\\s*\\b" + e.substr(2) + "\\b"), "") + ("+" === e.charAt(0)?" " + e.substr(2):""), t.setAttribute("class", a.e), l = J(t, _, K(t), h, p), t.setAttribute("class", c), a.data = l.firstMPT, t.style.cssText = m, a = a.xfirst = n.parse(t, l.difs, a, o));}});var Le=function Le(t){if((1 === t || 0 === t) && this.data._totalTime === this.data._totalDuration && "isFromStart" !== this.data.data){var e, i, s, r, n, a=this.t.style, o=h.transform.parse;if("all" === this.e)a.cssText = "", r = !0;else for(e = this.e.split(" ").join("").split(","), s = e.length; --s > -1;) i = e[s], h[i] && (h[i].parse === o?r = !0:i = "transformOrigin" === i?Pe:h[i].p), Ee(a, i);r && (Ee(a, xe), n = this.t._gsTransform, n && (n.svg && this.t.removeAttribute("data-svg-origin"), delete this.t._gsTransform));}};for(ve("clearProps", {parser:function parser(t, e, s, r, n){return (n = new ce(t, s, 0, 0, n, 2), n.setRatio = Le, n.e = e, n.pr = -10, n.data = r._tween, i = !0, n);}}), l = "bezier,throwProps,physicsProps,physics2D".split(","), de = l.length; de--;) ye(l[de]);l = a.prototype, l._firstPT = l._lastParsedTransform = l._transform = null, l._onInitTween = function(t, e, o){if(!t.nodeType)return !1;this._target = t, this._tween = o, this._vars = e, _ = e.autoRound, i = !1, s = e.suffixMap || a.suffixMap, r = Z(t, ""), n = this._overwriteProps;var l, f, m, d, g, v, y, T, w, b=t.style;if((u && "" === b.zIndex && (l = Q(t, "zIndex", r), ("auto" === l || "" === l) && this._addLazySet(b, "zIndex", 0)), "string" == typeof e && (d = b.cssText, l = K(t, r), b.cssText = d + ";" + e, l = J(t, l, K(t)).difs, !j && x.test(e) && (l.opacity = parseFloat(RegExp.$1)), e = l, b.cssText = d), this._firstPT = f = e.className?h.className.parse(t, e.className, "className", this, null, null, e):this.parse(t, e, null), this._transformType)){for(w = 3 === this._transformType, xe?p && (u = !0, "" === b.zIndex && (y = Q(t, "zIndex", r), ("auto" === y || "" === y) && this._addLazySet(b, "zIndex", 0)), c && this._addLazySet(b, "WebkitBackfaceVisibility", this._vars.WebkitBackfaceVisibility || (w?"visible":"hidden"))):b.zoom = 1, m = f; m && m._next;) m = m._next;T = new ce(t, "transform", 0, 0, null, 2), this._linkCSSP(T, null, m), T.setRatio = xe?Ie:ze, T.data = this._transform || Me(t, r, !0), T.tween = o, T.pr = -1, n.pop();}if(i){for(; f;) {for(v = f._next, m = d; m && m.pr > f.pr;) m = m._next;(f._prev = m?m._prev:g)?f._prev._next = f:d = f, (f._next = m)?m._prev = f:g = f, f = v;}this._firstPT = d;}return !0;}, l.parse = function(t, e, i, n){var a, o, l, u, p, f, c, m, d, g, v=t.style;for(a in e) f = e[a], o = h[a], o?i = o.parse(t, f, a, this, i, n, e):(p = Q(t, a, r) + "", d = "string" == typeof f, "color" === a || "fill" === a || "stroke" === a || -1 !== a.indexOf("Color") || d && P.test(f)?(d || (f = le(f), f = (f.length > 3?"rgba(":"rgb(") + f.join(",") + ")"), i = me(v, a, p, f, !0, "transparent", i, 0, n)):!d || -1 === f.indexOf(" ") && -1 === f.indexOf(",")?(l = parseFloat(p), c = l || 0 === l?p.substr((l + "").length):"", ("" === p || "auto" === p) && ("width" === a || "height" === a?(l = ie(t, a, r), c = "px"):"left" === a || "top" === a?(l = H(t, a, r), c = "px"):(l = "opacity" !== a?0:1, c = "")), g = d && "=" === f.charAt(1), g?(u = parseInt(f.charAt(0) + "1", 10), f = f.substr(2), u *= parseFloat(f), m = f.replace(T, "")):(u = parseFloat(f), m = d?f.replace(T, ""):""), "" === m && (m = a in s?s[a]:c), f = u || 0 === u?(g?u + l:u) + m:e[a], c !== m && "" !== m && (u || 0 === u) && l && (l = $(t, a, l, c), "%" === m?(l /= $(t, a, 100, "%") / 100, e.strictUnits !== !0 && (p = l + "%")):"em" === m?l /= $(t, a, 1, "em"):"px" !== m && (u = $(t, a, u, m), m = "px"), g && (u || 0 === u) && (f = u + l + m)), g && (u += l), !l && 0 !== l || !u && 0 !== u?void 0 !== v[a] && (f || "NaN" != f + "" && null != f)?(i = new ce(v, a, u || l || 0, 0, i, -1, a, !1, 0, p, f), i.xs0 = "none" !== f || "display" !== a && -1 === a.indexOf("Style")?f:p):q("invalid " + a + " tween value: " + e[a]):(i = new ce(v, a, l, u - l, i, 0, a, _ !== !1 && ("px" === m || "zIndex" === a), 0, p, f), i.xs0 = m)):i = me(v, a, p, f, !0, null, i, 0, n)), n && i && !i.plugin && (i.plugin = n);return i;}, l.setRatio = function(t){var e, i, s, r=this._firstPT, n=0.000001;if(1 !== t || this._tween._time !== this._tween._duration && 0 !== this._tween._time)if(t || this._tween._time !== this._tween._duration && 0 !== this._tween._time || this._tween._rawPrevTime === -0.000001)for(; r;) {if((e = r.c * t + r.s, r.r?e = Math.round(e):n > e && e > -n && (e = 0), r.type))if(1 === r.type)if((s = r.l, 2 === s))r.t[r.p] = r.xs0 + e + r.xs1 + r.xn1 + r.xs2;else if(3 === s)r.t[r.p] = r.xs0 + e + r.xs1 + r.xn1 + r.xs2 + r.xn2 + r.xs3;else if(4 === s)r.t[r.p] = r.xs0 + e + r.xs1 + r.xn1 + r.xs2 + r.xn2 + r.xs3 + r.xn3 + r.xs4;else if(5 === s)r.t[r.p] = r.xs0 + e + r.xs1 + r.xn1 + r.xs2 + r.xn2 + r.xs3 + r.xn3 + r.xs4 + r.xn4 + r.xs5;else {for(i = r.xs0 + e + r.xs1, s = 1; r.l > s; s++) i += r["xn" + s] + r["xs" + (s + 1)];r.t[r.p] = i;}else -1 === r.type?r.t[r.p] = r.xs0:r.setRatio && r.setRatio(t);else r.t[r.p] = e + r.xs0;r = r._next;}else for(; r;) 2 !== r.type?r.t[r.p] = r.b:r.setRatio(t), r = r._next;else for(; r;) 2 !== r.type?r.t[r.p] = r.e:r.setRatio(t), r = r._next;}, l._enableTransforms = function(t){this._transform = this._transform || Me(this._target, r, !0), this._transformType = this._transform.svg && Te || !t && 3 !== this._transformType?2:3;};var Xe=function Xe(){this.t[this.p] = this.e, this.data._linkCSSP(this, this._next, null, !0);};l._addLazySet = function(t, e, i){var s=this._firstPT = new ce(t, e, 0, 0, this._firstPT, 2);s.e = i, s.setRatio = Xe, s.data = this;}, l._linkCSSP = function(t, e, i, s){return (t && (e && (e._prev = t), t._next && (t._next._prev = t._prev), t._prev?t._prev._next = t._next:this._firstPT === t && (this._firstPT = t._next, s = !0), i?i._next = t:s || null !== this._firstPT || (this._firstPT = t), t._next = e, t._prev = i), t);}, l._kill = function(e){var i, s, r, n=e;if(e.autoAlpha || e.alpha){n = {};for(s in e) n[s] = e[s];n.opacity = 1, n.autoAlpha && (n.visibility = 1);}return (e.className && (i = this._classNamePT) && (r = i.xfirst, r && r._prev?this._linkCSSP(r._prev, i._next, r._prev._prev):r === this._firstPT && (this._firstPT = i._next), i._next && this._linkCSSP(i._next, i._next._next, r._prev), this._classNamePT = null), t.prototype._kill.call(this, n));};var Ue=(function(_Ue){function Ue(_x12, _x13, _x14){return _Ue.apply(this, arguments);}Ue.toString = function(){return _Ue.toString();};return Ue;})(function(t, e, i){var s, r, n, a;if(t.slice)for(r = t.length; --r > -1;) Ue(t[r], e, i);else for(s = t.childNodes, r = s.length; --r > -1;) n = s[r], a = n.type, n.style && (e.push(K(n)), i && i.push(n)), 1 !== a && 9 !== a && 11 !== a || !n.childNodes.length || Ue(n, e, i);});return (a.cascadeTo = function(t, i, s){var r, n, a, o, h=e.to(t, i, s), l=[h], _=[], u=[], p=[], f=e._internals.reservedProps;for(t = h._targets || h.target, Ue(t, _, p), h.render(i, !0, !0), Ue(t, u), h.render(0, !0, !0), h._enabled(!0), r = p.length; --r > -1;) if((n = J(p[r], _[r], u[r]), n.firstMPT)){n = n.difs;for(a in s) f[a] && (n[a] = s[a]);o = {};for(a in n) o[a] = _[r][a];l.push(e.fromTo(p[r], i, o, n));}return l;}, t.activate([a]), a);}, !0), (function(){var t=_gsScope._gsDefine.plugin({propName:"roundProps", priority:-1, API:2, init:function init(t, e, i){return (this._tween = i, !0);}}), e=t.prototype;e._onInitAllProps = function(){for(var t, e, i, s=this._tween, r=s.vars.roundProps instanceof Array?s.vars.roundProps:s.vars.roundProps.split(","), n=r.length, a={}, o=s._propLookup.roundProps; --n > -1;) a[r[n]] = 1;for(n = r.length; --n > -1;) for(t = r[n], e = s._firstPT; e;) i = e._next, e.pg?e.t._roundProps(a, !0):e.n === t && (this._add(e.t, t, e.s, e.c), i && (i._prev = e._prev), e._prev?e._prev._next = i:s._firstPT === e && (s._firstPT = i), e._next = e._prev = null, s._propLookup[t] = o), e = i;return !1;}, e._add = function(t, e, i, s){this._addTween(t, e, i, i + s, e, !0), this._overwriteProps.push(e);};})(), _gsScope._gsDefine.plugin({propName:"attr", API:2, version:"0.3.3", init:function init(t, e){var i, s, r;if("function" != typeof t.setAttribute){return !1;}this._target = t, this._proxy = {}, this._start = {}, this._end = {};for(i in e) this._start[i] = this._proxy[i] = s = t.getAttribute(i), r = this._addTween(this._proxy, i, parseFloat(s), e[i], i), this._end[i] = r?r.s + r.c:e[i], this._overwriteProps.push(i);return !0;}, set:function set(t){this._super.setRatio.call(this, t);for(var e, i=this._overwriteProps, s=i.length, r=1 === t?this._end:t?this._proxy:this._start; --s > -1;) e = i[s], this._target.setAttribute(e, r[e] + "");}}), _gsScope._gsDefine.plugin({propName:"directionalRotation", version:"0.2.1", API:2, init:function init(t, e){"object" != typeof e && (e = {rotation:e}), this.finals = {};var i, s, r, n, a, o, h=e.useRadians === !0?2 * Math.PI:360, l=0.000001;for(i in e) "useRadians" !== i && (o = (e[i] + "").split("_"), s = o[0], r = parseFloat("function" != typeof t[i]?t[i]:t[i.indexOf("set") || "function" != typeof t["get" + i.substr(3)]?i:"get" + i.substr(3)]()), n = this.finals[i] = "string" == typeof s && "=" === s.charAt(1)?r + parseInt(s.charAt(0) + "1", 10) * Number(s.substr(2)):Number(s) || 0, a = n - r, o.length && (s = o.join("_"), -1 !== s.indexOf("short") && (a %= h, a !== a % (h / 2) && (a = 0 > a?a + h:a - h)), -1 !== s.indexOf("_cw") && 0 > a?a = (a + 9999999999 * h) % h - (0 | a / h) * h:-1 !== s.indexOf("ccw") && a > 0 && (a = (a - 9999999999 * h) % h - (0 | a / h) * h)), (a > l || -l > a) && (this._addTween(t, i, r, r + a, i), this._overwriteProps.push(i)));return !0;}, set:function set(t){var e;if(1 !== t)this._super.setRatio.call(this, t);else for(e = this._firstPT; e;) e.f?e.t[e.p](this.finals[e.p]):e.t[e.p] = this.finals[e.p], e = e._next;}})._autoCSS = !0, _gsScope._gsDefine("easing.Back", ["easing.Ease"], function(t){var e, i, s, r=_gsScope.GreenSockGlobals || _gsScope, n=r.com.greensock, a=2 * Math.PI, o=Math.PI / 2, h=n._class, l=function l(e, i){var s=h("easing." + e, function(){}, !0), r=s.prototype = new t();return (r.constructor = s, r.getRatio = i, s);}, _=t.register || function(){}, u=function u(t, e, i, s){var r=h("easing." + t, {easeOut:new e(), easeIn:new i(), easeInOut:new s()}, !0);return (_(r, t), r);}, p=function p(t, e, i){this.t = t, this.v = e, i && (this.next = i, i.prev = this, this.c = i.v - e, this.gap = i.t - t);}, f=function f(e, i){var s=h("easing." + e, function(t){this._p1 = t || 0 === t?t:1.70158, this._p2 = 1.525 * this._p1;}, !0), r=s.prototype = new t();return (r.constructor = s, r.getRatio = i, r.config = function(t){return new s(t);}, s);}, c=u("Back", f("BackOut", function(t){return (t -= 1) * t * ((this._p1 + 1) * t + this._p1) + 1;}), f("BackIn", function(t){return t * t * ((this._p1 + 1) * t - this._p1);}), f("BackInOut", function(t){return 1 > (t *= 2)?0.5 * t * t * ((this._p2 + 1) * t - this._p2):0.5 * ((t -= 2) * t * ((this._p2 + 1) * t + this._p2) + 2);})), m=h("easing.SlowMo", function(t, e, i){e = e || 0 === e?e:0.7, null == t?t = 0.7:t > 1 && (t = 1), this._p = 1 !== t?e:0, this._p1 = (1 - t) / 2, this._p2 = t, this._p3 = this._p1 + this._p2, this._calcEnd = i === !0;}, !0), d=m.prototype = new t();return (d.constructor = m, d.getRatio = function(t){var e=t + (0.5 - t) * this._p;return this._p1 > t?this._calcEnd?1 - (t = 1 - t / this._p1) * t:e - (t = 1 - t / this._p1) * t * t * t * e:t > this._p3?this._calcEnd?1 - (t = (t - this._p3) / this._p1) * t:e + (t - e) * (t = (t - this._p3) / this._p1) * t * t * t:this._calcEnd?1:e;}, m.ease = new m(0.7, 0.7), d.config = m.config = function(t, e, i){return new m(t, e, i);}, e = h("easing.SteppedEase", function(t){t = t || 1, this._p1 = 1 / t, this._p2 = t + 1;}, !0), d = e.prototype = new t(), d.constructor = e, d.getRatio = function(t){return (0 > t?t = 0:t >= 1 && (t = 0.999999999), (this._p2 * t >> 0) * this._p1);}, d.config = e.config = function(t){return new e(t);}, i = h("easing.RoughEase", function(e){e = e || {};for(var i, s, r, n, a, o, h=e.taper || "none", l=[], _=0, u=0 | (e.points || 20), f=u, c=e.randomize !== !1, m=e.clamp === !0, d=e.template instanceof t?e.template:null, g="number" == typeof e.strength?0.4 * e.strength:0.4; --f > -1;) i = c?Math.random():1 / u * f, s = d?d.getRatio(i):i, "none" === h?r = g:"out" === h?(n = 1 - i, r = n * n * g):"in" === h?r = i * i * g:0.5 > i?(n = 2 * i, r = 0.5 * n * n * g):(n = 2 * (1 - i), r = 0.5 * n * n * g), c?s += Math.random() * r - 0.5 * r:f % 2?s += 0.5 * r:s -= 0.5 * r, m && (s > 1?s = 1:0 > s && (s = 0)), l[_++] = {x:i, y:s};for(l.sort(function(t, e){return t.x - e.x;}), o = new p(1, 1, null), f = u; --f > -1;) a = l[f], o = new p(a.x, a.y, o);this._prev = new p(0, 0, 0 !== o.t?o:o.next);}, !0), d = i.prototype = new t(), d.constructor = i, d.getRatio = function(t){var e=this._prev;if(t > e.t){for(; e.next && t >= e.t;) e = e.next;e = e.prev;}else for(; e.prev && e.t >= t;) e = e.prev;return (this._prev = e, e.v + (t - e.t) / e.gap * e.c);}, d.config = function(t){return new i(t);}, i.ease = new i(), u("Bounce", l("BounceOut", function(t){return 1 / 2.75 > t?7.5625 * t * t:2 / 2.75 > t?7.5625 * (t -= 1.5 / 2.75) * t + 0.75:2.5 / 2.75 > t?7.5625 * (t -= 2.25 / 2.75) * t + 0.9375:7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;}), l("BounceIn", function(t){return 1 / 2.75 > (t = 1 - t)?1 - 7.5625 * t * t:2 / 2.75 > t?1 - (7.5625 * (t -= 1.5 / 2.75) * t + 0.75):2.5 / 2.75 > t?1 - (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375):1 - (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375);}), l("BounceInOut", function(t){var e=0.5 > t;return (t = e?1 - 2 * t:2 * t - 1, t = 1 / 2.75 > t?7.5625 * t * t:2 / 2.75 > t?7.5625 * (t -= 1.5 / 2.75) * t + 0.75:2.5 / 2.75 > t?7.5625 * (t -= 2.25 / 2.75) * t + 0.9375:7.5625 * (t -= 2.625 / 2.75) * t + 0.984375, e?0.5 * (1 - t):0.5 * t + 0.5);})), u("Circ", l("CircOut", function(t){return Math.sqrt(1 - (t -= 1) * t);}), l("CircIn", function(t){return -(Math.sqrt(1 - t * t) - 1);}), l("CircInOut", function(t){return 1 > (t *= 2)?-0.5 * (Math.sqrt(1 - t * t) - 1):0.5 * (Math.sqrt(1 - (t -= 2) * t) + 1);})), s = function(e, i, s){var r=h("easing." + e, function(t, e){this._p1 = t >= 1?t:1, this._p2 = (e || s) / (1 > t?t:1), this._p3 = this._p2 / a * (Math.asin(1 / this._p1) || 0), this._p2 = a / this._p2;}, !0), n=r.prototype = new t();return (n.constructor = r, n.getRatio = i, n.config = function(t, e){return new r(t, e);}, r);}, u("Elastic", s("ElasticOut", function(t){return this._p1 * Math.pow(2, -10 * t) * Math.sin((t - this._p3) * this._p2) + 1;}, 0.3), s("ElasticIn", function(t){return -(this._p1 * Math.pow(2, 10 * (t -= 1)) * Math.sin((t - this._p3) * this._p2));}, 0.3), s("ElasticInOut", function(t){return 1 > (t *= 2)?-0.5 * this._p1 * Math.pow(2, 10 * (t -= 1)) * Math.sin((t - this._p3) * this._p2):0.5 * this._p1 * Math.pow(2, -10 * (t -= 1)) * Math.sin((t - this._p3) * this._p2) + 1;}, 0.45)), u("Expo", l("ExpoOut", function(t){return 1 - Math.pow(2, -10 * t);}), l("ExpoIn", function(t){return Math.pow(2, 10 * (t - 1)) - 0.001;}), l("ExpoInOut", function(t){return 1 > (t *= 2)?0.5 * Math.pow(2, 10 * (t - 1)):0.5 * (2 - Math.pow(2, -10 * (t - 1)));})), u("Sine", l("SineOut", function(t){return Math.sin(t * o);}), l("SineIn", function(t){return -Math.cos(t * o) + 1;}), l("SineInOut", function(t){return -0.5 * (Math.cos(Math.PI * t) - 1);})), h("easing.EaseLookup", {find:function find(e){return t.map[e];}}, !0), _(r.SlowMo, "SlowMo", "ease,"), _(i, "RoughEase", "ease,"), _(e, "SteppedEase", "ease,"), c);}, !0);}), _gsScope._gsDefine && _gsScope._gsQueue.pop()(), (function(t, e){"use strict";var i=t.GreenSockGlobals = t.GreenSockGlobals || t;if(!i.TweenLite){var s, r, n, a, o, h=function h(t){var e, s=t.split("."), r=i;for(e = 0; s.length > e; e++) r[s[e]] = r = r[s[e]] || {};return r;}, l=h("com.greensock"), _=1e-10, u=function u(t){var e, i=[], s=t.length;for(e = 0; e !== s; i.push(t[e++]));return i;}, p=function p(){}, f=(function(){var t=Object.prototype.toString, e=t.call([]);return function(i){return null != i && (i instanceof Array || "object" == typeof i && !!i.push && t.call(i) === e);};})(), c={}, m=(function(_m){function m(_x15, _x16, _x17, _x18){return _m.apply(this, arguments);}m.toString = function(){return _m.toString();};return m;})(function(s, r, n, a){this.sc = c[s]?c[s].sc:[], c[s] = this, this.gsClass = null, this.func = n;var o=[];this.check = function(l){for(var _, u, p, f, d=r.length, g=d; --d > -1;) (_ = c[r[d]] || new m(r[d], [])).gsClass?(o[d] = _.gsClass, g--):l && _.sc.push(this);if(0 === g && n)for(u = ("com.greensock." + s).split("."), p = u.pop(), f = h(u.join("."))[p] = this.gsClass = n.apply(n, o), a && (i[p] = f, "function" == typeof define && define.amd?define((t.GreenSockAMDPath?t.GreenSockAMDPath + "/":"") + s.split(".").pop(), [], function(){return f;}):s === e && "undefined" != typeof module && module.exports && (module.exports = f)), d = 0; this.sc.length > d; d++) this.sc[d].check();}, this.check(!0);}), d=t._gsDefine = function(t, e, i, s){return new m(t, e, i, s);}, g=l._class = function(t, e, i){return (e = e || function(){}, d(t, [], function(){return e;}, i), e);};d.globals = i;var v=[0, 0, 1, 1], y=[], T=g("easing.Ease", function(t, e, i, s){this._func = t, this._type = i || 0, this._power = s || 0, this._params = e?v.concat(e):v;}, !0), w=T.map = {}, x=T.register = function(t, e, i, s){for(var r, n, a, o, h=e.split(","), _=h.length, u=(i || "easeIn,easeOut,easeInOut").split(","); --_ > -1;) for(n = h[_], r = s?g("easing." + n, null, !0):l.easing[n] || {}, a = u.length; --a > -1;) o = u[a], w[n + "." + o] = w[o + n] = r[o] = t.getRatio?t:t[o] || new t();};for(n = T.prototype, n._calcEnd = !1, n.getRatio = function(t){if(this._func)return (this._params[0] = t, this._func.apply(null, this._params));var e=this._type, i=this._power, s=1 === e?1 - t:2 === e?t:0.5 > t?2 * t:2 * (1 - t);return (1 === i?s *= s:2 === i?s *= s * s:3 === i?s *= s * s * s:4 === i && (s *= s * s * s * s), 1 === e?1 - s:2 === e?s:0.5 > t?s / 2:1 - s / 2);}, s = ["Linear", "Quad", "Cubic", "Quart", "Quint,Strong"], r = s.length; --r > -1;) n = s[r] + ",Power" + r, x(new T(null, null, 1, r), n, "easeOut", !0), x(new T(null, null, 2, r), n, "easeIn" + (0 === r?",easeNone":"")), x(new T(null, null, 3, r), n, "easeInOut");w.linear = l.easing.Linear.easeIn, w.swing = l.easing.Quad.easeInOut;var b=g("events.EventDispatcher", function(t){this._listeners = {}, this._eventTarget = t || this;});n = b.prototype, n.addEventListener = function(t, e, i, s, r){r = r || 0;var n, h, l=this._listeners[t], _=0;for(null == l && (this._listeners[t] = l = []), h = l.length; --h > -1;) n = l[h], n.c === e && n.s === i?l.splice(h, 1):0 === _ && r > n.pr && (_ = h + 1);l.splice(_, 0, {c:e, s:i, up:s, pr:r}), this !== a || o || a.wake();}, n.removeEventListener = function(t, e){var i, s=this._listeners[t];if(s)for(i = s.length; --i > -1;) if(s[i].c === e)return (s.splice(i, 1), void 0);}, n.dispatchEvent = function(t){var e, i, s, r=this._listeners[t];if(r)for(e = r.length, i = this._eventTarget; --e > -1;) s = r[e], s && (s.up?s.c.call(s.s || i, {type:t, target:i}):s.c.call(s.s || i));};var P=t.requestAnimationFrame, S=t.cancelAnimationFrame, k=Date.now || function(){return new Date().getTime();}, R=k();for(s = ["ms", "moz", "webkit", "o"], r = s.length; --r > -1 && !P;) P = t[s[r] + "RequestAnimationFrame"], S = t[s[r] + "CancelAnimationFrame"] || t[s[r] + "CancelRequestAnimationFrame"];g("Ticker", function(t, e){var i, s, r, n, h, l=this, u=k(), f=e !== !1 && P, c=500, m=33, d="tick", g=(function(_g){function g(_x19){return _g.apply(this, arguments);}g.toString = function(){return _g.toString();};return g;})(function(t){var e, a, o=k() - R;o > c && (u += o - m), R += o, l.time = (R - u) / 1000, e = l.time - h, (!i || e > 0 || t === !0) && (l.frame++, h += e + (e >= n?0.004:n - e), a = !0), t !== !0 && (r = s(g)), a && l.dispatchEvent(d);});b.call(l), l.time = l.frame = 0, l.tick = function(){g(!0);}, l.lagSmoothing = function(t, e){c = t || 1 / _, m = Math.min(e, c, 0);}, l.sleep = function(){null != r && (f && S?S(r):clearTimeout(r), s = p, r = null, l === a && (o = !1));}, l.wake = function(){null !== r?l.sleep():l.frame > 10 && (R = k() - c + 5), s = 0 === i?p:f && P?P:function(t){return setTimeout(t, 0 | 1000 * (h - l.time) + 1);}, l === a && (o = !0), g(2);}, l.fps = function(t){return arguments.length?(i = t, n = 1 / (i || 60), h = this.time + n, l.wake(), void 0):i;}, l.useRAF = function(t){return arguments.length?(l.sleep(), f = t, l.fps(i), void 0):f;}, l.fps(t), setTimeout(function(){f && 5 > l.frame && l.useRAF(!1);}, 1500);}), n = l.Ticker.prototype = new l.events.EventDispatcher(), n.constructor = l.Ticker;var A=g("core.Animation", function(t, e){if((this.vars = e = e || {}, this._duration = this._totalDuration = t || 0, this._delay = Number(e.delay) || 0, this._timeScale = 1, this._active = e.immediateRender === !0, this.data = e.data, this._reversed = e.reversed === !0, B)){o || a.wake();var i=this.vars.useFrames?j:B;i.add(this, i._time), this.vars.paused && this.paused(!0);}});a = A.ticker = new l.Ticker(), n = A.prototype, n._dirty = n._gc = n._initted = n._paused = !1, n._totalTime = n._time = 0, n._rawPrevTime = -1, n._next = n._last = n._onUpdate = n._timeline = n.timeline = null, n._paused = !1;var O=(function(_O){function O(){return _O.apply(this, arguments);}O.toString = function(){return _O.toString();};return O;})(function(){o && k() - R > 2000 && a.wake(), setTimeout(O, 2000);});O(), n.play = function(t, e){return (null != t && this.seek(t, e), this.reversed(!1).paused(!1));}, n.pause = function(t, e){return (null != t && this.seek(t, e), this.paused(!0));}, n.resume = function(t, e){return (null != t && this.seek(t, e), this.paused(!1));}, n.seek = function(t, e){return this.totalTime(Number(t), e !== !1);}, n.restart = function(t, e){return this.reversed(!1).paused(!1).totalTime(t?-this._delay:0, e !== !1, !0);}, n.reverse = function(t, e){return (null != t && this.seek(t || this.totalDuration(), e), this.reversed(!0).paused(!1));}, n.render = function(){}, n.invalidate = function(){return (this._time = this._totalTime = 0, this._initted = this._gc = !1, this._rawPrevTime = -1, (this._gc || !this.timeline) && this._enabled(!0), this);}, n.isActive = function(){var t, e=this._timeline, i=this._startTime;return !e || !this._gc && !this._paused && e.isActive() && (t = e.rawTime()) >= i && i + this.totalDuration() / this._timeScale > t;}, n._enabled = function(t, e){return (o || a.wake(), this._gc = !t, this._active = this.isActive(), e !== !0 && (t && !this.timeline?this._timeline.add(this, this._startTime - this._delay):!t && this.timeline && this._timeline._remove(this, !0)), !1);}, n._kill = function(){return this._enabled(!1, !1);}, n.kill = function(t, e){return (this._kill(t, e), this);}, n._uncache = function(t){for(var e=t?this:this.timeline; e;) e._dirty = !0, e = e.timeline;return this;}, n._swapSelfInParams = function(t){for(var e=t.length, i=t.concat(); --e > -1;) "{self}" === t[e] && (i[e] = this);return i;}, n.eventCallback = function(t, e, i, s){if("on" === (t || "").substr(0, 2)){var r=this.vars;if(1 === arguments.length)return r[t];null == e?delete r[t]:(r[t] = e, r[t + "Params"] = f(i) && -1 !== i.join("").indexOf("{self}")?this._swapSelfInParams(i):i, r[t + "Scope"] = s), "onUpdate" === t && (this._onUpdate = e);}return this;}, n.delay = function(t){return arguments.length?(this._timeline.smoothChildTiming && this.startTime(this._startTime + t - this._delay), this._delay = t, this):this._delay;}, n.duration = function(t){return arguments.length?(this._duration = this._totalDuration = t, this._uncache(!0), this._timeline.smoothChildTiming && this._time > 0 && this._time < this._duration && 0 !== t && this.totalTime(this._totalTime * (t / this._duration), !0), this):(this._dirty = !1, this._duration);}, n.totalDuration = function(t){return (this._dirty = !1, arguments.length?this.duration(t):this._totalDuration);}, n.time = function(t, e){return arguments.length?(this._dirty && this.totalDuration(), this.totalTime(t > this._duration?this._duration:t, e)):this._time;}, n.totalTime = function(t, e, i){if((o || a.wake(), !arguments.length))return this._totalTime;if(this._timeline){if((0 > t && !i && (t += this.totalDuration()), this._timeline.smoothChildTiming)){this._dirty && this.totalDuration();var s=this._totalDuration, r=this._timeline;if((t > s && !i && (t = s), this._startTime = (this._paused?this._pauseTime:r._time) - (this._reversed?s - t:t) / this._timeScale, r._dirty || this._uncache(!1), r._timeline))for(; r._timeline;) r._timeline._time !== (r._startTime + r._totalTime) / r._timeScale && r.totalTime(r._totalTime, !0), r = r._timeline;}this._gc && this._enabled(!0, !1), (this._totalTime !== t || 0 === this._duration) && (this.render(t, e, !1), I.length && V());}return this;}, n.progress = n.totalProgress = function(t, e){return arguments.length?this.totalTime(this.duration() * t, e):this._time / this.duration();}, n.startTime = function(t){return arguments.length?(t !== this._startTime && (this._startTime = t, this.timeline && this.timeline._sortChildren && this.timeline.add(this, t - this._delay)), this):this._startTime;}, n.endTime = function(t){return this._startTime + (0 != t?this.totalDuration():this.duration()) / this._timeScale;}, n.timeScale = function(t){if(!arguments.length)return this._timeScale;if((t = t || _, this._timeline && this._timeline.smoothChildTiming)){var e=this._pauseTime, i=e || 0 === e?e:this._timeline.totalTime();this._startTime = i - (i - this._startTime) * this._timeScale / t;}return (this._timeScale = t, this._uncache(!1));}, n.reversed = function(t){return arguments.length?(t != this._reversed && (this._reversed = t, this.totalTime(this._timeline && !this._timeline.smoothChildTiming?this.totalDuration() - this._totalTime:this._totalTime, !0)), this):this._reversed;}, n.paused = function(t){if(!arguments.length)return this._paused;var e, i, s=this._timeline;return (t != this._paused && s && (o || t || a.wake(), e = s.rawTime(), i = e - this._pauseTime, !t && s.smoothChildTiming && (this._startTime += i, this._uncache(!1)), this._pauseTime = t?e:null, this._paused = t, this._active = this.isActive(), !t && 0 !== i && this._initted && this.duration() && this.render(s.smoothChildTiming?this._totalTime:(e - this._startTime) / this._timeScale, !0, !0)), this._gc && !t && this._enabled(!0, !1), this);};var C=g("core.SimpleTimeline", function(t){A.call(this, 0, t), this.autoRemoveChildren = this.smoothChildTiming = !0;});n = C.prototype = new A(), n.constructor = C, n.kill()._gc = !1, n._first = n._last = n._recent = null, n._sortChildren = !1, n.add = n.insert = function(t, e){var i, s;if((t._startTime = Number(e || 0) + t._delay, t._paused && this !== t._timeline && (t._pauseTime = t._startTime + (this.rawTime() - t._startTime) / t._timeScale), t.timeline && t.timeline._remove(t, !0), t.timeline = t._timeline = this, t._gc && t._enabled(!0, !0), i = this._last, this._sortChildren))for(s = t._startTime; i && i._startTime > s;) i = i._prev;return (i?(t._next = i._next, i._next = t):(t._next = this._first, this._first = t), t._next?t._next._prev = t:this._last = t, t._prev = i, this._recent = t, this._timeline && this._uncache(!0), this);}, n._remove = function(t, e){return (t.timeline === this && (e || t._enabled(!1, !0), t._prev?t._prev._next = t._next:this._first === t && (this._first = t._next), t._next?t._next._prev = t._prev:this._last === t && (this._last = t._prev), t._next = t._prev = t.timeline = null, t === this._recent && (this._recent = this._last), this._timeline && this._uncache(!0)), this);}, n.render = function(t, e, i){var s, r=this._first;for(this._totalTime = this._time = this._rawPrevTime = t; r;) s = r._next, (r._active || t >= r._startTime && !r._paused) && (r._reversed?r.render((r._dirty?r.totalDuration():r._totalDuration) - (t - r._startTime) * r._timeScale, e, i):r.render((t - r._startTime) * r._timeScale, e, i)), r = s;}, n.rawTime = function(){return (o || a.wake(), this._totalTime);};var D=g("TweenLite", function(e, i, s){if((A.call(this, i, s), this.render = D.prototype.render, null == e))throw "Cannot tween a null target.";this.target = e = "string" != typeof e?e:D.selector(e) || e;var r, n, a, o=e.jquery || e.length && e !== t && e[0] && (e[0] === t || e[0].nodeType && e[0].style && !e.nodeType), h=this.vars.overwrite;if((this._overwrite = h = null == h?Y[D.defaultOverwrite]:"number" == typeof h?h >> 0:Y[h], (o || e instanceof Array || e.push && f(e)) && "number" != typeof e[0]))for(this._targets = a = u(e), this._propLookup = [], this._siblings = [], r = 0; a.length > r; r++) n = a[r], n?"string" != typeof n?n.length && n !== t && n[0] && (n[0] === t || n[0].nodeType && n[0].style && !n.nodeType)?(a.splice(r--, 1), this._targets = a = a.concat(u(n))):(this._siblings[r] = G(n, this, !1), 1 === h && this._siblings[r].length > 1 && Z(n, this, null, 1, this._siblings[r])):(n = a[r--] = D.selector(n), "string" == typeof n && a.splice(r + 1, 1)):a.splice(r--, 1);else this._propLookup = {}, this._siblings = G(e, this, !1), 1 === h && this._siblings.length > 1 && Z(e, this, null, 1, this._siblings);(this.vars.immediateRender || 0 === i && 0 === this._delay && this.vars.immediateRender !== !1) && (this._time = -_, this.render(-this._delay));}, !0), M=function M(e){return e && e.length && e !== t && e[0] && (e[0] === t || e[0].nodeType && e[0].style && !e.nodeType);}, z=function z(t, e){var i, s={};for(i in t) U[i] || i in e && "transform" !== i && "x" !== i && "y" !== i && "width" !== i && "height" !== i && "className" !== i && "border" !== i || !(!N[i] || N[i] && N[i]._autoCSS) || (s[i] = t[i], delete t[i]);t.css = s;};n = D.prototype = new A(), n.constructor = D, n.kill()._gc = !1, n.ratio = 0, n._firstPT = n._targets = n._overwrittenProps = n._startAt = null, n._notifyPluginsOfEnabled = n._lazy = !1, D.version = "1.16.1", D.defaultEase = n._ease = new T(null, null, 1, 1), D.defaultOverwrite = "auto", D.ticker = a, D.autoSleep = 120, D.lagSmoothing = function(t, e){a.lagSmoothing(t, e);}, D.selector = t.$ || t.jQuery || function(e){var i=t.$ || t.jQuery;return i?(D.selector = i, i(e)):"undefined" == typeof document?e:document.querySelectorAll?document.querySelectorAll(e):document.getElementById("#" === e.charAt(0)?e.substr(1):e);};var I=[], F={}, E=D._internals = {isArray:f, isSelector:M, lazyTweens:I}, N=D._plugins = {}, L=E.tweenLookup = {}, X=0, U=E.reservedProps = {ease:1, delay:1, overwrite:1, onComplete:1, onCompleteParams:1, onCompleteScope:1, useFrames:1, runBackwards:1, startAt:1, onUpdate:1, onUpdateParams:1, onUpdateScope:1, onStart:1, onStartParams:1, onStartScope:1, onReverseComplete:1, onReverseCompleteParams:1, onReverseCompleteScope:1, onRepeat:1, onRepeatParams:1, onRepeatScope:1, easeParams:1, yoyo:1, immediateRender:1, repeat:1, repeatDelay:1, data:1, paused:1, reversed:1, autoCSS:1, lazy:1, onOverwrite:1}, Y={none:0, all:1, auto:2, concurrent:3, allOnStart:4, preexisting:5, "true":1, "false":0}, j=A._rootFramesTimeline = new C(), B=A._rootTimeline = new C(), q=30, V=E.lazyRender = function(){var t, e=I.length;for(F = {}; --e > -1;) t = I[e], t && t._lazy !== !1 && (t.render(t._lazy[0], t._lazy[1], !0), t._lazy = !1);I.length = 0;};B._startTime = a.time, j._startTime = a.frame, B._active = j._active = !0, setTimeout(V, 1), A._updateRoot = D.render = function(){var t, e, i;if((I.length && V(), B.render((a.time - B._startTime) * B._timeScale, !1, !1), j.render((a.frame - j._startTime) * j._timeScale, !1, !1), I.length && V(), a.frame >= q)){q = a.frame + (parseInt(D.autoSleep, 10) || 120);for(i in L) {for(e = L[i].tweens, t = e.length; --t > -1;) e[t]._gc && e.splice(t, 1);0 === e.length && delete L[i];}if((i = B._first, (!i || i._paused) && D.autoSleep && !j._first && 1 === a._listeners.tick.length)){for(; i && i._paused;) i = i._next;i || a.sleep();}}}, a.addEventListener("tick", A._updateRoot);var G=function G(t, e, i){var s, r, n=t._gsTweenID;if((L[n || (t._gsTweenID = n = "t" + X++)] || (L[n] = {target:t, tweens:[]}), e && (s = L[n].tweens, s[r = s.length] = e, i)))for(; --r > -1;) s[r] === e && s.splice(r, 1);return L[n].tweens;}, W=function W(t, e, i, s){var r, n, a=t.vars.onOverwrite;return (a && (r = a(t, e, i, s)), a = D.onOverwrite, a && (n = a(t, e, i, s)), r !== !1 && n !== !1);}, Z=function Z(t, e, i, s, r){var n, a, o, h;if(1 === s || s >= 4){for(h = r.length, n = 0; h > n; n++) if((o = r[n]) !== e)o._gc || W(o, e) && o._enabled(!1, !1) && (a = !0);else if(5 === s)break;return a;}var l, u=e._startTime + _, p=[], f=0, c=0 === e._duration;for(n = r.length; --n > -1;) (o = r[n]) === e || o._gc || o._paused || (o._timeline !== e._timeline?(l = l || Q(e, 0, c), 0 === Q(o, l, c) && (p[f++] = o)):u >= o._startTime && o._startTime + o.totalDuration() / o._timeScale > u && ((c || !o._initted) && 2e-10 >= u - o._startTime || (p[f++] = o)));for(n = f; --n > -1;) if((o = p[n], 2 === s && o._kill(i, t, e) && (a = !0), 2 !== s || !o._firstPT && o._initted)){if(2 !== s && !W(o, e))continue;o._enabled(!1, !1) && (a = !0);}return a;}, Q=function Q(t, e, i){for(var s=t._timeline, r=s._timeScale, n=t._startTime; s._timeline;) {if((n += s._startTime, r *= s._timeScale, s._paused)){return -100;}s = s._timeline;}return (n /= r, n > e?n - e:i && n === e || !t._initted && 2 * _ > n - e?_:(n += t.totalDuration() / t._timeScale / r) > e + _?0:n - e - _);};n._init = function(){var t, e, i, s, r, n=this.vars, a=this._overwrittenProps, o=this._duration, h=!!n.immediateRender, l=n.ease;if(n.startAt){this._startAt && (this._startAt.render(-1, !0), this._startAt.kill()), r = {};for(s in n.startAt) r[s] = n.startAt[s];if((r.overwrite = !1, r.immediateRender = !0, r.lazy = h && n.lazy !== !1, r.startAt = r.delay = null, this._startAt = D.to(this.target, 0, r), h))if(this._time > 0)this._startAt = null;else if(0 !== o)return;}else if(n.runBackwards && 0 !== o)if(this._startAt)this._startAt.render(-1, !0), this._startAt.kill(), this._startAt = null;else {0 !== this._time && (h = !1), i = {};for(s in n) U[s] && "autoCSS" !== s || (i[s] = n[s]);if((i.overwrite = 0, i.data = "isFromStart", i.lazy = h && n.lazy !== !1, i.immediateRender = h, this._startAt = D.to(this.target, 0, i), h)){if(0 === this._time)return;}else this._startAt._init(), this._startAt._enabled(!1), this.vars.immediateRender && (this._startAt = null);}if((this._ease = l = l?l instanceof T?l:"function" == typeof l?new T(l, n.easeParams):w[l] || D.defaultEase:D.defaultEase, n.easeParams instanceof Array && l.config && (this._ease = l.config.apply(l, n.easeParams)), this._easeType = this._ease._type, this._easePower = this._ease._power, this._firstPT = null, this._targets))for(t = this._targets.length; --t > -1;) this._initProps(this._targets[t], this._propLookup[t] = {}, this._siblings[t], a?a[t]:null) && (e = !0);else e = this._initProps(this.target, this._propLookup, this._siblings, a);if((e && D._onPluginEvent("_onInitAllProps", this), a && (this._firstPT || "function" != typeof this.target && this._enabled(!1, !1)), n.runBackwards))for(i = this._firstPT; i;) i.s += i.c, i.c = -i.c, i = i._next;this._onUpdate = n.onUpdate, this._initted = !0;}, n._initProps = function(e, i, s, r){var n, a, o, h, l, _;if(null == e)return !1;F[e._gsTweenID] && V(), this.vars.css || e.style && e !== t && e.nodeType && N.css && this.vars.autoCSS !== !1 && z(this.vars, e);for(n in this.vars) {if((_ = this.vars[n], U[n]))_ && (_ instanceof Array || _.push && f(_)) && -1 !== _.join("").indexOf("{self}") && (this.vars[n] = _ = this._swapSelfInParams(_, this));else if(N[n] && (h = new N[n]())._onInitTween(e, this.vars[n], this)){for(this._firstPT = l = {_next:this._firstPT, t:h, p:"setRatio", s:0, c:1, f:!0, n:n, pg:!0, pr:h._priority}, a = h._overwriteProps.length; --a > -1;) i[h._overwriteProps[a]] = this._firstPT;(h._priority || h._onInitAllProps) && (o = !0), (h._onDisable || h._onEnable) && (this._notifyPluginsOfEnabled = !0);}else this._firstPT = i[n] = l = {_next:this._firstPT, t:e, p:n, f:"function" == typeof e[n], n:n, pg:!1, pr:0}, l.s = l.f?e[n.indexOf("set") || "function" != typeof e["get" + n.substr(3)]?n:"get" + n.substr(3)]():parseFloat(e[n]), l.c = "string" == typeof _ && "=" === _.charAt(1)?parseInt(_.charAt(0) + "1", 10) * Number(_.substr(2)):Number(_) - l.s || 0;l && l._next && (l._next._prev = l);}return r && this._kill(r, e)?this._initProps(e, i, s, r):this._overwrite > 1 && this._firstPT && s.length > 1 && Z(e, this, i, this._overwrite, s)?(this._kill(i, e), this._initProps(e, i, s, r)):(this._firstPT && (this.vars.lazy !== !1 && this._duration || this.vars.lazy && !this._duration) && (F[e._gsTweenID] = !0), o);}, n.render = function(t, e, i){var s, r, n, a, o=this._time, h=this._duration, l=this._rawPrevTime;if(t >= h)this._totalTime = this._time = h, this.ratio = this._ease._calcEnd?this._ease.getRatio(1):1, this._reversed || (s = !0, r = "onComplete", i = i || this._timeline.autoRemoveChildren), 0 === h && (this._initted || !this.vars.lazy || i) && (this._startTime === this._timeline._duration && (t = 0), (0 === t || 0 > l || l === _ && "isPause" !== this.data) && l !== t && (i = !0, l > _ && (r = "onReverseComplete")), this._rawPrevTime = a = !e || t || l === t?t:_);else if(1e-7 > t)this._totalTime = this._time = 0, this.ratio = this._ease._calcEnd?this._ease.getRatio(0):0, (0 !== o || 0 === h && l > 0) && (r = "onReverseComplete", s = this._reversed), 0 > t && (this._active = !1, 0 === h && (this._initted || !this.vars.lazy || i) && (l >= 0 && (l !== _ || "isPause" !== this.data) && (i = !0), this._rawPrevTime = a = !e || t || l === t?t:_)), this._initted || (i = !0);else if((this._totalTime = this._time = t, this._easeType)){var u=t / h, p=this._easeType, f=this._easePower;(1 === p || 3 === p && u >= 0.5) && (u = 1 - u), 3 === p && (u *= 2), 1 === f?u *= u:2 === f?u *= u * u:3 === f?u *= u * u * u:4 === f && (u *= u * u * u * u), this.ratio = 1 === p?1 - u:2 === p?u:0.5 > t / h?u / 2:1 - u / 2;}else this.ratio = this._ease.getRatio(t / h);if(this._time !== o || i){if(!this._initted){if((this._init(), !this._initted || this._gc))return;if(!i && this._firstPT && (this.vars.lazy !== !1 && this._duration || this.vars.lazy && !this._duration))return (this._time = this._totalTime = o, this._rawPrevTime = l, I.push(this), this._lazy = [t, e], void 0);this._time && !s?this.ratio = this._ease.getRatio(this._time / h):s && this._ease._calcEnd && (this.ratio = this._ease.getRatio(0 === this._time?0:1));}for(this._lazy !== !1 && (this._lazy = !1), this._active || !this._paused && this._time !== o && t >= 0 && (this._active = !0), 0 === o && (this._startAt && (t >= 0?this._startAt.render(t, e, i):r || (r = "_dummyGS")), this.vars.onStart && (0 !== this._time || 0 === h) && (e || this.vars.onStart.apply(this.vars.onStartScope || this, this.vars.onStartParams || y))), n = this._firstPT; n;) n.f?n.t[n.p](n.c * this.ratio + n.s):n.t[n.p] = n.c * this.ratio + n.s, n = n._next;this._onUpdate && (0 > t && this._startAt && t !== -0.0001 && this._startAt.render(t, e, i), e || (this._time !== o || s) && this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || y)), r && (!this._gc || i) && (0 > t && this._startAt && !this._onUpdate && t !== -0.0001 && this._startAt.render(t, e, i), s && (this._timeline.autoRemoveChildren && this._enabled(!1, !1), this._active = !1), !e && this.vars[r] && this.vars[r].apply(this.vars[r + "Scope"] || this, this.vars[r + "Params"] || y), 0 === h && this._rawPrevTime === _ && a !== _ && (this._rawPrevTime = 0));}}, n._kill = function(t, e, i){if(("all" === t && (t = null), null == t && (null == e || e === this.target)))return (this._lazy = !1, this._enabled(!1, !1));e = "string" != typeof e?e || this._targets || this.target:D.selector(e) || e;var s, r, n, a, o, h, l, _, u;if((f(e) || M(e)) && "number" != typeof e[0])for(s = e.length; --s > -1;) this._kill(t, e[s]) && (h = !0);else {if(this._targets){for(s = this._targets.length; --s > -1;) if(e === this._targets[s]){o = this._propLookup[s] || {}, this._overwrittenProps = this._overwrittenProps || [], r = this._overwrittenProps[s] = t?this._overwrittenProps[s] || {}:"all";break;}}else {if(e !== this.target)return !1;o = this._propLookup, r = this._overwrittenProps = t?this._overwrittenProps || {}:"all";}if(o){if((l = t || o, _ = t !== r && "all" !== r && t !== o && ("object" != typeof t || !t._tempKill), i && (D.onOverwrite || this.vars.onOverwrite))){for(n in l) o[n] && (u || (u = []), u.push(n));if(!W(this, i, e, u))return !1;}for(n in l) (a = o[n]) && (a.pg && a.t._kill(l) && (h = !0), a.pg && 0 !== a.t._overwriteProps.length || (a._prev?a._prev._next = a._next:a === this._firstPT && (this._firstPT = a._next), a._next && (a._next._prev = a._prev), a._next = a._prev = null), delete o[n]), _ && (r[n] = 1);!this._firstPT && this._initted && this._enabled(!1, !1);}}return h;}, n.invalidate = function(){return (this._notifyPluginsOfEnabled && D._onPluginEvent("_onDisable", this), this._firstPT = this._overwrittenProps = this._startAt = this._onUpdate = null, this._notifyPluginsOfEnabled = this._active = this._lazy = !1, this._propLookup = this._targets?{}:[], A.prototype.invalidate.call(this), this.vars.immediateRender && (this._time = -_, this.render(-this._delay)), this);}, n._enabled = function(t, e){if((o || a.wake(), t && this._gc)){var i, s=this._targets;if(s)for(i = s.length; --i > -1;) this._siblings[i] = G(s[i], this, !0);else this._siblings = G(this.target, this, !0);}return (A.prototype._enabled.call(this, t, e), this._notifyPluginsOfEnabled && this._firstPT?D._onPluginEvent(t?"_onEnable":"_onDisable", this):!1);}, D.to = function(t, e, i){return new D(t, e, i);}, D.from = function(t, e, i){return (i.runBackwards = !0, i.immediateRender = 0 != i.immediateRender, new D(t, e, i));}, D.fromTo = function(t, e, i, s){return (s.startAt = i, s.immediateRender = 0 != s.immediateRender && 0 != i.immediateRender, new D(t, e, s));}, D.delayedCall = function(t, e, i, s, r){return new D(e, 0, {delay:t, onComplete:e, onCompleteParams:i, onCompleteScope:s, onReverseComplete:e, onReverseCompleteParams:i, onReverseCompleteScope:s, immediateRender:!1, lazy:!1, useFrames:r, overwrite:0});}, D.set = function(t, e){return new D(t, 0, e);}, D.getTweensOf = function(t, e){if(null == t)return [];t = "string" != typeof t?t:D.selector(t) || t;var i, s, r, n;if((f(t) || M(t)) && "number" != typeof t[0]){for(i = t.length, s = []; --i > -1;) s = s.concat(D.getTweensOf(t[i], e));for(i = s.length; --i > -1;) for(n = s[i], r = i; --r > -1;) n === s[r] && s.splice(i, 1);}else for(s = G(t).concat(), i = s.length; --i > -1;) (s[i]._gc || e && !s[i].isActive()) && s.splice(i, 1);return s;}, D.killTweensOf = D.killDelayedCallsTo = function(t, e, i){"object" == typeof e && (i = e, e = !1);for(var s=D.getTweensOf(t, e), r=s.length; --r > -1;) s[r]._kill(i, t);};var $=g("plugins.TweenPlugin", function(t, e){this._overwriteProps = (t || "").split(","), this._propName = this._overwriteProps[0], this._priority = e || 0, this._super = $.prototype;}, !0);if((n = $.prototype, $.version = "1.10.1", $.API = 2, n._firstPT = null, n._addTween = function(t, e, i, s, r, n){var a, o;return null != s && (a = "number" == typeof s || "=" !== s.charAt(1)?Number(s) - i:parseInt(s.charAt(0) + "1", 10) * Number(s.substr(2)))?(this._firstPT = o = {_next:this._firstPT, t:t, p:e, s:i, c:a, f:"function" == typeof t[e], n:r || e, r:n}, o._next && (o._next._prev = o), o):void 0;}, n.setRatio = function(t){for(var e, i=this._firstPT, s=0.000001; i;) e = i.c * t + i.s, i.r?e = Math.round(e):s > e && e > -s && (e = 0), i.f?i.t[i.p](e):i.t[i.p] = e, i = i._next;}, n._kill = function(t){var e, i=this._overwriteProps, s=this._firstPT;if(null != t[this._propName])this._overwriteProps = [];else for(e = i.length; --e > -1;) null != t[i[e]] && i.splice(e, 1);for(; s;) null != t[s.n] && (s._next && (s._next._prev = s._prev), s._prev?(s._prev._next = s._next, s._prev = null):this._firstPT === s && (this._firstPT = s._next)), s = s._next;return !1;}, n._roundProps = function(t, e){for(var i=this._firstPT; i;) (t[this._propName] || null != i.n && t[i.n.split(this._propName + "_").join("")]) && (i.r = e), i = i._next;}, D._onPluginEvent = function(t, e){var i, s, r, n, a, o=e._firstPT;if("_onInitAllProps" === t){for(; o;) {for(a = o._next, s = r; s && s.pr > o.pr;) s = s._next;(o._prev = s?s._prev:n)?o._prev._next = o:r = o, (o._next = s)?s._prev = o:n = o, o = a;}o = e._firstPT = r;}for(; o;) o.pg && "function" == typeof o.t[t] && o.t[t]() && (i = !0), o = o._next;return i;}, $.activate = function(t){for(var e=t.length; --e > -1;) t[e].API === $.API && (N[new t[e]()._propName] = t[e]);return !0;}, d.plugin = function(t){if(!(t && t.propName && t.init && t.API))throw "illegal plugin definition.";var e, i=t.propName, s=t.priority || 0, r=t.overwriteProps, n={init:"_onInitTween", set:"setRatio", kill:"_kill", round:"_roundProps", initAll:"_onInitAllProps"}, a=g("plugins." + i.charAt(0).toUpperCase() + i.substr(1) + "Plugin", function(){$.call(this, i, s), this._overwriteProps = r || [];}, t.global === !0), o=a.prototype = new $(i);o.constructor = a, a.API = t.API;for(e in n) "function" == typeof t[e] && (o[n[e]] = t[e]);return (a.version = t.version, $.activate([a]), a);}, s = t._gsQueue)){for(r = 0; s.length > r; r++) s[r]();for(n in c) c[n].func || t.console.log("GSAP encountered missing dependency: com.greensock." + n);}o = !1;}})("undefined" != typeof module && module.exports && "undefined" != typeof global?global:undefined || window, "TweenMax");
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],83:[function(require,module,exports){
 /**
  * This is the main entry point for KaTeX. Here, we expose functions for
  * rendering expressions either to DOM nodes or to markup strings.
@@ -4527,6 +4523,8 @@ else if(this._totalTime=this._time=t,this._easeType){var u=t/h,p=this._easeType,
  * We also expose the ParseError class to check if errors thrown from KaTeX are
  * errors in the expression, or errors in javascript handling.
  */
+
+"use strict";
 
 var ParseError = require("./src/ParseError");
 var Settings = require("./src/Settings");
@@ -4539,7 +4537,7 @@ var utils = require("./src/utils");
  * Parse and build an expression, and place that expression in the DOM node
  * given.
  */
-var render = function(expression, baseNode, options) {
+var render = function render(expression, baseNode, options) {
     utils.clearNode(baseNode);
 
     var settings = new Settings(options);
@@ -4554,11 +4552,9 @@ var render = function(expression, baseNode, options) {
 // disable rendering.
 if (typeof document !== "undefined") {
     if (document.compatMode !== "CSS1Compat") {
-        typeof console !== "undefined" && console.warn(
-            "Warning: KaTeX doesn't work in quirks mode. Make sure your " +
-                "website has a suitable doctype.");
+        typeof console !== "undefined" && console.warn("Warning: KaTeX doesn't work in quirks mode. Make sure your " + "website has a suitable doctype.");
 
-        render = function() {
+        render = function () {
             throw new ParseError("KaTeX doesn't work in quirks mode.");
         };
     }
@@ -4567,7 +4563,7 @@ if (typeof document !== "undefined") {
 /**
  * Parse and build an expression, and return the markup for that.
  */
-var renderToString = function(expression, options) {
+var renderToString = function renderToString(expression, options) {
     var settings = new Settings(options);
 
     var tree = parseTree(expression, settings);
@@ -4577,7 +4573,7 @@ var renderToString = function(expression, options) {
 /**
  * Parse an expression and return the parse tree.
  */
-var generateParseTree = function(expression, options) {
+var generateParseTree = function generateParseTree(expression, options) {
     var settings = new Settings(options);
     return parseTree(expression, settings);
 };
@@ -4594,7 +4590,7 @@ module.exports = {
     ParseError: ParseError
 };
 
-},{"./src/ParseError":86,"./src/Settings":88,"./src/buildTree":93,"./src/parseTree":102,"./src/utils":104}],83:[function(require,module,exports){
+},{"./src/ParseError":87,"./src/Settings":89,"./src/buildTree":94,"./src/parseTree":103,"./src/utils":105}],84:[function(require,module,exports){
 /** @flow */
 
 "use strict";
@@ -4637,7 +4633,7 @@ function matchAt(re, str, pos) {
 }
 
 module.exports = matchAt;
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 /**
  * The Lexer class handles tokenizing the input in various ways. Since our
  * parser expects us to be able to backtrack, the lexer allows lexing from any
@@ -4650,6 +4646,8 @@ module.exports = matchAt;
  * The various `_innerLex` functions perform the actual lexing of different
  * kinds.
  */
+
+"use strict";
 
 var matchAt = require("match-at");
 
@@ -4669,27 +4667,25 @@ function Token(text, data, position) {
 
 // "normal" types of tokens. These are tokens which can be matched by a simple
 // regex
-var mathNormals = [
-    /[/|@.""`0-9a-zA-Z]/, // ords
-    /[*+-]/, // bins
-    /[=<>:]/, // rels
-    /[,;]/, // punctuation
-    /['\^_{}]/, // misc
-    /[(\[]/, // opens
-    /[)\]?!]/, // closes
-    /~/, // spacing
-    /&/, // horizontal alignment
-    /\\\\/ // line break
+var mathNormals = [/[/|@.""`0-9a-zA-Z]/, // ords
+/[*+-]/, // bins
+/[=<>:]/, // rels
+/[,;]/, // punctuation
+/['\^_{}]/, // misc
+/[(\[]/, // opens
+/[)\]?!]/, // closes
+/~/, // spacing
+/&/, // horizontal alignment
+/\\\\/ // line break
 ];
 
 // These are "normal" tokens like above, but should instead be parsed in text
 // mode.
-var textNormals = [
-    /[a-zA-Z0-9`!@*()-=+\[\]'";:?\/.,]/, // ords
-    /[{}]/, // grouping
-    /~/, // spacing
-    /&/, // horizontal alignment
-    /\\\\/ // line break
+var textNormals = [/[a-zA-Z0-9`!@*()-=+\[\]'";:?\/.,]/, // ords
+/[{}]/, // grouping
+/~/, // spacing
+/&/, // horizontal alignment
+/\\\\/ // line break
 ];
 
 // Regexes for matching whitespace
@@ -4705,7 +4701,7 @@ var anyFunc = /\\(?:[a-zA-Z]+|.)/;
  * "normal" tokens to try, and whether it should completely ignore whitespace or
  * not.
  */
-Lexer.prototype._innerLex = function(pos, normals, ignoreWhitespace) {
+Lexer.prototype._innerLex = function (pos, normals, ignoreWhitespace) {
     var input = this._input;
     var whitespace;
 
@@ -4727,7 +4723,7 @@ Lexer.prototype._innerLex = function(pos, normals, ignoreWhitespace) {
     }
 
     var match;
-    if ((match = matchAt(anyFunc, input, pos))) {
+    if (match = matchAt(anyFunc, input, pos)) {
         // If we match a function token, return it
         return new Token(match[0], null, pos + match[0].length);
     } else {
@@ -4736,17 +4732,14 @@ Lexer.prototype._innerLex = function(pos, normals, ignoreWhitespace) {
         for (var i = 0; i < normals.length; i++) {
             var normal = normals[i];
 
-            if ((match = matchAt(normal, input, pos))) {
+            if (match = matchAt(normal, input, pos)) {
                 // If it is, return it
-                return new Token(
-                    match[0], null, pos + match[0].length);
+                return new Token(match[0], null, pos + match[0].length);
             }
         }
     }
 
-    throw new ParseError(
-            "Unexpected character: '" + input[pos] + "'",
-            this, pos);
+    throw new ParseError("Unexpected character: '" + input[pos] + "'", this, pos);
 };
 
 // A regex to match a CSS color (like #ffffff or BlueViolet)
@@ -4755,7 +4748,7 @@ var cssColor = /#[a-z0-9]+|[a-z]+/i;
 /**
  * This function lexes a CSS color.
  */
-Lexer.prototype._innerLexColor = function(pos) {
+Lexer.prototype._innerLexColor = function (pos) {
     var input = this._input;
 
     // Ignore whitespace
@@ -4763,7 +4756,7 @@ Lexer.prototype._innerLexColor = function(pos) {
     pos += whitespace.length;
 
     var match;
-    if ((match = matchAt(cssColor, input, pos))) {
+    if (match = matchAt(cssColor, input, pos)) {
         // If we look like a color, return a color
         return new Token(match[0], null, pos + match[0].length);
     } else {
@@ -4778,7 +4771,7 @@ var sizeRegex = /(-?)\s*(\d+(?:\.\d*)?|\.\d+)\s*([a-z]{2})/;
 /**
  * This function lexes a dimension.
  */
-Lexer.prototype._innerLexSize = function(pos) {
+Lexer.prototype._innerLexSize = function (pos) {
     var input = this._input;
 
     // Ignore whitespace
@@ -4786,16 +4779,16 @@ Lexer.prototype._innerLexSize = function(pos) {
     pos += whitespace.length;
 
     var match;
-    if ((match = matchAt(sizeRegex, input, pos))) {
+    if (match = matchAt(sizeRegex, input, pos)) {
         var unit = match[3];
         // We only currently handle "em" and "ex" units
         if (unit !== "em" && unit !== "ex") {
             throw new ParseError("Invalid unit: '" + unit + "'", this, pos);
         }
         return new Token(match[0], {
-                number: +(match[1] + match[2]),
-                unit: unit
-            }, pos + match[0].length);
+            number: +(match[1] + match[2]),
+            unit: unit
+        }, pos + match[0].length);
     }
 
     throw new ParseError("Invalid size", this, pos);
@@ -4804,7 +4797,7 @@ Lexer.prototype._innerLexSize = function(pos) {
 /**
  * This function lexes a string of whitespace.
  */
-Lexer.prototype._innerLexWhitespace = function(pos) {
+Lexer.prototype._innerLexWhitespace = function (pos) {
     var input = this._input;
 
     var whitespace = matchAt(whitespaceRegex, input, pos)[0];
@@ -4817,7 +4810,7 @@ Lexer.prototype._innerLexWhitespace = function(pos) {
  * This function lexes a single token starting at `pos` and of the given mode.
  * Based on the mode, we defer to one of the `_innerLex` functions.
  */
-Lexer.prototype.lex = function(pos, mode) {
+Lexer.prototype.lex = function (pos, mode) {
     if (mode === "math") {
         return this._innerLex(pos, mathNormals, true);
     } else if (mode === "text") {
@@ -4833,7 +4826,7 @@ Lexer.prototype.lex = function(pos, mode) {
 
 module.exports = Lexer;
 
-},{"./ParseError":86,"match-at":83}],85:[function(require,module,exports){
+},{"./ParseError":87,"match-at":84}],86:[function(require,module,exports){
 /**
  * This file contains information about the options that the Parser carries
  * around with it while parsing. Data is held in an `Options` object, and when
@@ -4850,6 +4843,8 @@ module.exports = Lexer;
  * as the parentStyle and parentSize of the new options class, so parent
  * handling is taken care of automatically.
  */
+"use strict";
+
 function Options(data) {
     this.style = data.style;
     this.color = data.color;
@@ -4874,7 +4869,7 @@ function Options(data) {
  * Returns a new options object with the same properties as "this".  Properties
  * from "extension" will be copied to the new options object.
  */
-Options.prototype.extend = function(extension) {
+Options.prototype.extend = function (extension) {
     var data = {
         style: this.style,
         size: this.size,
@@ -4897,7 +4892,7 @@ Options.prototype.extend = function(extension) {
 /**
  * Create a new options object with the given style.
  */
-Options.prototype.withStyle = function(style) {
+Options.prototype.withStyle = function (style) {
     return this.extend({
         style: style
     });
@@ -4906,7 +4901,7 @@ Options.prototype.withStyle = function(style) {
 /**
  * Create a new options object with the given size.
  */
-Options.prototype.withSize = function(size) {
+Options.prototype.withSize = function (size) {
     return this.extend({
         size: size
     });
@@ -4915,7 +4910,7 @@ Options.prototype.withSize = function(size) {
 /**
  * Create a new options object with the given color.
  */
-Options.prototype.withColor = function(color) {
+Options.prototype.withColor = function (color) {
     return this.extend({
         color: color
     });
@@ -4924,7 +4919,7 @@ Options.prototype.withColor = function(color) {
 /**
  * Create a new options object with "phantom" set to true.
  */
-Options.prototype.withPhantom = function() {
+Options.prototype.withPhantom = function () {
     return this.extend({
         phantom: true
     });
@@ -4933,7 +4928,7 @@ Options.prototype.withPhantom = function() {
 /**
  * Create a new options objects with the give font.
  */
-Options.prototype.withFont = function(font) {
+Options.prototype.withFont = function (font) {
     return this.extend({
         font: font
     });
@@ -4943,7 +4938,7 @@ Options.prototype.withFont = function(font) {
  * Create a new options object with the same style, size, and color. This is
  * used so that parent style and size changes are handled correctly.
  */
-Options.prototype.reset = function() {
+Options.prototype.reset = function () {
     return this.extend({});
 };
 
@@ -5014,7 +5009,7 @@ var colorMap = {
  * Gets the CSS color of the current options object, accounting for the
  * `colorMap`.
  */
-Options.prototype.getColor = function() {
+Options.prototype.getColor = function () {
     if (this.phantom) {
         return "transparent";
     } else {
@@ -5024,12 +5019,14 @@ Options.prototype.getColor = function() {
 
 module.exports = Options;
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 /**
  * This is the ParseError class, which is the main error thrown by KaTeX
  * functions when something has gone wrong. This is used to distinguish internal
  * errors from errors in the expression that the user provided.
  */
+"use strict";
+
 function ParseError(message, lexer, position) {
     var error = "KaTeX parse error: " + message;
 
@@ -5042,8 +5039,7 @@ function ParseError(message, lexer, position) {
         // Get the input
         var input = lexer._input;
         // Insert a combining underscore at the correct position
-        input = input.slice(0, position) + "\u0332" +
-            input.slice(position);
+        input = input.slice(0, position) + "̲" + input.slice(position);
 
         // Extract some context from the input and add it to the error
         var begin = Math.max(0, position - 15);
@@ -5066,7 +5062,9 @@ ParseError.prototype.__proto__ = Error.prototype;
 
 module.exports = ParseError;
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
+"use strict";
+
 var functions = require("./functions");
 var environments = require("./environments");
 var Lexer = require("./Lexer");
@@ -5138,12 +5136,9 @@ function ParseFuncOrArgument(result, isFunction) {
  * Checks a result to make sure it has the right type, and throws an
  * appropriate error otherwise.
  */
-Parser.prototype.expect = function(result, text) {
+Parser.prototype.expect = function (result, text) {
     if (result.text !== text) {
-        throw new ParseError(
-            "Expected '" + text + "', got '" + result.text + "'",
-            this.lexer, result.position
-        );
+        throw new ParseError("Expected '" + text + "', got '" + result.text + "'", this.lexer, result.position);
     }
 };
 
@@ -5152,7 +5147,7 @@ Parser.prototype.expect = function(result, text) {
  *
  * @return {?Array.<ParseNode>}
  */
-Parser.prototype.parse = function(input) {
+Parser.prototype.parse = function (input) {
     // Try to parse the input
     var parse = this.parseInput(0, "math");
     return parse.result;
@@ -5161,7 +5156,7 @@ Parser.prototype.parse = function(input) {
 /**
  * Parses an entire input tree.
  */
-Parser.prototype.parseInput = function(pos, mode) {
+Parser.prototype.parseInput = function (pos, mode) {
     // Parse an expression
     var expression = this.parseExpression(pos, mode, false);
     // If we succeeded, make sure there's an EOF at the end
@@ -5183,7 +5178,7 @@ var endOfExpression = ["}", "\\end", "\\right", "&", "\\\\", "\\cr"];
  *
  * @return {ParseResult}
  */
-Parser.prototype.parseExpression = function(pos, mode, breakOnInfix, breakOnToken) {
+Parser.prototype.parseExpression = function (pos, mode, breakOnInfix, breakOnToken) {
     var body = [];
     var lex = null;
     // Keep adding atoms to the body until we can't parse any more atoms (either
@@ -5237,8 +5232,7 @@ Parser.prototype.handleInfixNodes = function (body, mode) {
         var node = body[i];
         if (node.type === "infix") {
             if (overIndex !== -1) {
-                throw new ParseError("only one infix operator per group",
-                    this.lexer, -1);
+                throw new ParseError("only one infix operator per group", this.lexer, -1);
             }
             overIndex = i;
             funcName = node.value.replaceWith;
@@ -5277,19 +5271,16 @@ var SUPSUB_GREEDINESS = 1;
 /**
  * Handle a subscript or superscript with nice errors.
  */
-Parser.prototype.handleSupSubscript = function(pos, mode, symbol, name) {
+Parser.prototype.handleSupSubscript = function (pos, mode, symbol, name) {
     var group = this.parseGroup(pos, mode);
 
     if (!group) {
         var lex = this.lexer.lex(pos, mode);
 
         if (!this.settings.throwOnError && lex.text[0] === "\\") {
-            return new ParseResult(
-                this.handleUnsupportedCmd(lex.text, mode),
-                lex.position);
+            return new ParseResult(this.handleUnsupportedCmd(lex.text, mode), lex.position);
         } else {
-            throw new ParseError(
-                "Expected group after '" + symbol + "'", this.lexer, pos);
+            throw new ParseError("Expected group after '" + symbol + "'", this.lexer, pos);
         }
     } else if (group.isFunction) {
         // ^ and _ have a greediness, so handle interactions with functions'
@@ -5298,10 +5289,7 @@ Parser.prototype.handleSupSubscript = function(pos, mode, symbol, name) {
         if (funcGreediness > SUPSUB_GREEDINESS) {
             return this.parseFunction(pos, mode);
         } else {
-            throw new ParseError(
-                "Got function '" + group.result.result + "' with no arguments " +
-                    "as " + name,
-                this.lexer, pos);
+            throw new ParseError("Got function '" + group.result.result + "' with no arguments " + "as " + name, this.lexer, pos);
         }
     } else {
         return group.result;
@@ -5312,39 +5300,33 @@ Parser.prototype.handleSupSubscript = function(pos, mode, symbol, name) {
  * Converts the textual input of an unsupported command into a text node
  * contained within a color node whose color is determined by errorColor
  */
- Parser.prototype.handleUnsupportedCmd = function(text, mode) {
-     var textordArray = [];
+Parser.prototype.handleUnsupportedCmd = function (text, mode) {
+    var textordArray = [];
 
-     for (var i = 0; i < text.length; i++) {
+    for (var i = 0; i < text.length; i++) {
         textordArray.push(new ParseNode("textord", text[i], "text"));
-     }
+    }
 
-     var textNode = new ParseNode(
-         "text",
-         {
-             body: textordArray,
-             type: "text"
-         },
-         mode);
+    var textNode = new ParseNode("text", {
+        body: textordArray,
+        type: "text"
+    }, mode);
 
-     var colorNode = new ParseNode(
-        "color",
-        {
-            color: this.settings.errorColor,
-            value: [textNode],
-            type: "color"
-        },
-        mode);
+    var colorNode = new ParseNode("color", {
+        color: this.settings.errorColor,
+        value: [textNode],
+        type: "color"
+    }, mode);
 
-     return colorNode;
- };
+    return colorNode;
+};
 
 /**
  * Parses a group with optional super/subscripts.
  *
  * @return {?ParseResult}
  */
-Parser.prototype.parseAtom = function(pos, mode) {
+Parser.prototype.parseAtom = function (pos, mode) {
     // The body of an atom is an implicit group, so that things like
     // \left(x\right)^2 work correctly.
     var base = this.parseImplicitGroup(pos, mode);
@@ -5373,10 +5355,8 @@ Parser.prototype.parseAtom = function(pos, mode) {
         if (lex.text === "\\limits" || lex.text === "\\nolimits") {
             // We got a limit control
             if (!base || base.result.type !== "op") {
-                throw new ParseError("Limit controls must follow a math operator",
-                    this.lexer, currPos);
-            }
-            else {
+                throw new ParseError("Limit controls must follow a math operator", this.lexer, currPos);
+            } else {
                 var limits = lex.text === "\\limits";
                 base.result.value.limits = limits;
                 base.result.value.alwaysHandleSupSub = true;
@@ -5385,21 +5365,17 @@ Parser.prototype.parseAtom = function(pos, mode) {
         } else if (lex.text === "^") {
             // We got a superscript start
             if (superscript) {
-                throw new ParseError(
-                    "Double superscript", this.lexer, currPos);
+                throw new ParseError("Double superscript", this.lexer, currPos);
             }
-            result = this.handleSupSubscript(
-                lex.position, mode, lex.text, "superscript");
+            result = this.handleSupSubscript(lex.position, mode, lex.text, "superscript");
             currPos = result.position;
             superscript = result.result;
         } else if (lex.text === "_") {
             // We got a subscript start
             if (subscript) {
-                throw new ParseError(
-                    "Double subscript", this.lexer, currPos);
+                throw new ParseError("Double subscript", this.lexer, currPos);
             }
-            result = this.handleSupSubscript(
-                lex.position, mode, lex.text, "subscript");
+            result = this.handleSupSubscript(lex.position, mode, lex.text, "subscript");
             currPos = result.position;
             subscript = result.result;
         } else if (lex.text === "'") {
@@ -5425,13 +5401,11 @@ Parser.prototype.parseAtom = function(pos, mode) {
 
     if (superscript || subscript) {
         // If we got either a superscript or subscript, create a supsub
-        return new ParseResult(
-            new ParseNode("supsub", {
-                base: base && base.result,
-                sup: superscript,
-                sub: subscript
-            }, mode),
-            currPos);
+        return new ParseResult(new ParseNode("supsub", {
+            base: base && base.result,
+            sup: superscript,
+            sub: subscript
+        }, mode), currPos);
     } else {
         // Otherwise return the original body
         return base;
@@ -5439,15 +5413,10 @@ Parser.prototype.parseAtom = function(pos, mode) {
 };
 
 // A list of the size-changing functions, for use in parseImplicitGroup
-var sizeFuncs = [
-    "\\tiny", "\\scriptsize", "\\footnotesize", "\\small", "\\normalsize",
-    "\\large", "\\Large", "\\LARGE", "\\huge", "\\Huge"
-];
+var sizeFuncs = ["\\tiny", "\\scriptsize", "\\footnotesize", "\\small", "\\normalsize", "\\large", "\\Large", "\\LARGE", "\\huge", "\\Huge"];
 
 // A list of the style-changing functions, for use in parseImplicitGroup
-var styleFuncs = [
-    "\\displaystyle", "\\textstyle", "\\scriptstyle", "\\scriptscriptstyle"
-];
+var styleFuncs = ["\\displaystyle", "\\textstyle", "\\scriptstyle", "\\scriptscriptstyle"];
 
 /**
  * Parses an implicit group, which is a group that starts at the end of a
@@ -5460,7 +5429,7 @@ var styleFuncs = [
  *
  * @return {?ParseResult}
  */
-Parser.prototype.parseImplicitGroup = function(pos, mode) {
+Parser.prototype.parseImplicitGroup = function (pos, mode) {
     var start = this.parseSymbol(pos, mode);
 
     if (!start || !start.result) {
@@ -5480,62 +5449,50 @@ Parser.prototype.parseImplicitGroup = function(pos, mode) {
         // Check the next token
         this.expect(body.peek, "\\right");
         var right = this.parseFunction(body.position, mode);
-        return new ParseResult(
-            new ParseNode("leftright", {
-                body: body.result,
-                left: left.result.value.value,
-                right: right.result.value.value
-            }, mode),
-            right.position);
+        return new ParseResult(new ParseNode("leftright", {
+            body: body.result,
+            left: left.result.value.value,
+            right: right.result.value.value
+        }, mode), right.position);
     } else if (func === "\\begin") {
         // begin...end is similar to left...right
         var begin = this.parseFunction(pos, mode);
         var envName = begin.result.value.name;
         if (!environments.hasOwnProperty(envName)) {
-            throw new ParseError(
-                "No such environment: " + envName,
-                this.lexer, begin.result.value.namepos);
+            throw new ParseError("No such environment: " + envName, this.lexer, begin.result.value.namepos);
         }
         // Build the environment object. Arguments and other information will
         // be made available to the begin and end methods using properties.
         var env = environments[envName];
         var args = [null, mode, envName];
-        var newPos = this.parseArguments(
-            begin.position, mode, "\\begin{" + envName + "}", env, args);
+        var newPos = this.parseArguments(begin.position, mode, "\\begin{" + envName + "}", env, args);
         args[0] = newPos;
         var result = env.handler.apply(this, args);
         var endLex = this.lexer.lex(result.position, mode);
         this.expect(endLex, "\\end");
         var end = this.parseFunction(result.position, mode);
         if (end.result.value.name !== envName) {
-            throw new ParseError(
-                "Mismatch: \\begin{" + envName + "} matched " +
-                "by \\end{" + end.result.value.name + "}",
-                this.lexer, end.namepos);
+            throw new ParseError("Mismatch: \\begin{" + envName + "} matched " + "by \\end{" + end.result.value.name + "}", this.lexer, end.namepos);
         }
         result.position = end.position;
         return result;
     } else if (utils.contains(sizeFuncs, func)) {
         // If we see a sizing function, parse out the implict body
         body = this.parseExpression(start.result.position, mode, false);
-        return new ParseResult(
-            new ParseNode("sizing", {
-                // Figure out what size to use based on the list of functions above
-                size: "size" + (utils.indexOf(sizeFuncs, func) + 1),
-                value: body.result
-            }, mode),
-            body.position);
+        return new ParseResult(new ParseNode("sizing", {
+            // Figure out what size to use based on the list of functions above
+            size: "size" + (utils.indexOf(sizeFuncs, func) + 1),
+            value: body.result
+        }, mode), body.position);
     } else if (utils.contains(styleFuncs, func)) {
         // If we see a styling function, parse out the implict body
         body = this.parseExpression(start.result.position, mode, true);
-        return new ParseResult(
-            new ParseNode("styling", {
-                // Figure out what style to use by pulling out the style from
-                // the function name
-                style: func.slice(1, func.length - 5),
-                value: body.result
-            }, mode),
-            body.position);
+        return new ParseResult(new ParseNode("styling", {
+            // Figure out what style to use by pulling out the style from
+            // the function name
+            style: func.slice(1, func.length - 5),
+            value: body.result
+        }, mode), body.position);
     } else {
         // Defer to parseFunction if it's not a function we handle
         return this.parseFunction(pos, mode);
@@ -5547,7 +5504,7 @@ Parser.prototype.parseImplicitGroup = function(pos, mode) {
  *
  * @return {?ParseResult}
  */
-Parser.prototype.parseFunction = function(pos, mode) {
+Parser.prototype.parseFunction = function (pos, mode) {
     var baseGroup = this.parseGroup(pos, mode);
 
     if (baseGroup) {
@@ -5555,18 +5512,13 @@ Parser.prototype.parseFunction = function(pos, mode) {
             var func = baseGroup.result.result;
             var funcData = functions.funcs[func];
             if (mode === "text" && !funcData.allowedInText) {
-                throw new ParseError(
-                    "Can't use function '" + func + "' in text mode",
-                    this.lexer, baseGroup.position);
+                throw new ParseError("Can't use function '" + func + "' in text mode", this.lexer, baseGroup.position);
             }
 
             var args = [func];
-            var newPos = this.parseArguments(
-                baseGroup.result.position, mode, func, funcData, args);
+            var newPos = this.parseArguments(baseGroup.result.position, mode, func, funcData, args);
             var result = functions.funcs[func].handler.apply(this, args);
-            return new ParseResult(
-                new ParseNode(result.type, result, mode),
-                newPos);
+            return new ParseResult(new ParseNode(result.type, result, mode), newPos);
         } else {
             return baseGroup.result;
         }
@@ -5574,7 +5526,6 @@ Parser.prototype.parseFunction = function(pos, mode) {
         return null;
     }
 };
-
 
 /**
  * Parses the arguments of a function or environment
@@ -5584,7 +5535,7 @@ Parser.prototype.parseFunction = function(pos, mode) {
  * @param {Array} args  list of arguments to which new ones will be pushed
  * @return the position after all arguments have been parsed
  */
-Parser.prototype.parseArguments = function(pos, mode, func, funcData, args) {
+Parser.prototype.parseArguments = function (pos, mode, func, funcData, args) {
     var totalArgs = funcData.numArgs + funcData.numOptionalArgs;
     if (totalArgs === 0) {
         return pos;
@@ -5618,28 +5569,19 @@ Parser.prototype.parseArguments = function(pos, mode, func, funcData, args) {
                 var lex = this.lexer.lex(newPos, mode);
 
                 if (!this.settings.throwOnError && lex.text[0] === "\\") {
-                    arg = new ParseFuncOrArgument(
-                        new ParseResult(
-                            this.handleUnsupportedCmd(lex.text, mode),
-                            lex.position),
-                        false);
+                    arg = new ParseFuncOrArgument(new ParseResult(this.handleUnsupportedCmd(lex.text, mode), lex.position), false);
                 } else {
-                    throw new ParseError(
-                        "Expected group after '" + func + "'", this.lexer, pos);
+                    throw new ParseError("Expected group after '" + func + "'", this.lexer, pos);
                 }
             }
         }
         var argNode;
         if (arg.isFunction) {
-            var argGreediness =
-                functions.funcs[arg.result.result].greediness;
+            var argGreediness = functions.funcs[arg.result.result].greediness;
             if (argGreediness > baseGreediness) {
                 argNode = this.parseFunction(newPos, mode);
             } else {
-                throw new ParseError(
-                    "Got function '" + arg.result.result + "' as " +
-                    "argument to '" + func + "'",
-                    this.lexer, arg.result.position - 1);
+                throw new ParseError("Got function '" + arg.result.result + "' as " + "argument to '" + func + "'", this.lexer, arg.result.position - 1);
             }
         } else {
             argNode = arg.result;
@@ -5654,14 +5596,13 @@ Parser.prototype.parseArguments = function(pos, mode, func, funcData, args) {
     return newPos;
 };
 
-
 /**
  * Parses a group when the mode is changing. Takes a position, a new mode, and
  * an outer mode that is used to parse the outside.
  *
  * @return {?ParseFuncOrArgument}
  */
-Parser.prototype.parseSpecialGroup = function(pos, mode, outerMode, optional) {
+Parser.prototype.parseSpecialGroup = function (pos, mode, outerMode, optional) {
     // Handle `original` argTypes
     if (mode === "original") {
         mode = outerMode;
@@ -5685,11 +5626,7 @@ Parser.prototype.parseSpecialGroup = function(pos, mode, outerMode, optional) {
         }
         var closeBrace = this.lexer.lex(inner.position, outerMode);
         this.expect(closeBrace, optional ? "]" : "}");
-        return new ParseFuncOrArgument(
-            new ParseResult(
-                new ParseNode(mode, data, outerMode),
-                closeBrace.position),
-            false);
+        return new ParseFuncOrArgument(new ParseResult(new ParseNode(mode, data, outerMode), closeBrace.position), false);
     } else if (mode === "text") {
         // text mode is special because it should ignore the whitespace before
         // it
@@ -5710,7 +5647,7 @@ Parser.prototype.parseSpecialGroup = function(pos, mode, outerMode, optional) {
  *
  * @return {?ParseFuncOrArgument}
  */
-Parser.prototype.parseGroup = function(pos, mode) {
+Parser.prototype.parseGroup = function (pos, mode) {
     var start = this.lexer.lex(pos, mode);
     // Try to parse an open brace
     if (start.text === "{") {
@@ -5719,11 +5656,7 @@ Parser.prototype.parseGroup = function(pos, mode) {
         // Make sure we get a close brace
         var closeBrace = this.lexer.lex(expression.position, mode);
         this.expect(closeBrace, "}");
-        return new ParseFuncOrArgument(
-            new ParseResult(
-                new ParseNode("ordgroup", expression.result, mode),
-                closeBrace.position),
-            false);
+        return new ParseFuncOrArgument(new ParseResult(new ParseNode("ordgroup", expression.result, mode), closeBrace.position), false);
     } else {
         // Otherwise, just return a nucleus
         return this.parseSymbol(pos, mode);
@@ -5735,7 +5668,7 @@ Parser.prototype.parseGroup = function(pos, mode) {
  *
  * @return {?ParseFuncOrArgument}
  */
-Parser.prototype.parseOptionalGroup = function(pos, mode) {
+Parser.prototype.parseOptionalGroup = function (pos, mode) {
     var start = this.lexer.lex(pos, mode);
     // Try to parse an open bracket
     if (start.text === "[") {
@@ -5744,11 +5677,7 @@ Parser.prototype.parseOptionalGroup = function(pos, mode) {
         // Make sure we get a close bracket
         var closeBracket = this.lexer.lex(expression.position, mode);
         this.expect(closeBracket, "]");
-        return new ParseFuncOrArgument(
-            new ParseResult(
-                new ParseNode("ordgroup", expression.result, mode),
-                closeBracket.position),
-            false);
+        return new ParseFuncOrArgument(new ParseResult(new ParseNode("ordgroup", expression.result, mode), closeBracket.position), false);
     } else {
         // Otherwise, return null,
         return null;
@@ -5761,24 +5690,17 @@ Parser.prototype.parseOptionalGroup = function(pos, mode) {
  *
  * @return {?ParseFuncOrArgument}
  */
-Parser.prototype.parseSymbol = function(pos, mode) {
+Parser.prototype.parseSymbol = function (pos, mode) {
     var nucleus = this.lexer.lex(pos, mode);
 
     if (functions.funcs[nucleus.text]) {
         // If there exists a function with this name, we return the function and
         // say that it is a function.
-        return new ParseFuncOrArgument(
-            new ParseResult(nucleus.text, nucleus.position),
-            true);
+        return new ParseFuncOrArgument(new ParseResult(nucleus.text, nucleus.position), true);
     } else if (symbols[mode][nucleus.text]) {
         // Otherwise if this is a no-argument function, find the type it
         // corresponds to in the symbols map
-        return new ParseFuncOrArgument(
-            new ParseResult(
-                new ParseNode(symbols[mode][nucleus.text].group,
-                              nucleus.text, mode),
-                nucleus.position),
-            false);
+        return new ParseFuncOrArgument(new ParseResult(new ParseNode(symbols[mode][nucleus.text].group, nucleus.text, mode), nucleus.position), false);
     } else {
         return null;
     }
@@ -5788,7 +5710,7 @@ Parser.prototype.ParseNode = ParseNode;
 
 module.exports = Parser;
 
-},{"./Lexer":84,"./ParseError":86,"./environments":96,"./functions":99,"./parseData":101,"./symbols":103,"./utils":104}],88:[function(require,module,exports){
+},{"./Lexer":85,"./ParseError":87,"./environments":97,"./functions":100,"./parseData":102,"./symbols":104,"./utils":105}],89:[function(require,module,exports){
 /**
  * This is a module for storing settings passed into KaTeX. It correctly handles
  * default settings.
@@ -5797,8 +5719,10 @@ module.exports = Parser;
 /**
  * Helper function for getting a default value if the value is undefined
  */
+"use strict";
+
 function get(option, defaultValue) {
-    return option === undefined ? defaultValue : option;
+  return option === undefined ? defaultValue : option;
 }
 
 /**
@@ -5809,16 +5733,16 @@ function get(option, defaultValue) {
  *                 textstyle or displaystyle (default false)
  */
 function Settings(options) {
-    // allow null options
-    options = options || {};
-    this.displayMode = get(options.displayMode, false);
-    this.throwOnError = get(options.throwOnError, true);
-    this.errorColor = get(options.errorColor, "#cc0000");
+  // allow null options
+  options = options || {};
+  this.displayMode = get(options.displayMode, false);
+  this.throwOnError = get(options.throwOnError, true);
+  this.errorColor = get(options.errorColor, "#cc0000");
 }
 
 module.exports = Settings;
 
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 /**
  * This file contains information and classes for the various kinds of styles
  * used in TeX. It provides a generic `Style` class, which holds information
@@ -5833,6 +5757,8 @@ module.exports = Settings;
  * size multiplier, which gives the size difference between a style and
  * textstyle.
  */
+"use strict";
+
 function Style(id, size, multiplier, cramped) {
     this.id = id;
     this.size = size;
@@ -5843,14 +5769,14 @@ function Style(id, size, multiplier, cramped) {
 /**
  * Get the style of a superscript given a base in the current style.
  */
-Style.prototype.sup = function() {
+Style.prototype.sup = function () {
     return styles[sup[this.id]];
 };
 
 /**
  * Get the style of a subscript given a base in the current style.
  */
-Style.prototype.sub = function() {
+Style.prototype.sub = function () {
     return styles[sub[this.id]];
 };
 
@@ -5858,7 +5784,7 @@ Style.prototype.sub = function() {
  * Get the style of a fraction numerator given the fraction in the current
  * style.
  */
-Style.prototype.fracNum = function() {
+Style.prototype.fracNum = function () {
     return styles[fracNum[this.id]];
 };
 
@@ -5866,7 +5792,7 @@ Style.prototype.fracNum = function() {
  * Get the style of a fraction denominator given the fraction in the current
  * style.
  */
-Style.prototype.fracDen = function() {
+Style.prototype.fracDen = function () {
     return styles[fracDen[this.id]];
 };
 
@@ -5874,21 +5800,21 @@ Style.prototype.fracDen = function() {
  * Get the cramped version of a style (in particular, cramping a cramped style
  * doesn't change the style).
  */
-Style.prototype.cramp = function() {
+Style.prototype.cramp = function () {
     return styles[cramp[this.id]];
 };
 
 /**
  * HTML class name, like "displaystyle cramped"
  */
-Style.prototype.cls = function() {
+Style.prototype.cls = function () {
     return sizeNames[this.size] + (this.cramped ? " cramped" : " uncramped");
 };
 
 /**
  * HTML Reset class name, like "reset-textstyle"
  */
-Style.prototype.reset = function() {
+Style.prototype.reset = function () {
     return resetNames[this.size];
 };
 
@@ -5903,32 +5829,13 @@ var SS = 6;
 var SSc = 7;
 
 // String names for the different sizes
-var sizeNames = [
-    "displaystyle textstyle",
-    "textstyle",
-    "scriptstyle",
-    "scriptscriptstyle"
-];
+var sizeNames = ["displaystyle textstyle", "textstyle", "scriptstyle", "scriptscriptstyle"];
 
 // Reset names for the different sizes
-var resetNames = [
-    "reset-textstyle",
-    "reset-textstyle",
-    "reset-scriptstyle",
-    "reset-scriptscriptstyle"
-];
+var resetNames = ["reset-textstyle", "reset-textstyle", "reset-scriptstyle", "reset-scriptscriptstyle"];
 
 // Instances of the different styles
-var styles = [
-    new Style(D, 0, 1.0, false),
-    new Style(Dc, 0, 1.0, true),
-    new Style(T, 1, 1.0, false),
-    new Style(Tc, 1, 1.0, true),
-    new Style(S, 2, 0.7, false),
-    new Style(Sc, 2, 0.7, true),
-    new Style(SS, 3, 0.5, false),
-    new Style(SSc, 3, 0.5, true)
-];
+var styles = [new Style(D, 0, 1, false), new Style(Dc, 0, 1, true), new Style(T, 1, 1, false), new Style(Tc, 1, 1, true), new Style(S, 2, 0.7, false), new Style(Sc, 2, 0.7, true), new Style(SS, 3, 0.5, false), new Style(SSc, 3, 0.5, true)];
 
 // Lookup tables for switching from one style to another
 var sup = [S, Sc, S, Sc, SS, SSc, SS, SSc];
@@ -5946,34 +5853,23 @@ module.exports = {
     SCRIPTSCRIPT: styles[SS]
 };
 
-},{}],90:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 /**
  * This module contains general functions that can be used for building
  * different kinds of domTree nodes in a consistent manner.
  */
+
+"use strict";
 
 var domTree = require("./domTree");
 var fontMetrics = require("./fontMetrics");
 var symbols = require("./symbols");
 var utils = require("./utils");
 
-var greekCapitals = [
-    "\\Gamma",
-    "\\Delta",
-    "\\Theta",
-    "\\Lambda",
-    "\\Xi",
-    "\\Pi",
-    "\\Sigma",
-    "\\Upsilon",
-    "\\Phi",
-    "\\Psi",
-    "\\Omega"
-];
+var greekCapitals = ["\\Gamma", "\\Delta", "\\Theta", "\\Lambda", "\\Xi", "\\Pi", "\\Sigma", "\\Upsilon", "\\Phi", "\\Psi", "\\Omega"];
 
-var dotlessLetters = [
-    "\u0131",   // dotless i, \imath
-    "\u0237"    // dotless j, \jmath
+var dotlessLetters = ["ı", // dotless i, \imath
+"ȷ" // dotless j, \jmath
 ];
 
 /**
@@ -5981,7 +5877,7 @@ var dotlessLetters = [
  * Correctly pulls out metrics for the character, and optionally takes a list of
  * classes to be attached to the node.
  */
-var makeSymbol = function(value, style, mode, color, classes) {
+var makeSymbol = function makeSymbol(value, style, mode, color, classes) {
     // Replace the value with its replaced value from symbol.js
     if (symbols[mode][value] && symbols[mode][value].replace) {
         value = symbols[mode][value].replace;
@@ -5991,14 +5887,10 @@ var makeSymbol = function(value, style, mode, color, classes) {
 
     var symbolNode;
     if (metrics) {
-        symbolNode = new domTree.symbolNode(
-            value, metrics.height, metrics.depth, metrics.italic, metrics.skew,
-            classes);
+        symbolNode = new domTree.symbolNode(value, metrics.height, metrics.depth, metrics.italic, metrics.skew, classes);
     } else {
         // TODO(emily): Figure out a good way to only print this in development
-        typeof console !== "undefined" && console.warn(
-            "No character metrics for '" + value + "' in style '" +
-                style + "'");
+        typeof console !== "undefined" && console.warn("No character metrics for '" + value + "' in style '" + style + "'");
         symbolNode = new domTree.symbolNode(value, 0, 0, 0, 0, classes);
     }
 
@@ -6013,7 +5905,7 @@ var makeSymbol = function(value, style, mode, color, classes) {
  * Makes a symbol in Main-Regular or AMS-Regular.
  * Used for rel, bin, open, close, inner, and punct.
  */
-var mathsym = function(value, mode, color, classes) {
+var mathsym = function mathsym(value, mode, color, classes) {
     // Decide what font to render the symbol in by its entry in the symbols
     // table.
     // Have a special case for when the value = \ because the \ is used as a
@@ -6023,20 +5915,18 @@ var mathsym = function(value, mode, color, classes) {
     if (value === "\\" || symbols[mode][value].font === "main") {
         return makeSymbol(value, "Main-Regular", mode, color, classes);
     } else {
-        return makeSymbol(
-            value, "AMS-Regular", mode, color, classes.concat(["amsrm"]));
+        return makeSymbol(value, "AMS-Regular", mode, color, classes.concat(["amsrm"]));
     }
 };
 
 /**
  * Makes a symbol in the default font for mathords and textords.
  */
-var mathDefault = function(value, mode, color, classes, type) {
+var mathDefault = function mathDefault(value, mode, color, classes, type) {
     if (type === "mathord") {
         return mathit(value, mode, color, classes);
     } else if (type === "textord") {
-        return makeSymbol(
-            value, "Main-Regular", mode, color, classes.concat(["mathrm"]));
+        return makeSymbol(value, "Main-Regular", mode, color, classes.concat(["mathrm"]));
     } else {
         throw new Error("unexpected type: " + type + " in mathDefault");
     }
@@ -6045,24 +5935,21 @@ var mathDefault = function(value, mode, color, classes, type) {
 /**
  * Makes a symbol in the italic math font.
  */
-var mathit = function(value, mode, color, classes) {
+var mathit = function mathit(value, mode, color, classes) {
     if (/[0-9]/.test(value.charAt(0)) ||
-            // glyphs for \imath and \jmath do not exist in Math-Italic so we
-            // need to use Main-Italic instead
-            utils.contains(dotlessLetters, value) ||
-            utils.contains(greekCapitals, value)) {
-        return makeSymbol(
-            value, "Main-Italic", mode, color, classes.concat(["mainit"]));
+    // glyphs for \imath and \jmath do not exist in Math-Italic so we
+    // need to use Main-Italic instead
+    utils.contains(dotlessLetters, value) || utils.contains(greekCapitals, value)) {
+        return makeSymbol(value, "Main-Italic", mode, color, classes.concat(["mainit"]));
     } else {
-        return makeSymbol(
-            value, "Math-Italic", mode, color, classes.concat(["mathit"]));
+        return makeSymbol(value, "Math-Italic", mode, color, classes.concat(["mathit"]));
     }
 };
 
 /**
  * Makes either a mathord or textord in the correct font and color.
  */
-var makeOrd = function(group, options, type) {
+var makeOrd = function makeOrd(group, options, type) {
     var mode = group.mode;
     var value = group.value;
     if (symbols[mode][value] && symbols[mode][value].replace) {
@@ -6093,7 +5980,7 @@ var makeOrd = function(group, options, type) {
  * Calculate the height, depth, and maxFontSize of an element based on its
  * children.
  */
-var sizeElementFromChildren = function(elem) {
+var sizeElementFromChildren = function sizeElementFromChildren(elem) {
     var height = 0;
     var depth = 0;
     var maxFontSize = 0;
@@ -6120,7 +6007,7 @@ var sizeElementFromChildren = function(elem) {
 /**
  * Makes a span with the given list of classes, list of children, and color.
  */
-var makeSpan = function(classes, children, color) {
+var makeSpan = function makeSpan(classes, children, color) {
     var span = new domTree.span(classes, children);
 
     sizeElementFromChildren(span);
@@ -6135,7 +6022,7 @@ var makeSpan = function(classes, children, color) {
 /**
  * Makes a document fragment with the given list of children.
  */
-var makeFragment = function(children) {
+var makeFragment = function makeFragment(children) {
     var fragment = new domTree.documentFragment(children);
 
     sizeElementFromChildren(fragment);
@@ -6148,13 +6035,11 @@ var makeFragment = function(children) {
  * element has the same max font size. To do this, we create a zero-width space
  * with the correct font size.
  */
-var makeFontSizer = function(options, fontSize) {
-    var fontSizeInner = makeSpan([], [new domTree.symbolNode("\u200b")]);
-    fontSizeInner.style.fontSize = (fontSize / options.style.sizeMultiplier) + "em";
+var makeFontSizer = function makeFontSizer(options, fontSize) {
+    var fontSizeInner = makeSpan([], [new domTree.symbolNode("​")]);
+    fontSizeInner.style.fontSize = fontSize / options.style.sizeMultiplier + "em";
 
-    var fontSizer = makeSpan(
-        ["fontsize-ensurer", "reset-" + options.size, "size5"],
-        [fontSizeInner]);
+    var fontSizer = makeSpan(["fontsize-ensurer", "reset-" + options.size, "size5"], [fontSizeInner]);
 
     return fontSizer;
 };
@@ -6198,7 +6083,7 @@ var makeFontSizer = function(options, fontSize) {
  *  - options: An Options object
  *
  */
-var makeVList = function(children, positionType, positionData, options) {
+var makeVList = function makeVList(children, positionType, positionData, options) {
     var depth;
     var currPos;
     var i;
@@ -6211,15 +6096,12 @@ var makeVList = function(children, positionType, positionData, options) {
         depth = -oldChildren[0].shift - oldChildren[0].elem.depth;
         currPos = depth;
         for (i = 1; i < oldChildren.length; i++) {
-            var diff = -oldChildren[i].shift - currPos -
-                oldChildren[i].elem.depth;
-            var size = diff -
-                (oldChildren[i - 1].elem.height +
-                 oldChildren[i - 1].elem.depth);
+            var diff = -oldChildren[i].shift - currPos - oldChildren[i].elem.depth;
+            var size = diff - (oldChildren[i - 1].elem.height + oldChildren[i - 1].elem.depth);
 
             currPos = currPos + diff;
 
-            children.push({type: "kern", size: size});
+            children.push({ type: "kern", size: size });
             children.push(oldChildren[i]);
         }
     } else if (positionType === "top") {
@@ -6276,8 +6158,7 @@ var makeVList = function(children, positionType, positionData, options) {
 
     // Add in an element at the end with no offset to fix the calculation of
     // baselines in some browsers (namely IE, sometimes safari)
-    var baselineFix = makeSpan(
-        ["baseline-fix"], [fontSizer, new domTree.symbolNode("\u200b")]);
+    var baselineFix = makeSpan(["baseline-fix"], [fontSizer, new domTree.symbolNode("​")]);
     realChildren.push(baselineFix);
 
     var vlist = makeSpan(["vlist"], realChildren);
@@ -6294,7 +6175,7 @@ var sizingMultiplier = {
     size2: 0.7,
     size3: 0.8,
     size4: 0.9,
-    size5: 1.0,
+    size5: 1,
     size6: 1.2,
     size7: 1.44,
     size8: 1.73,
@@ -6343,11 +6224,11 @@ var spacingFunctions = {
 // A map between tex font commands an MathML mathvariant attribute values
 var fontMap = {
     // styles
-    "mathbf": {
+    mathbf: {
         variant: "bold",
         fontName: "Main-Bold"
     },
-    "mathrm": {
+    mathrm: {
         variant: "normal",
         fontName: "Main-Regular"
     },
@@ -6357,27 +6238,27 @@ var fontMap = {
     // up calling mathit.
 
     // families
-    "mathbb": {
+    mathbb: {
         variant: "double-struck",
         fontName: "AMS-Regular"
     },
-    "mathcal": {
+    mathcal: {
         variant: "script",
         fontName: "Caligraphic-Regular"
     },
-    "mathfrak": {
+    mathfrak: {
         variant: "fraktur",
         fontName: "Fraktur-Regular"
     },
-    "mathscr": {
+    mathscr: {
         variant: "script",
         fontName: "Script-Regular"
     },
-    "mathsf": {
+    mathsf: {
         variant: "sans-serif",
         fontName: "SansSerif-Regular"
     },
-    "mathtt": {
+    mathtt: {
         variant: "monospace",
         fontName: "Typewriter-Regular"
     }
@@ -6395,13 +6276,15 @@ module.exports = {
     spacingFunctions: spacingFunctions
 };
 
-},{"./domTree":95,"./fontMetrics":97,"./symbols":103,"./utils":104}],91:[function(require,module,exports){
+},{"./domTree":96,"./fontMetrics":98,"./symbols":104,"./utils":105}],92:[function(require,module,exports){
 /**
  * This file does the main work of building a domTree structure from a parse
  * tree. The entry point is the `buildHTML` function, which takes a parse tree.
  * Then, the buildExpression, buildGroup, and various groupTypes functions are
  * called, to produce a final HTML tree.
  */
+
+"use strict";
 
 var ParseError = require("./ParseError");
 var Style = require("./Style");
@@ -6419,7 +6302,7 @@ var makeSpan = buildCommon.makeSpan;
  * nodes. This function handles the `prev` node correctly, and passes the
  * previous element from the list as the prev of the next element.
  */
-var buildExpression = function(expression, options, prev) {
+var buildExpression = function buildExpression(expression, options, prev) {
     var groups = [];
     for (var i = 0; i < expression.length; i++) {
         var group = expression[i];
@@ -6468,7 +6351,17 @@ var groupToType = {
  * recursive definitions, and thus call `getTypeOfGroup` on their inner
  * elements.
  */
-var getTypeOfGroup = function(group) {
+var getTypeOfGroup = (function (_getTypeOfGroup) {
+    function getTypeOfGroup(_x) {
+        return _getTypeOfGroup.apply(this, arguments);
+    }
+
+    getTypeOfGroup.toString = function () {
+        return _getTypeOfGroup.toString();
+    };
+
+    return getTypeOfGroup;
+})(function (group) {
     if (group == null) {
         // Like when typesetting $^3$
         return groupToType.mathord;
@@ -6487,7 +6380,7 @@ var getTypeOfGroup = function(group) {
     } else {
         return groupToType[group.type];
     }
-};
+});
 
 /**
  * Sometimes, groups perform special rules when they have superscripts or
@@ -6495,14 +6388,13 @@ var getTypeOfGroup = function(group) {
  * its inner element should handle the superscripts and subscripts instead of
  * handling them itself.
  */
-var shouldHandleSupSub = function(group, options) {
+var shouldHandleSupSub = function shouldHandleSupSub(group, options) {
     if (!group) {
         return false;
     } else if (group.type === "op") {
         // Operators handle supsubs differently when they have limits
         // (e.g. `\displaystyle\sum_2^3`)
-        return group.value.limits &&
-            (options.style.size === Style.DISPLAY.size || group.value.alwaysHandleSupSub);
+        return group.value.limits && (options.style.size === Style.DISPLAY.size || group.value.alwaysHandleSupSub);
     } else if (group.type === "accent") {
         return isCharacterBox(group.value.base);
     } else {
@@ -6515,7 +6407,17 @@ var shouldHandleSupSub = function(group, options) {
  * cases, this will just be the group itself, but when ordgroups and colors have
  * a single element, we want to pull that out.
  */
-var getBaseElem = function(group) {
+var getBaseElem = (function (_getBaseElem) {
+    function getBaseElem(_x2) {
+        return _getBaseElem.apply(this, arguments);
+    }
+
+    getBaseElem.toString = function () {
+        return _getBaseElem.toString();
+    };
+
+    return getBaseElem;
+})(function (group) {
     if (!group) {
         return false;
     } else if (group.type === "ordgroup") {
@@ -6533,33 +6435,22 @@ var getBaseElem = function(group) {
     } else {
         return group;
     }
-};
+});
 
 /**
  * TeXbook algorithms often reference "character boxes", which are simply groups
  * with a single character in them. To decide if something is a character box,
  * we find its innermost group, and see if it is a single character.
  */
-var isCharacterBox = function(group) {
+var isCharacterBox = function isCharacterBox(group) {
     var baseElem = getBaseElem(group);
 
     // These are all they types of groups which hold single characters
-    return baseElem.type === "mathord" ||
-        baseElem.type === "textord" ||
-        baseElem.type === "bin" ||
-        baseElem.type === "rel" ||
-        baseElem.type === "inner" ||
-        baseElem.type === "open" ||
-        baseElem.type === "close" ||
-        baseElem.type === "punct";
+    return baseElem.type === "mathord" || baseElem.type === "textord" || baseElem.type === "bin" || baseElem.type === "rel" || baseElem.type === "inner" || baseElem.type === "open" || baseElem.type === "close" || baseElem.type === "punct";
 };
 
-var makeNullDelimiter = function(options) {
-    return makeSpan([
-        "sizing", "reset-" + options.size, "size5",
-        options.style.reset(), Style.TEXT.cls(),
-        "nulldelimiter"
-    ]);
+var makeNullDelimiter = function makeNullDelimiter(options) {
+    return makeSpan(["sizing", "reset-" + options.size, "size5", options.style.reset(), Style.TEXT.cls(), "nulldelimiter"]);
 };
 
 /**
@@ -6567,15 +6458,15 @@ var makeNullDelimiter = function(options) {
  * Simpler types come at the beginning, while complicated types come afterwards.
  */
 var groupTypes = {
-    mathord: function(group, options, prev) {
+    mathord: function mathord(group, options, prev) {
         return buildCommon.makeOrd(group, options, "mathord");
     },
 
-    textord: function(group, options, prev) {
+    textord: function textord(group, options, prev) {
         return buildCommon.makeOrd(group, options, "textord");
     },
 
-    bin: function(group, options, prev) {
+    bin: function bin(group, options, prev) {
         var className = "mbin";
         // Pull out the most recent element. Do some special handling to find
         // things at the end of a \color group. Note that we don't use the same
@@ -6588,59 +6479,44 @@ var groupTypes = {
         // See TeXbook pg. 442-446, Rules 5 and 6, and the text before Rule 19.
         // Here, we determine whether the bin should turn into an ord. We
         // currently only apply Rule 5.
-        if (!prev || utils.contains(["mbin", "mopen", "mrel", "mop", "mpunct"],
-                getTypeOfGroup(prevAtom))) {
+        if (!prev || utils.contains(["mbin", "mopen", "mrel", "mop", "mpunct"], getTypeOfGroup(prevAtom))) {
             group.type = "textord";
             className = "mord";
         }
 
-        return buildCommon.mathsym(
-            group.value, group.mode, options.getColor(), [className]);
+        return buildCommon.mathsym(group.value, group.mode, options.getColor(), [className]);
     },
 
-    rel: function(group, options, prev) {
-        return buildCommon.mathsym(
-            group.value, group.mode, options.getColor(), ["mrel"]);
+    rel: function rel(group, options, prev) {
+        return buildCommon.mathsym(group.value, group.mode, options.getColor(), ["mrel"]);
     },
 
-    open: function(group, options, prev) {
-        return buildCommon.mathsym(
-            group.value, group.mode, options.getColor(), ["mopen"]);
+    open: function open(group, options, prev) {
+        return buildCommon.mathsym(group.value, group.mode, options.getColor(), ["mopen"]);
     },
 
-    close: function(group, options, prev) {
-        return buildCommon.mathsym(
-            group.value, group.mode, options.getColor(), ["mclose"]);
+    close: function close(group, options, prev) {
+        return buildCommon.mathsym(group.value, group.mode, options.getColor(), ["mclose"]);
     },
 
-    inner: function(group, options, prev) {
-        return buildCommon.mathsym(
-            group.value, group.mode, options.getColor(), ["minner"]);
+    inner: function inner(group, options, prev) {
+        return buildCommon.mathsym(group.value, group.mode, options.getColor(), ["minner"]);
     },
 
-    punct: function(group, options, prev) {
-        return buildCommon.mathsym(
-            group.value, group.mode, options.getColor(), ["mpunct"]);
+    punct: function punct(group, options, prev) {
+        return buildCommon.mathsym(group.value, group.mode, options.getColor(), ["mpunct"]);
     },
 
-    ordgroup: function(group, options, prev) {
-        return makeSpan(
-            ["mord", options.style.cls()],
-            buildExpression(group.value, options.reset())
-        );
+    ordgroup: function ordgroup(group, options, prev) {
+        return makeSpan(["mord", options.style.cls()], buildExpression(group.value, options.reset()));
     },
 
-    text: function(group, options, prev) {
-        return makeSpan(["text", "mord", options.style.cls()],
-            buildExpression(group.value.body, options.reset()));
+    text: function text(group, options, prev) {
+        return makeSpan(["text", "mord", options.style.cls()], buildExpression(group.value.body, options.reset()));
     },
 
-    color: function(group, options, prev) {
-        var elements = buildExpression(
-            group.value.value,
-            options.withColor(group.value.color),
-            prev
-        );
+    color: function color(group, options, prev) {
+        var elements = buildExpression(group.value.value, options.withColor(group.value.color), prev);
 
         // \color isn't supposed to affect the type of the elements it contains.
         // To accomplish this, we wrap the results in a fragment, so the inner
@@ -6649,7 +6525,7 @@ var groupTypes = {
         return new buildCommon.makeFragment(elements);
     },
 
-    supsub: function(group, options, prev) {
+    supsub: function supsub(group, options, prev) {
         // Superscript and subscripts are handled in the TeXbook on page
         // 445-446, rules 18(a-f).
 
@@ -6663,17 +6539,13 @@ var groupTypes = {
         var supmid, submid, sup, sub;
 
         if (group.value.sup) {
-            sup = buildGroup(group.value.sup,
-                    options.withStyle(options.style.sup()));
-            supmid = makeSpan(
-                    [options.style.reset(), options.style.sup().cls()], [sup]);
+            sup = buildGroup(group.value.sup, options.withStyle(options.style.sup()));
+            supmid = makeSpan([options.style.reset(), options.style.sup().cls()], [sup]);
         }
 
         if (group.value.sub) {
-            sub = buildGroup(group.value.sub,
-                    options.withStyle(options.style.sub()));
-            submid = makeSpan(
-                    [options.style.reset(), options.style.sub().cls()], [sub]);
+            sub = buildGroup(group.value.sub, options.withStyle(options.style.sub()));
+            submid = makeSpan([options.style.reset(), options.style.sub().cls()], [sub]);
         }
 
         // Rule 18a
@@ -6698,21 +6570,15 @@ var groupTypes = {
 
         // scriptspace is a font-size-independent size, so scale it
         // appropriately
-        var multiplier = Style.TEXT.sizeMultiplier *
-                options.style.sizeMultiplier;
-        var scriptspace =
-            (0.5 / fontMetrics.metrics.ptPerEm) / multiplier + "em";
+        var multiplier = Style.TEXT.sizeMultiplier * options.style.sizeMultiplier;
+        var scriptspace = 0.5 / fontMetrics.metrics.ptPerEm / multiplier + "em";
 
         var supsub;
         if (!group.value.sup) {
             // Rule 18b
-            subShift = Math.max(
-                subShift, fontMetrics.metrics.sub1,
-                sub.height - 0.8 * fontMetrics.metrics.xHeight);
+            subShift = Math.max(subShift, fontMetrics.metrics.sub1, sub.height - 0.8 * fontMetrics.metrics.xHeight);
 
-            supsub = buildCommon.makeVList([
-                {type: "elem", elem: submid}
-            ], "shift", subShift, options);
+            supsub = buildCommon.makeVList([{ type: "elem", elem: submid }], "shift", subShift, options);
 
             supsub.children[0].style.marginRight = scriptspace;
 
@@ -6724,38 +6590,28 @@ var groupTypes = {
             }
         } else if (!group.value.sub) {
             // Rule 18c, d
-            supShift = Math.max(supShift, minSupShift,
-                sup.depth + 0.25 * fontMetrics.metrics.xHeight);
+            supShift = Math.max(supShift, minSupShift, sup.depth + 0.25 * fontMetrics.metrics.xHeight);
 
-            supsub = buildCommon.makeVList([
-                {type: "elem", elem: supmid}
-            ], "shift", -supShift, options);
+            supsub = buildCommon.makeVList([{ type: "elem", elem: supmid }], "shift", -supShift, options);
 
             supsub.children[0].style.marginRight = scriptspace;
         } else {
-            supShift = Math.max(
-                supShift, minSupShift,
-                sup.depth + 0.25 * fontMetrics.metrics.xHeight);
+            supShift = Math.max(supShift, minSupShift, sup.depth + 0.25 * fontMetrics.metrics.xHeight);
             subShift = Math.max(subShift, fontMetrics.metrics.sub2);
 
             var ruleWidth = fontMetrics.metrics.defaultRuleThickness;
 
             // Rule 18e
-            if ((supShift - sup.depth) - (sub.height - subShift) <
-                    4 * ruleWidth) {
+            if (supShift - sup.depth - (sub.height - subShift) < 4 * ruleWidth) {
                 subShift = 4 * ruleWidth - (supShift - sup.depth) + sub.height;
-                var psi = 0.8 * fontMetrics.metrics.xHeight -
-                    (supShift - sup.depth);
+                var psi = 0.8 * fontMetrics.metrics.xHeight - (supShift - sup.depth);
                 if (psi > 0) {
                     supShift += psi;
                     subShift -= psi;
                 }
             }
 
-            supsub = buildCommon.makeVList([
-                {type: "elem", elem: submid, shift: subShift},
-                {type: "elem", elem: supmid, shift: -supShift}
-            ], "individualShift", null, options);
+            supsub = buildCommon.makeVList([{ type: "elem", elem: submid, shift: subShift }, { type: "elem", elem: supmid, shift: -supShift }], "individualShift", null, options);
 
             // See comment above about subscripts not being shifted
             if (base instanceof domTree.symbolNode) {
@@ -6766,11 +6622,10 @@ var groupTypes = {
             supsub.children[1].style.marginRight = scriptspace;
         }
 
-        return makeSpan([getTypeOfGroup(group.value.base)],
-            [base, supsub]);
+        return makeSpan([getTypeOfGroup(group.value.base)], [base, supsub]);
     },
 
-    genfrac: function(group, options, prev) {
+    genfrac: function genfrac(group, options, prev) {
         // Fractions are handled in the TeXbook on pages 444-445, rules 15(a-e).
         // Figure out what style this fraction should be in based on the
         // function used
@@ -6792,8 +6647,7 @@ var groupTypes = {
 
         var ruleWidth;
         if (group.value.hasBarLine) {
-            ruleWidth = fontMetrics.metrics.defaultRuleThickness /
-                options.style.sizeMultiplier;
+            ruleWidth = fontMetrics.metrics.defaultRuleThickness / options.style.sizeMultiplier;
         } else {
             ruleWidth = 0;
         }
@@ -6824,48 +6678,33 @@ var groupTypes = {
         var frac;
         if (ruleWidth === 0) {
             // Rule 15c
-            var candiateClearance =
-                (numShift - numer.depth) - (denom.height - denomShift);
+            var candiateClearance = numShift - numer.depth - (denom.height - denomShift);
             if (candiateClearance < clearance) {
                 numShift += 0.5 * (clearance - candiateClearance);
                 denomShift += 0.5 * (clearance - candiateClearance);
             }
 
-            frac = buildCommon.makeVList([
-                {type: "elem", elem: denomreset, shift: denomShift},
-                {type: "elem", elem: numerreset, shift: -numShift}
-            ], "individualShift", null, options);
+            frac = buildCommon.makeVList([{ type: "elem", elem: denomreset, shift: denomShift }, { type: "elem", elem: numerreset, shift: -numShift }], "individualShift", null, options);
         } else {
             // Rule 15d
             var axisHeight = fontMetrics.metrics.axisHeight;
 
-            if ((numShift - numer.depth) - (axisHeight + 0.5 * ruleWidth) <
-                    clearance) {
-                numShift +=
-                    clearance - ((numShift - numer.depth) -
-                                 (axisHeight + 0.5 * ruleWidth));
+            if (numShift - numer.depth - (axisHeight + 0.5 * ruleWidth) < clearance) {
+                numShift += clearance - (numShift - numer.depth - (axisHeight + 0.5 * ruleWidth));
             }
 
-            if ((axisHeight - 0.5 * ruleWidth) - (denom.height - denomShift) <
-                    clearance) {
-                denomShift +=
-                    clearance - ((axisHeight - 0.5 * ruleWidth) -
-                                 (denom.height - denomShift));
+            if (axisHeight - 0.5 * ruleWidth - (denom.height - denomShift) < clearance) {
+                denomShift += clearance - (axisHeight - 0.5 * ruleWidth - (denom.height - denomShift));
             }
 
-            var mid = makeSpan(
-                [options.style.reset(), Style.TEXT.cls(), "frac-line"]);
+            var mid = makeSpan([options.style.reset(), Style.TEXT.cls(), "frac-line"]);
             // Manually set the height of the line because its height is
             // created in CSS
             mid.height = ruleWidth;
 
             var midShift = -(axisHeight - 0.5 * ruleWidth);
 
-            frac = buildCommon.makeVList([
-                {type: "elem", elem: denomreset, shift: denomShift},
-                {type: "elem", elem: mid,        shift: midShift},
-                {type: "elem", elem: numerreset, shift: -numShift}
-            ], "individualShift", null, options);
+            frac = buildCommon.makeVList([{ type: "elem", elem: denomreset, shift: denomShift }, { type: "elem", elem: mid, shift: midShift }, { type: "elem", elem: numerreset, shift: -numShift }], "individualShift", null, options);
         }
 
         // Since we manually change the style sometimes (with \dfrac or \tfrac),
@@ -6885,25 +6724,18 @@ var groupTypes = {
         if (group.value.leftDelim == null) {
             leftDelim = makeNullDelimiter(options);
         } else {
-            leftDelim = delimiter.customSizedDelim(
-                group.value.leftDelim, delimSize, true,
-                options.withStyle(fstyle), group.mode);
+            leftDelim = delimiter.customSizedDelim(group.value.leftDelim, delimSize, true, options.withStyle(fstyle), group.mode);
         }
         if (group.value.rightDelim == null) {
             rightDelim = makeNullDelimiter(options);
         } else {
-            rightDelim = delimiter.customSizedDelim(
-                group.value.rightDelim, delimSize, true,
-                options.withStyle(fstyle), group.mode);
+            rightDelim = delimiter.customSizedDelim(group.value.rightDelim, delimSize, true, options.withStyle(fstyle), group.mode);
         }
 
-        return makeSpan(
-            ["mord", options.style.reset(), fstyle.cls()],
-            [leftDelim, makeSpan(["mfrac"], [frac]), rightDelim],
-            options.getColor());
+        return makeSpan(["mord", options.style.reset(), fstyle.cls()], [leftDelim, makeSpan(["mfrac"], [frac]), rightDelim], options.getColor());
     },
 
-    array: function(group, options, prev) {
+    array: function array(group, options, prev) {
         var r, c;
         var nr = group.value.body.length;
         var nc = 0;
@@ -6920,13 +6752,13 @@ var groupTypes = {
         var arraystretch = utils.deflt(group.value.arraystretch, 1);
         var arrayskip = arraystretch * baselineskip;
         var arstrutHeight = 0.7 * arrayskip; // \strutbox in ltfsstrc.dtx and
-        var arstrutDepth = 0.3 * arrayskip;  // \@arstrutbox in lttab.dtx
+        var arstrutDepth = 0.3 * arrayskip; // \@arstrutbox in lttab.dtx
 
         var totalHeight = 0;
         for (r = 0; r < group.value.body.length; ++r) {
             var inrow = group.value.body[r];
             var height = arstrutHeight; // \@array adds an \@arstrut
-            var depth = arstrutDepth;   // to each tow (via the template)
+            var depth = arstrutDepth; // to each tow (via the template)
 
             if (nc < inrow.length) {
                 nc = inrow.length;
@@ -6948,17 +6780,18 @@ var groupTypes = {
             if (group.value.rowGaps[r]) {
                 gap = group.value.rowGaps[r].value;
                 switch (gap.unit) {
-                case "em":
-                    gap = gap.number;
-                    break;
-                case "ex":
-                    gap = gap.number * fontMetrics.metrics.emPerEx;
-                    break;
-                default:
-                    console.error("Can't handle unit " + gap.unit);
-                    gap = 0;
+                    case "em":
+                        gap = gap.number;
+                        break;
+                    case "ex":
+                        gap = gap.number * fontMetrics.metrics.emPerEx;
+                        break;
+                    default:
+                        console.error("Can't handle unit " + gap.unit);
+                        gap = 0;
                 }
-                if (gap > 0) { // \@argarraycr
+                if (gap > 0) {
+                    // \@argarraycr
                     gap += arstrutDepth;
                     if (depth < gap) {
                         depth = gap; // \@xargarraycr
@@ -6981,10 +6814,9 @@ var groupTypes = {
         var colSep;
         var colDescrNum;
         for (c = 0, colDescrNum = 0;
-             // Continue while either there are more columns or more column
-             // descriptions, so trailing separators don't get lost.
-             c < nc || colDescrNum < colDescriptions.length;
-             ++c, ++colDescrNum) {
+        // Continue while either there are more columns or more column
+        // descriptions, so trailing separators don't get lost.
+        c < nc || colDescrNum < colDescriptions.length; ++c, ++colDescrNum) {
 
             var colDescr = colDescriptions[colDescrNum] || {};
 
@@ -6994,23 +6826,18 @@ var groupTypes = {
                 // between them.
                 if (!firstSeparator) {
                     colSep = makeSpan(["arraycolsep"], []);
-                    colSep.style.width =
-                        fontMetrics.metrics.doubleRuleSep + "em";
+                    colSep.style.width = fontMetrics.metrics.doubleRuleSep + "em";
                     cols.push(colSep);
                 }
 
                 if (colDescr.separator === "|") {
-                    var separator = makeSpan(
-                        ["vertical-separator"],
-                        []);
+                    var separator = makeSpan(["vertical-separator"], []);
                     separator.style.height = totalHeight + "em";
-                    separator.style.verticalAlign =
-                        -(totalHeight - offset) + "em";
+                    separator.style.verticalAlign = -(totalHeight - offset) + "em";
 
                     cols.push(separator);
                 } else {
-                    throw new ParseError(
-                        "Invalid separator type: " + colDescr.separator);
+                    throw new ParseError("Invalid separator type: " + colDescr.separator);
                 }
 
                 colDescrNum++;
@@ -7042,13 +6869,11 @@ var groupTypes = {
                 var shift = row.pos - offset;
                 elem.depth = row.depth;
                 elem.height = row.height;
-                col.push({type: "elem", elem: elem, shift: shift});
+                col.push({ type: "elem", elem: elem, shift: shift });
             }
 
             col = buildCommon.makeVList(col, "individualShift", null, options);
-            col = makeSpan(
-                ["col-align-" + (colDescr.align || "c")],
-                [col]);
+            col = makeSpan(["col-align-" + (colDescr.align || "c")], [col]);
             cols.push(col);
 
             if (c < nc - 1 || group.value.hskipBeforeAndAfter) {
@@ -7064,47 +6889,37 @@ var groupTypes = {
         return makeSpan(["mord"], [body], options.getColor());
     },
 
-    spacing: function(group, options, prev) {
-        if (group.value === "\\ " || group.value === "\\space" ||
-            group.value === " " || group.value === "~") {
+    spacing: function spacing(group, options, prev) {
+        if (group.value === "\\ " || group.value === "\\space" || group.value === " " || group.value === "~") {
             // Spaces are generated by adding an actual space. Each of these
             // things has an entry in the symbols table, so these will be turned
             // into appropriate outputs.
-            return makeSpan(
-                ["mord", "mspace"],
-                [buildCommon.mathsym(group.value, group.mode)]
-            );
+            return makeSpan(["mord", "mspace"], [buildCommon.mathsym(group.value, group.mode)]);
         } else {
             // Other kinds of spaces are of arbitrary width. We use CSS to
             // generate these.
-            return makeSpan(
-                ["mord", "mspace",
-                 buildCommon.spacingFunctions[group.value].className]);
+            return makeSpan(["mord", "mspace", buildCommon.spacingFunctions[group.value].className]);
         }
     },
 
-    llap: function(group, options, prev) {
-        var inner = makeSpan(
-            ["inner"], [buildGroup(group.value.body, options.reset())]);
+    llap: function llap(group, options, prev) {
+        var inner = makeSpan(["inner"], [buildGroup(group.value.body, options.reset())]);
         var fix = makeSpan(["fix"], []);
-        return makeSpan(
-            ["llap", options.style.cls()], [inner, fix]);
+        return makeSpan(["llap", options.style.cls()], [inner, fix]);
     },
 
-    rlap: function(group, options, prev) {
-        var inner = makeSpan(
-            ["inner"], [buildGroup(group.value.body, options.reset())]);
+    rlap: function rlap(group, options, prev) {
+        var inner = makeSpan(["inner"], [buildGroup(group.value.body, options.reset())]);
         var fix = makeSpan(["fix"], []);
-        return makeSpan(
-            ["rlap", options.style.cls()], [inner, fix]);
+        return makeSpan(["rlap", options.style.cls()], [inner, fix]);
     },
 
-    op: function(group, options, prev) {
+    op: function op(group, options, prev) {
         // Operators are handled in the TeXbook pg. 443-444, rule 13(a).
         var supGroup;
         var subGroup;
         var hasLimits = false;
-        if (group.type === "supsub" ) {
+        if (group.type === "supsub") {
             // If we have limits, supsub will pass us its group to handle. Pull
             // out the superscript and subscript and set the group to the op in
             // its base.
@@ -7115,14 +6930,10 @@ var groupTypes = {
         }
 
         // Most operators have a large successor symbol, but these don't.
-        var noSuccessor = [
-            "\\smallint"
-        ];
+        var noSuccessor = ["\\smallint"];
 
         var large = false;
-        if (options.style.size === Style.DISPLAY.size &&
-            group.value.symbol &&
-            !utils.contains(noSuccessor, group.value.body)) {
+        if (options.style.size === Style.DISPLAY.size && group.value.symbol && !utils.contains(noSuccessor, group.value.body)) {
 
             // Most symbol operators get larger in displaystyle (rule 13)
             large = true;
@@ -7134,18 +6945,14 @@ var groupTypes = {
         if (group.value.symbol) {
             // If this is a symbol, create the symbol.
             var style = large ? "Size2-Regular" : "Size1-Regular";
-            base = buildCommon.makeSymbol(
-                group.value.body, style, "math", options.getColor(),
-                ["op-symbol", large ? "large-op" : "small-op", "mop"]);
+            base = buildCommon.makeSymbol(group.value.body, style, "math", options.getColor(), ["op-symbol", large ? "large-op" : "small-op", "mop"]);
 
             // Shift the symbol so its center lies on the axis (rule 13). It
             // appears that our fonts have the centers of the symbols already
             // almost on the axis, so these numbers are very small. Note we
             // don't actually apply this here, but instead it is used either in
             // the vlist creation or separately when there are no limits.
-            baseShift = (base.height - base.depth) / 2 -
-                fontMetrics.metrics.axisHeight *
-                options.style.sizeMultiplier;
+            baseShift = (base.height - base.depth) / 2 - fontMetrics.metrics.axisHeight * options.style.sizeMultiplier;
 
             // The slant of the symbol is just its italic correction.
             slant = base.italic;
@@ -7170,26 +6977,17 @@ var groupTypes = {
             // We manually have to handle the superscripts and subscripts. This,
             // aside from the kern calculations, is copied from supsub.
             if (supGroup) {
-                var sup = buildGroup(
-                    supGroup, options.withStyle(options.style.sup()));
-                supmid = makeSpan(
-                    [options.style.reset(), options.style.sup().cls()], [sup]);
+                var sup = buildGroup(supGroup, options.withStyle(options.style.sup()));
+                supmid = makeSpan([options.style.reset(), options.style.sup().cls()], [sup]);
 
-                supKern = Math.max(
-                    fontMetrics.metrics.bigOpSpacing1,
-                    fontMetrics.metrics.bigOpSpacing3 - sup.depth);
+                supKern = Math.max(fontMetrics.metrics.bigOpSpacing1, fontMetrics.metrics.bigOpSpacing3 - sup.depth);
             }
 
             if (subGroup) {
-                var sub = buildGroup(
-                    subGroup, options.withStyle(options.style.sub()));
-                submid = makeSpan(
-                    [options.style.reset(), options.style.sub().cls()],
-                    [sub]);
+                var sub = buildGroup(subGroup, options.withStyle(options.style.sub()));
+                submid = makeSpan([options.style.reset(), options.style.sub().cls()], [sub]);
 
-                subKern = Math.max(
-                    fontMetrics.metrics.bigOpSpacing2,
-                    fontMetrics.metrics.bigOpSpacing4 - sub.height);
+                subKern = Math.max(fontMetrics.metrics.bigOpSpacing2, fontMetrics.metrics.bigOpSpacing4 - sub.height);
             }
 
             // Build the final group as a vlist of the possible subscript, base,
@@ -7198,12 +6996,7 @@ var groupTypes = {
             if (!supGroup) {
                 top = base.height - baseShift;
 
-                finalGroup = buildCommon.makeVList([
-                    {type: "kern", size: fontMetrics.metrics.bigOpSpacing5},
-                    {type: "elem", elem: submid},
-                    {type: "kern", size: subKern},
-                    {type: "elem", elem: base}
-                ], "top", top, options);
+                finalGroup = buildCommon.makeVList([{ type: "kern", size: fontMetrics.metrics.bigOpSpacing5 }, { type: "elem", elem: submid }, { type: "kern", size: subKern }, { type: "elem", elem: base }], "top", top, options);
 
                 // Here, we shift the limits by the slant of the symbol. Note
                 // that we are supposed to shift the limits by 1/2 of the slant,
@@ -7213,12 +7006,7 @@ var groupTypes = {
             } else if (!subGroup) {
                 bottom = base.depth + baseShift;
 
-                finalGroup = buildCommon.makeVList([
-                    {type: "elem", elem: base},
-                    {type: "kern", size: supKern},
-                    {type: "elem", elem: supmid},
-                    {type: "kern", size: fontMetrics.metrics.bigOpSpacing5}
-                ], "bottom", bottom, options);
+                finalGroup = buildCommon.makeVList([{ type: "elem", elem: base }, { type: "kern", size: supKern }, { type: "elem", elem: supmid }, { type: "kern", size: fontMetrics.metrics.bigOpSpacing5 }], "bottom", bottom, options);
 
                 // See comment above about slants
                 finalGroup.children[1].style.marginLeft = slant + "em";
@@ -7228,20 +7016,9 @@ var groupTypes = {
                 // subscript) but be safe.
                 return base;
             } else {
-                bottom = fontMetrics.metrics.bigOpSpacing5 +
-                    submid.height + submid.depth +
-                    subKern +
-                    base.depth + baseShift;
+                bottom = fontMetrics.metrics.bigOpSpacing5 + submid.height + submid.depth + subKern + base.depth + baseShift;
 
-                finalGroup = buildCommon.makeVList([
-                    {type: "kern", size: fontMetrics.metrics.bigOpSpacing5},
-                    {type: "elem", elem: submid},
-                    {type: "kern", size: subKern},
-                    {type: "elem", elem: base},
-                    {type: "kern", size: supKern},
-                    {type: "elem", elem: supmid},
-                    {type: "kern", size: fontMetrics.metrics.bigOpSpacing5}
-                ], "bottom", bottom, options);
+                finalGroup = buildCommon.makeVList([{ type: "kern", size: fontMetrics.metrics.bigOpSpacing5 }, { type: "elem", elem: submid }, { type: "kern", size: subKern }, { type: "elem", elem: base }, { type: "kern", size: supKern }, { type: "elem", elem: supmid }, { type: "kern", size: fontMetrics.metrics.bigOpSpacing5 }], "bottom", bottom, options);
 
                 // See comment above about slants
                 finalGroup.children[0].style.marginLeft = -slant + "em";
@@ -7258,76 +7035,58 @@ var groupTypes = {
         }
     },
 
-    katex: function(group, options, prev) {
+    katex: function katex(group, options, prev) {
         // The KaTeX logo. The offsets for the K and a were chosen to look
         // good, but the offsets for the T, E, and X were taken from the
         // definition of \TeX in TeX (see TeXbook pg. 356)
-        var k = makeSpan(
-            ["k"], [buildCommon.mathsym("K", group.mode)]);
-        var a = makeSpan(
-            ["a"], [buildCommon.mathsym("A", group.mode)]);
+        var k = makeSpan(["k"], [buildCommon.mathsym("K", group.mode)]);
+        var a = makeSpan(["a"], [buildCommon.mathsym("A", group.mode)]);
 
         a.height = (a.height + 0.2) * 0.75;
         a.depth = (a.height - 0.2) * 0.75;
 
-        var t = makeSpan(
-            ["t"], [buildCommon.mathsym("T", group.mode)]);
-        var e = makeSpan(
-            ["e"], [buildCommon.mathsym("E", group.mode)]);
+        var t = makeSpan(["t"], [buildCommon.mathsym("T", group.mode)]);
+        var e = makeSpan(["e"], [buildCommon.mathsym("E", group.mode)]);
 
-        e.height = (e.height - 0.2155);
-        e.depth = (e.depth + 0.2155);
+        e.height = e.height - 0.2155;
+        e.depth = e.depth + 0.2155;
 
-        var x = makeSpan(
-            ["x"], [buildCommon.mathsym("X", group.mode)]);
+        var x = makeSpan(["x"], [buildCommon.mathsym("X", group.mode)]);
 
-        return makeSpan(
-            ["katex-logo", "mord"], [k, a, t, e, x], options.getColor());
+        return makeSpan(["katex-logo", "mord"], [k, a, t, e, x], options.getColor());
     },
 
-    overline: function(group, options, prev) {
+    overline: function overline(group, options, prev) {
         // Overlines are handled in the TeXbook pg 443, Rule 9.
 
         // Build the inner group in the cramped style.
-        var innerGroup = buildGroup(group.value.body,
-                options.withStyle(options.style.cramp()));
+        var innerGroup = buildGroup(group.value.body, options.withStyle(options.style.cramp()));
 
-        var ruleWidth = fontMetrics.metrics.defaultRuleThickness /
-            options.style.sizeMultiplier;
+        var ruleWidth = fontMetrics.metrics.defaultRuleThickness / options.style.sizeMultiplier;
 
         // Create the line above the body
-        var line = makeSpan(
-            [options.style.reset(), Style.TEXT.cls(), "overline-line"]);
+        var line = makeSpan([options.style.reset(), Style.TEXT.cls(), "overline-line"]);
         line.height = ruleWidth;
-        line.maxFontSize = 1.0;
+        line.maxFontSize = 1;
 
         // Generate the vlist, with the appropriate kerns
-        var vlist = buildCommon.makeVList([
-            {type: "elem", elem: innerGroup},
-            {type: "kern", size: 3 * ruleWidth},
-            {type: "elem", elem: line},
-            {type: "kern", size: ruleWidth}
-        ], "firstBaseline", null, options);
+        var vlist = buildCommon.makeVList([{ type: "elem", elem: innerGroup }, { type: "kern", size: 3 * ruleWidth }, { type: "elem", elem: line }, { type: "kern", size: ruleWidth }], "firstBaseline", null, options);
 
         return makeSpan(["overline", "mord"], [vlist], options.getColor());
     },
 
-    sqrt: function(group, options, prev) {
+    sqrt: function sqrt(group, options, prev) {
         // Square roots are handled in the TeXbook pg. 443, Rule 11.
 
         // First, we do the same steps as in overline to build the inner group
         // and line
-        var inner = buildGroup(group.value.body,
-                options.withStyle(options.style.cramp()));
+        var inner = buildGroup(group.value.body, options.withStyle(options.style.cramp()));
 
-        var ruleWidth = fontMetrics.metrics.defaultRuleThickness /
-            options.style.sizeMultiplier;
+        var ruleWidth = fontMetrics.metrics.defaultRuleThickness / options.style.sizeMultiplier;
 
-        var line = makeSpan(
-            [options.style.reset(), Style.TEXT.cls(), "sqrt-line"], [],
-            options.getColor());
+        var line = makeSpan([options.style.reset(), Style.TEXT.cls(), "sqrt-line"], [], options.getColor());
         line.height = ruleWidth;
-        line.maxFontSize = 1.0;
+        line.maxFontSize = 1;
 
         var phi = ruleWidth;
         if (options.style.id < Style.TEXT.id) {
@@ -7337,22 +7096,17 @@ var groupTypes = {
         // Calculate the clearance between the body and line
         var lineClearance = ruleWidth + phi / 4;
 
-        var innerHeight =
-            (inner.height + inner.depth) * options.style.sizeMultiplier;
+        var innerHeight = (inner.height + inner.depth) * options.style.sizeMultiplier;
         var minDelimiterHeight = innerHeight + lineClearance + ruleWidth;
 
         // Create a \surd delimiter of the required minimum size
-        var delim = makeSpan(["sqrt-sign"], [
-            delimiter.customSizedDelim("\\surd", minDelimiterHeight,
-                                       false, options, group.mode)],
-                             options.getColor());
+        var delim = makeSpan(["sqrt-sign"], [delimiter.customSizedDelim("\\surd", minDelimiterHeight, false, options, group.mode)], options.getColor());
 
-        var delimDepth = (delim.height + delim.depth) - ruleWidth;
+        var delimDepth = delim.height + delim.depth - ruleWidth;
 
         // Adjust the clearance based on the delimiter size
         if (delimDepth > inner.height + inner.depth + lineClearance) {
-            lineClearance =
-                (lineClearance + delimDepth - inner.height - inner.depth) / 2;
+            lineClearance = (lineClearance + delimDepth - inner.height - inner.depth) / 2;
         }
 
         // Shift the delimiter so that its top lines up with the top of the line
@@ -7370,12 +7124,7 @@ var groupTypes = {
         if (inner.height === 0 && inner.depth === 0) {
             body = makeSpan();
         } else {
-            body = buildCommon.makeVList([
-                {type: "elem", elem: inner},
-                {type: "kern", size: lineClearance},
-                {type: "elem", elem: line},
-                {type: "kern", size: ruleWidth}
-            ], "firstBaseline", null, options);
+            body = buildCommon.makeVList([{ type: "elem", elem: inner }, { type: "kern", size: lineClearance }, { type: "elem", elem: line }, { type: "kern", size: ruleWidth }], "firstBaseline", null, options);
         }
 
         if (!group.value.index) {
@@ -7384,12 +7133,8 @@ var groupTypes = {
             // Handle the optional root index
 
             // The index is always in scriptscript style
-            var root = buildGroup(
-                group.value.index,
-                options.withStyle(Style.SCRIPTSCRIPT));
-            var rootWrap = makeSpan(
-                [options.style.reset(), Style.SCRIPTSCRIPT.cls()],
-                [root]);
+            var root = buildGroup(group.value.index, options.withStyle(Style.SCRIPTSCRIPT));
+            var rootWrap = makeSpan([options.style.reset(), Style.SCRIPTSCRIPT.cls()], [root]);
 
             // Figure out the height and depth of the inner part
             var innerRootHeight = Math.max(delim.height, body.height);
@@ -7400,9 +7145,7 @@ var groupTypes = {
             var toShift = 0.6 * (innerRootHeight - innerRootDepth);
 
             // Build a VList with the superscript shifted up correctly
-            var rootVList = buildCommon.makeVList(
-                [{type: "elem", elem: rootWrap}],
-                "shift", -toShift, options);
+            var rootVList = buildCommon.makeVList([{ type: "elem", elem: rootWrap }], "shift", -toShift, options);
             // Add a class surrounding it so we can add on the appropriate
             // kerning
             var rootVListWrap = makeSpan(["root"], [rootVList]);
@@ -7411,17 +7154,13 @@ var groupTypes = {
         }
     },
 
-    sizing: function(group, options, prev) {
+    sizing: function sizing(group, options, prev) {
         // Handle sizing operators like \Huge. Real TeX doesn't actually allow
         // these functions inside of math expressions, so we do some special
         // handling.
-        var inner = buildExpression(group.value.value,
-                options.withSize(group.value.size), prev);
+        var inner = buildExpression(group.value.value, options.withSize(group.value.size), prev);
 
-        var span = makeSpan(["mord"],
-            [makeSpan(["sizing", "reset-" + options.size, group.value.size,
-                       options.style.cls()],
-                      inner)]);
+        var span = makeSpan(["mord"], [makeSpan(["sizing", "reset-" + options.size, group.value.size, options.style.cls()], inner)]);
 
         // Calculate the correct maxFontSize manually
         var fontSize = buildCommon.sizingMultiplier[group.value.size];
@@ -7430,32 +7169,31 @@ var groupTypes = {
         return span;
     },
 
-    styling: function(group, options, prev) {
+    styling: function styling(group, options, prev) {
         // Style changes are handled in the TeXbook on pg. 442, Rule 3.
 
         // Figure out what style we're changing to.
         var style = {
-            "display": Style.DISPLAY,
-            "text": Style.TEXT,
-            "script": Style.SCRIPT,
-            "scriptscript": Style.SCRIPTSCRIPT
+            display: Style.DISPLAY,
+            text: Style.TEXT,
+            script: Style.SCRIPT,
+            scriptscript: Style.SCRIPTSCRIPT
         };
 
         var newStyle = style[group.value.style];
 
         // Build the inner expression in the new style.
-        var inner = buildExpression(
-            group.value.value, options.withStyle(newStyle), prev);
+        var inner = buildExpression(group.value.value, options.withStyle(newStyle), prev);
 
         return makeSpan([options.style.reset(), newStyle.cls()], inner);
     },
 
-    font: function(group, options, prev) {
+    font: function font(group, options, prev) {
         var font = group.value.font;
         return buildGroup(group.value.body, options.withFont(font), prev);
     },
 
-    delimsizing: function(group, options, prev) {
+    delimsizing: function delimsizing(group, options, prev) {
         var delim = group.value.value;
 
         if (delim === ".") {
@@ -7465,13 +7203,10 @@ var groupTypes = {
         }
 
         // Use delimiter.sizedDelim to generate the delimiter.
-        return makeSpan(
-            [groupToType[group.value.delimType]],
-            [delimiter.sizedDelim(
-                delim, group.value.size, options, group.mode)]);
+        return makeSpan([groupToType[group.value.delimType]], [delimiter.sizedDelim(delim, group.value.size, options, group.mode)]);
     },
 
-    leftright: function(group, options, prev) {
+    leftright: function leftright(group, options, prev) {
         // Build the inner expression
         var inner = buildExpression(group.value.body, options.reset());
 
@@ -7497,9 +7232,7 @@ var groupTypes = {
         } else {
             // Otherwise, use leftRightDelim to generate the correct sized
             // delimiter.
-            leftDelim = delimiter.leftRightDelim(
-                group.value.left, innerHeight, innerDepth, options,
-                group.mode);
+            leftDelim = delimiter.leftRightDelim(group.value.left, innerHeight, innerDepth, options, group.mode);
         }
         // Add it to the beginning of the expression
         inner.unshift(leftDelim);
@@ -7509,18 +7242,15 @@ var groupTypes = {
         if (group.value.right === ".") {
             rightDelim = makeNullDelimiter(options);
         } else {
-            rightDelim = delimiter.leftRightDelim(
-                group.value.right, innerHeight, innerDepth, options,
-                group.mode);
+            rightDelim = delimiter.leftRightDelim(group.value.right, innerHeight, innerDepth, options, group.mode);
         }
         // Add it to the end of the expression.
         inner.push(rightDelim);
 
-        return makeSpan(
-            ["minner", options.style.cls()], inner, options.getColor());
+        return makeSpan(["minner", options.style.cls()], inner, options.getColor());
     },
 
-    rule: function(group, options, prev) {
+    rule: function rule(group, options, prev) {
         // Make an empty span for the rule
         var rule = makeSpan(["mord", "rule"], [], options.getColor());
 
@@ -7562,7 +7292,7 @@ var groupTypes = {
         return rule;
     },
 
-    accent: function(group, options, prev) {
+    accent: function accent(group, options, prev) {
         // Accents are handled in the TeXbook pg. 443, rule 12.
         var base = group.value.base;
 
@@ -7587,13 +7317,11 @@ var groupTypes = {
 
             // Rerender the supsub group with its new base, and store that
             // result.
-            supsubGroup = buildGroup(
-                supsub, options.reset(), prev);
+            supsubGroup = buildGroup(supsub, options.reset(), prev);
         }
 
         // Build the base group
-        var body = buildGroup(
-            base, options.withStyle(options.style.cramp()));
+        var body = buildGroup(base, options.withStyle(options.style.cramp()));
 
         // Calculate the skew of the accent. This is based on the line "If the
         // nucleus is not a single character, let s = 0; otherwise set s to the
@@ -7606,8 +7334,7 @@ var groupTypes = {
             // innermost character. To do that, we find the innermost character:
             var baseChar = getBaseElem(base);
             // Then, we render its group to get the symbol inside it
-            var baseGroup = buildGroup(
-                baseChar, options.withStyle(options.style.cramp()));
+            var baseGroup = buildGroup(baseChar, options.withStyle(options.style.cramp()));
             // Finally, we pull the skew off of the symbol.
             skew = baseGroup.skew;
             // Note that we now throw away baseGroup, because the layers we
@@ -7622,8 +7349,7 @@ var groupTypes = {
         var clearance = Math.min(body.height, fontMetrics.metrics.xHeight);
 
         // Build the accent
-        var accent = buildCommon.makeSymbol(
-            group.value.accent, "Main-Regular", "math", options.getColor());
+        var accent = buildCommon.makeSymbol(group.value.accent, "Main-Regular", "math", options.getColor());
         // Remove the italic correction of the accent, because it only serves to
         // shift the accent over to a place we don't want.
         accent.italic = 0;
@@ -7634,14 +7360,9 @@ var groupTypes = {
         // TODO(emily): Fix this in a better way, like by changing the font
         var vecClass = group.value.accent === "\\vec" ? "accent-vec" : null;
 
-        var accentBody = makeSpan(["accent-body", vecClass], [
-            makeSpan([], [accent])]);
+        var accentBody = makeSpan(["accent-body", vecClass], [makeSpan([], [accent])]);
 
-        accentBody = buildCommon.makeVList([
-            {type: "elem", elem: body},
-            {type: "kern", size: -clearance},
-            {type: "elem", elem: accentBody}
-        ], "firstBaseline", null, options);
+        accentBody = buildCommon.makeVList([{ type: "elem", elem: body }, { type: "kern", size: -clearance }, { type: "elem", elem: accentBody }], "firstBaseline", null, options);
 
         // Shift the accent over by the skew. Note we shift by twice the skew
         // because we are centering the accent, so by adding 2*skew to the left,
@@ -7668,12 +7389,8 @@ var groupTypes = {
         }
     },
 
-    phantom: function(group, options, prev) {
-        var elements = buildExpression(
-            group.value.value,
-            options.withPhantom(),
-            prev
-        );
+    phantom: function phantom(group, options, prev) {
+        var elements = buildExpression(group.value.value, options.withPhantom(), prev);
 
         // \phantom isn't supposed to affect the elements it contains.
         // See "color" for more details.
@@ -7686,7 +7403,7 @@ var groupTypes = {
  * function for it. It also handles the interaction of size and style changes
  * between parents and children.
  */
-var buildGroup = function(group, options, prev) {
+var buildGroup = function buildGroup(group, options, prev) {
     if (!group) {
         return makeSpan();
     }
@@ -7699,8 +7416,7 @@ var buildGroup = function(group, options, prev) {
         // If the style changed between the parent and the current group,
         // account for the size difference
         if (options.style !== options.parentStyle) {
-            multiplier = options.style.sizeMultiplier /
-                    options.parentStyle.sizeMultiplier;
+            multiplier = options.style.sizeMultiplier / options.parentStyle.sizeMultiplier;
 
             groupNode.height *= multiplier;
             groupNode.depth *= multiplier;
@@ -7709,8 +7425,7 @@ var buildGroup = function(group, options, prev) {
         // If the size changed between the parent and the current group, account
         // for that size difference.
         if (options.size !== options.parentSize) {
-            multiplier = buildCommon.sizingMultiplier[options.size] /
-                    buildCommon.sizingMultiplier[options.parentSize];
+            multiplier = buildCommon.sizingMultiplier[options.size] / buildCommon.sizingMultiplier[options.parentSize];
 
             groupNode.height *= multiplier;
             groupNode.depth *= multiplier;
@@ -7718,8 +7433,7 @@ var buildGroup = function(group, options, prev) {
 
         return groupNode;
     } else {
-        throw new ParseError(
-            "Got group of unknown type: '" + group.type + "'");
+        throw new ParseError("Got group of unknown type: '" + group.type + "'");
     }
 };
 
@@ -7727,7 +7441,7 @@ var buildGroup = function(group, options, prev) {
  * Take an entire parse tree, and build it into an appropriate set of HTML
  * nodes.
  */
-var buildHTML = function(tree, options) {
+var buildHTML = function buildHTML(tree, options) {
     // buildExpression is destructive, so we need to make a clone
     // of the incoming tree so that it isn't accidentally changed
     tree = JSON.parse(JSON.stringify(tree));
@@ -7743,7 +7457,7 @@ var buildHTML = function(tree, options) {
     var bottomStrut = makeSpan(["strut", "bottom"]);
 
     topStrut.style.height = body.height + "em";
-    bottomStrut.style.height = (body.height + body.depth) + "em";
+    bottomStrut.style.height = body.height + body.depth + "em";
     // We'd like to use `vertical-align: top` but in IE 9 this lowers the
     // baseline of the box to the bottom of this strut (instead staying in the
     // normal place) so we use an absolute value for vertical-align instead
@@ -7759,12 +7473,14 @@ var buildHTML = function(tree, options) {
 
 module.exports = buildHTML;
 
-},{"./ParseError":86,"./Style":89,"./buildCommon":90,"./delimiter":94,"./domTree":95,"./fontMetrics":97,"./utils":104}],92:[function(require,module,exports){
+},{"./ParseError":87,"./Style":90,"./buildCommon":91,"./delimiter":95,"./domTree":96,"./fontMetrics":98,"./utils":105}],93:[function(require,module,exports){
 /**
  * This file converts a parse tree into a cooresponding MathML tree. The main
  * entry point is the `buildMathML` function, which takes a parse tree from the
  * parser.
  */
+
+"use strict";
 
 var buildCommon = require("./buildCommon");
 var fontMetrics = require("./fontMetrics");
@@ -7780,7 +7496,7 @@ var fontMap = buildCommon.fontMap;
  * Takes a symbol and converts it into a MathML text node after performing
  * optional replacement from symbols.js.
  */
-var makeText = function(text, mode) {
+var makeText = function makeText(text, mode) {
     if (symbols[mode][text] && symbols[mode][text].replace) {
         text = symbols[mode][text].replace;
     }
@@ -7791,7 +7507,7 @@ var makeText = function(text, mode) {
 /**
  * Returns the math variant as a string or null if none is required.
  */
-var getVariant = function(group, options) {
+var getVariant = function getVariant(group, options) {
     var font = options.font;
     if (!font) {
         return null;
@@ -7824,10 +7540,8 @@ var getVariant = function(group, options) {
  * tree. Each function should take a parse group and return a MathML node.
  */
 var groupTypes = {
-    mathord: function(group, options) {
-        var node = new mathMLTree.MathNode(
-            "mi",
-            [makeText(group.value, group.mode)]);
+    mathord: function mathord(group, options) {
+        var node = new mathMLTree.MathNode("mi", [makeText(group.value, group.mode)]);
 
         var variant = getVariant(group, options);
         if (variant) {
@@ -7836,7 +7550,7 @@ var groupTypes = {
         return node;
     },
 
-    textord: function(group, options) {
+    textord: function textord(group, options) {
         var text = makeText(group.value, group.mode);
 
         var variant = getVariant(group, options) || "normal";
@@ -7857,51 +7571,45 @@ var groupTypes = {
         return node;
     },
 
-    bin: function(group) {
-        var node = new mathMLTree.MathNode(
-            "mo", [makeText(group.value, group.mode)]);
+    bin: function bin(group) {
+        var node = new mathMLTree.MathNode("mo", [makeText(group.value, group.mode)]);
 
         return node;
     },
 
-    rel: function(group) {
-        var node = new mathMLTree.MathNode(
-            "mo", [makeText(group.value, group.mode)]);
+    rel: function rel(group) {
+        var node = new mathMLTree.MathNode("mo", [makeText(group.value, group.mode)]);
 
         return node;
     },
 
-    open: function(group) {
-        var node = new mathMLTree.MathNode(
-            "mo", [makeText(group.value, group.mode)]);
+    open: function open(group) {
+        var node = new mathMLTree.MathNode("mo", [makeText(group.value, group.mode)]);
 
         return node;
     },
 
-    close: function(group) {
-        var node = new mathMLTree.MathNode(
-            "mo", [makeText(group.value, group.mode)]);
+    close: function close(group) {
+        var node = new mathMLTree.MathNode("mo", [makeText(group.value, group.mode)]);
 
         return node;
     },
 
-    inner: function(group) {
-        var node = new mathMLTree.MathNode(
-            "mo", [makeText(group.value, group.mode)]);
+    inner: function inner(group) {
+        var node = new mathMLTree.MathNode("mo", [makeText(group.value, group.mode)]);
 
         return node;
     },
 
-    punct: function(group) {
-        var node = new mathMLTree.MathNode(
-            "mo", [makeText(group.value, group.mode)]);
+    punct: function punct(group) {
+        var node = new mathMLTree.MathNode("mo", [makeText(group.value, group.mode)]);
 
         node.setAttribute("separator", "true");
 
         return node;
     },
 
-    ordgroup: function(group, options) {
+    ordgroup: function ordgroup(group, options) {
         var inner = buildExpression(group.value, options);
 
         var node = new mathMLTree.MathNode("mrow", inner);
@@ -7909,7 +7617,7 @@ var groupTypes = {
         return node;
     },
 
-    text: function(group, options) {
+    text: function text(group, options) {
         var inner = buildExpression(group.value.body, options);
 
         var node = new mathMLTree.MathNode("mtext", inner);
@@ -7917,7 +7625,7 @@ var groupTypes = {
         return node;
     },
 
-    color: function(group, options) {
+    color: function color(group, options) {
         var inner = buildExpression(group.value.value, options);
 
         var node = new mathMLTree.MathNode("mstyle", inner);
@@ -7927,7 +7635,7 @@ var groupTypes = {
         return node;
     },
 
-    supsub: function(group, options) {
+    supsub: function supsub(group, options) {
         var children = [buildGroup(group.value.base, options)];
 
         if (group.value.sub) {
@@ -7952,11 +7660,8 @@ var groupTypes = {
         return node;
     },
 
-    genfrac: function(group, options) {
-        var node = new mathMLTree.MathNode(
-            "mfrac",
-            [buildGroup(group.value.numer, options),
-             buildGroup(group.value.denom, options)]);
+    genfrac: function genfrac(group, options) {
+        var node = new mathMLTree.MathNode("mfrac", [buildGroup(group.value.numer, options), buildGroup(group.value.denom, options)]);
 
         if (!group.value.hasBarLine) {
             node.setAttribute("linethickness", "0px");
@@ -7966,8 +7671,7 @@ var groupTypes = {
             var withDelims = [];
 
             if (group.value.leftDelim != null) {
-                var leftOp = new mathMLTree.MathNode(
-                    "mo", [new mathMLTree.TextNode(group.value.leftDelim)]);
+                var leftOp = new mathMLTree.MathNode("mo", [new mathMLTree.TextNode(group.value.leftDelim)]);
 
                 leftOp.setAttribute("fence", "true");
 
@@ -7977,8 +7681,7 @@ var groupTypes = {
             withDelims.push(node);
 
             if (group.value.rightDelim != null) {
-                var rightOp = new mathMLTree.MathNode(
-                    "mo", [new mathMLTree.TextNode(group.value.rightDelim)]);
+                var rightOp = new mathMLTree.MathNode("mo", [new mathMLTree.TextNode(group.value.rightDelim)]);
 
                 rightOp.setAttribute("fence", "true");
 
@@ -7993,39 +7696,30 @@ var groupTypes = {
         return node;
     },
 
-    array: function(group, options) {
-        return new mathMLTree.MathNode(
-            "mtable", group.value.body.map(function(row) {
-                return new mathMLTree.MathNode(
-                    "mtr", row.map(function(cell) {
-                        return new mathMLTree.MathNode(
-                            "mtd", [buildGroup(cell, options)]);
-                    }));
+    array: function array(group, options) {
+        return new mathMLTree.MathNode("mtable", group.value.body.map(function (row) {
+            return new mathMLTree.MathNode("mtr", row.map(function (cell) {
+                return new mathMLTree.MathNode("mtd", [buildGroup(cell, options)]);
             }));
+        }));
     },
 
-    sqrt: function(group, options) {
+    sqrt: function sqrt(group, options) {
         var node;
         if (group.value.index) {
-            node = new mathMLTree.MathNode(
-                "mroot", [
-                    buildGroup(group.value.body, options),
-                    buildGroup(group.value.index, options)
-                ]);
+            node = new mathMLTree.MathNode("mroot", [buildGroup(group.value.body, options), buildGroup(group.value.index, options)]);
         } else {
-            node = new mathMLTree.MathNode(
-                "msqrt", [buildGroup(group.value.body, options)]);
+            node = new mathMLTree.MathNode("msqrt", [buildGroup(group.value.body, options)]);
         }
 
         return node;
     },
 
-    leftright: function(group, options) {
+    leftright: function leftright(group, options) {
         var inner = buildExpression(group.value.body, options);
 
         if (group.value.left !== ".") {
-            var leftNode = new mathMLTree.MathNode(
-                "mo", [makeText(group.value.left, group.mode)]);
+            var leftNode = new mathMLTree.MathNode("mo", [makeText(group.value.left, group.mode)]);
 
             leftNode.setAttribute("fence", "true");
 
@@ -8033,8 +7727,7 @@ var groupTypes = {
         }
 
         if (group.value.right !== ".") {
-            var rightNode = new mathMLTree.MathNode(
-                "mo", [makeText(group.value.right, group.mode)]);
+            var rightNode = new mathMLTree.MathNode("mo", [makeText(group.value.right, group.mode)]);
 
             rightNode.setAttribute("fence", "true");
 
@@ -8046,71 +7739,61 @@ var groupTypes = {
         return outerNode;
     },
 
-    accent: function(group, options) {
-        var accentNode = new mathMLTree.MathNode(
-            "mo", [makeText(group.value.accent, group.mode)]);
+    accent: function accent(group, options) {
+        var accentNode = new mathMLTree.MathNode("mo", [makeText(group.value.accent, group.mode)]);
 
-        var node = new mathMLTree.MathNode(
-            "mover",
-            [buildGroup(group.value.base, options),
-             accentNode]);
+        var node = new mathMLTree.MathNode("mover", [buildGroup(group.value.base, options), accentNode]);
 
         node.setAttribute("accent", "true");
 
         return node;
     },
 
-    spacing: function(group) {
+    spacing: function spacing(group) {
         var node;
 
-        if (group.value === "\\ " || group.value === "\\space" ||
-            group.value === " " || group.value === "~") {
-            node = new mathMLTree.MathNode(
-                "mtext", [new mathMLTree.TextNode("\u00a0")]);
+        if (group.value === "\\ " || group.value === "\\space" || group.value === " " || group.value === "~") {
+            node = new mathMLTree.MathNode("mtext", [new mathMLTree.TextNode(" ")]);
         } else {
             node = new mathMLTree.MathNode("mspace");
 
-            node.setAttribute(
-                "width", buildCommon.spacingFunctions[group.value].size);
+            node.setAttribute("width", buildCommon.spacingFunctions[group.value].size);
         }
 
         return node;
     },
 
-    op: function(group) {
+    op: function op(group) {
         var node;
 
         // TODO(emily): handle big operators using the `largeop` attribute
 
         if (group.value.symbol) {
             // This is a symbol. Just add the symbol.
-            node = new mathMLTree.MathNode(
-                "mo", [makeText(group.value.body, group.mode)]);
+            node = new mathMLTree.MathNode("mo", [makeText(group.value.body, group.mode)]);
         } else {
             // This is a text operator. Add all of the characters from the
             // operator's name.
             // TODO(emily): Add a space in the middle of some of these
             // operators, like \limsup.
-            node = new mathMLTree.MathNode(
-                "mi", [new mathMLTree.TextNode(group.value.body.slice(1))]);
+            node = new mathMLTree.MathNode("mi", [new mathMLTree.TextNode(group.value.body.slice(1))]);
         }
 
         return node;
     },
 
-    katex: function(group) {
-        var node = new mathMLTree.MathNode(
-            "mtext", [new mathMLTree.TextNode("KaTeX")]);
+    katex: function katex(group) {
+        var node = new mathMLTree.MathNode("mtext", [new mathMLTree.TextNode("KaTeX")]);
 
         return node;
     },
 
-    font: function(group, options) {
+    font: function font(group, options) {
         var font = group.value.font;
         return buildGroup(group.value.body, options.withFont(font));
     },
 
-    delimsizing: function(group) {
+    delimsizing: function delimsizing(group) {
         var children = [];
 
         if (group.value.value !== ".") {
@@ -8119,8 +7802,7 @@ var groupTypes = {
 
         var node = new mathMLTree.MathNode("mo", children);
 
-        if (group.value.delimType === "open" ||
-            group.value.delimType === "close") {
+        if (group.value.delimType === "open" || group.value.delimType === "close") {
             // Only some of the delimsizing functions act as fences, and they
             // return "open" or "close" delimTypes.
             node.setAttribute("fence", "true");
@@ -8133,16 +7815,16 @@ var groupTypes = {
         return node;
     },
 
-    styling: function(group, options) {
+    styling: function styling(group, options) {
         var inner = buildExpression(group.value.value, options);
 
         var node = new mathMLTree.MathNode("mstyle", inner);
 
         var styleAttributes = {
-            "display": ["0", "true"],
-            "text": ["0", "false"],
-            "script": ["1", "false"],
-            "scriptscript": ["2", "false"]
+            display: ["0", "true"],
+            text: ["0", "false"],
+            script: ["1", "false"],
+            scriptscript: ["2", "false"]
         };
 
         var attr = styleAttributes[group.value.style];
@@ -8153,7 +7835,7 @@ var groupTypes = {
         return node;
     },
 
-    sizing: function(group, options) {
+    sizing: function sizing(group, options) {
         var inner = buildExpression(group.value.value, options);
 
         var node = new mathMLTree.MathNode("mstyle", inner);
@@ -8163,27 +7845,22 @@ var groupTypes = {
         // in, so we can't reset the size to normal before changing it.  Now
         // that we're passing an options parameter we should be able to fix
         // this.
-        node.setAttribute(
-            "mathsize", buildCommon.sizingMultiplier[group.value.size] + "em");
+        node.setAttribute("mathsize", buildCommon.sizingMultiplier[group.value.size] + "em");
 
         return node;
     },
 
-    overline: function(group, options) {
-        var operator = new mathMLTree.MathNode(
-            "mo", [new mathMLTree.TextNode("\u203e")]);
+    overline: function overline(group, options) {
+        var operator = new mathMLTree.MathNode("mo", [new mathMLTree.TextNode("‾")]);
         operator.setAttribute("stretchy", "true");
 
-        var node = new mathMLTree.MathNode(
-            "mover",
-            [buildGroup(group.value.body, options),
-             operator]);
+        var node = new mathMLTree.MathNode("mover", [buildGroup(group.value.body, options), operator]);
         node.setAttribute("accent", "true");
 
         return node;
     },
 
-    rule: function(group) {
+    rule: function rule(group) {
         // TODO(emily): Figure out if there's an actual way to draw black boxes
         // in MathML.
         var node = new mathMLTree.MathNode("mrow");
@@ -8191,9 +7868,8 @@ var groupTypes = {
         return node;
     },
 
-    llap: function(group, options) {
-        var node = new mathMLTree.MathNode(
-            "mpadded", [buildGroup(group.value.body, options)]);
+    llap: function llap(group, options) {
+        var node = new mathMLTree.MathNode("mpadded", [buildGroup(group.value.body, options)]);
 
         node.setAttribute("lspace", "-1width");
         node.setAttribute("width", "0px");
@@ -8201,16 +7877,15 @@ var groupTypes = {
         return node;
     },
 
-    rlap: function(group, options) {
-        var node = new mathMLTree.MathNode(
-            "mpadded", [buildGroup(group.value.body, options)]);
+    rlap: function rlap(group, options) {
+        var node = new mathMLTree.MathNode("mpadded", [buildGroup(group.value.body, options)]);
 
         node.setAttribute("width", "0px");
 
         return node;
     },
 
-    phantom: function(group, options, prev) {
+    phantom: function phantom(group, options, prev) {
         var inner = buildExpression(group.value.value, options);
         return new mathMLTree.MathNode("mphantom", inner);
     }
@@ -8221,7 +7896,7 @@ var groupTypes = {
  * MathML nodes. A little simpler than the HTML version because we don't do any
  * previous-node handling.
  */
-var buildExpression = function(expression, options) {
+var buildExpression = function buildExpression(expression, options) {
     var groups = [];
     for (var i = 0; i < expression.length; i++) {
         var group = expression[i];
@@ -8234,7 +7909,7 @@ var buildExpression = function(expression, options) {
  * Takes a group from the parser and calls the appropriate groupTypes function
  * on it to produce a MathML node.
  */
-var buildGroup = function(group, options) {
+var buildGroup = function buildGroup(group, options) {
     if (!group) {
         return new mathMLTree.MathNode("mrow");
     }
@@ -8243,8 +7918,7 @@ var buildGroup = function(group, options) {
         // Call the groupTypes function
         return groupTypes[group.type](group, options);
     } else {
-        throw new ParseError(
-            "Got group of unknown type: '" + group.type + "'");
+        throw new ParseError("Got group of unknown type: '" + group.type + "'");
     }
 };
 
@@ -8256,7 +7930,7 @@ var buildGroup = function(group, options) {
  * Note that we actually return a domTree element with a `<math>` inside it so
  * we can do appropriate styling.
  */
-var buildMathML = function(tree, texExpression, options) {
+var buildMathML = function buildMathML(tree, texExpression, options) {
     var expression = buildExpression(tree, options);
 
     // Wrap up the expression in an mrow so it is presented in the semantics
@@ -8264,13 +7938,11 @@ var buildMathML = function(tree, texExpression, options) {
     var wrapper = new mathMLTree.MathNode("mrow", expression);
 
     // Build a TeX annotation of the source
-    var annotation = new mathMLTree.MathNode(
-        "annotation", [new mathMLTree.TextNode(texExpression)]);
+    var annotation = new mathMLTree.MathNode("annotation", [new mathMLTree.TextNode(texExpression)]);
 
     annotation.setAttribute("encoding", "application/x-tex");
 
-    var semantics = new mathMLTree.MathNode(
-        "semantics", [wrapper, annotation]);
+    var semantics = new mathMLTree.MathNode("semantics", [wrapper, annotation]);
 
     var math = new mathMLTree.MathNode("math", [semantics]);
 
@@ -8280,7 +7952,9 @@ var buildMathML = function(tree, texExpression, options) {
 
 module.exports = buildMathML;
 
-},{"./ParseError":86,"./buildCommon":90,"./fontMetrics":97,"./mathMLTree":100,"./symbols":103,"./utils":104}],93:[function(require,module,exports){
+},{"./ParseError":87,"./buildCommon":91,"./fontMetrics":98,"./mathMLTree":101,"./symbols":104,"./utils":105}],94:[function(require,module,exports){
+"use strict";
+
 var buildHTML = require("./buildHTML");
 var buildMathML = require("./buildMathML");
 var buildCommon = require("./buildCommon");
@@ -8290,7 +7964,7 @@ var Style = require("./Style");
 
 var makeSpan = buildCommon.makeSpan;
 
-var buildTree = function(tree, expression, settings) {
+var buildTree = function buildTree(tree, expression, settings) {
     settings = settings || new Settings({});
 
     var startStyle = Style.TEXT;
@@ -8309,9 +7983,7 @@ var buildTree = function(tree, expression, settings) {
     var mathMLNode = buildMathML(tree, expression, options);
     var htmlNode = buildHTML(tree, options);
 
-    var katexNode = makeSpan(["katex"], [
-        mathMLNode, htmlNode
-    ]);
+    var katexNode = makeSpan(["katex"], [mathMLNode, htmlNode]);
 
     if (settings.displayMode) {
         return makeSpan(["katex-display"], [katexNode]);
@@ -8322,7 +7994,7 @@ var buildTree = function(tree, expression, settings) {
 
 module.exports = buildTree;
 
-},{"./Options":85,"./Settings":88,"./Style":89,"./buildCommon":90,"./buildHTML":91,"./buildMathML":92}],94:[function(require,module,exports){
+},{"./Options":86,"./Settings":89,"./Style":90,"./buildCommon":91,"./buildHTML":92,"./buildMathML":93}],95:[function(require,module,exports){
 /**
  * This file deals with creating delimiters of various sizes. The TeXbook
  * discusses these routines on page 441-442, in the "Another subroutine sets box
@@ -8345,6 +8017,8 @@ module.exports = buildTree;
  * used in `\left` and `\right`.
  */
 
+"use strict";
+
 var ParseError = require("./ParseError");
 var Style = require("./Style");
 
@@ -8359,20 +8033,18 @@ var makeSpan = buildCommon.makeSpan;
  * Get the metrics for a given symbol and font, after transformation (i.e.
  * after following replacement from symbols.js)
  */
-var getMetrics = function(symbol, font) {
+var getMetrics = function getMetrics(symbol, font) {
     if (symbols.math[symbol] && symbols.math[symbol].replace) {
-        return fontMetrics.getCharacterMetrics(
-            symbols.math[symbol].replace, font);
+        return fontMetrics.getCharacterMetrics(symbols.math[symbol].replace, font);
     } else {
-        return fontMetrics.getCharacterMetrics(
-            symbol, font);
+        return fontMetrics.getCharacterMetrics(symbol, font);
     }
 };
 
 /**
  * Builds a symbol in the given font size (note size is an integer)
  */
-var mathrmSize = function(value, size, mode) {
+var mathrmSize = function mathrmSize(value, size, mode) {
     return buildCommon.makeSymbol(value, "Size" + size + "-Regular", mode);
 };
 
@@ -8380,9 +8052,8 @@ var mathrmSize = function(value, size, mode) {
  * Puts a delimiter span in a given style, and adds appropriate height, depth,
  * and maxFontSizes.
  */
-var styleWrap = function(delim, toStyle, options) {
-    var span = makeSpan(
-        ["style-wrap", options.style.reset(), toStyle.cls()], [delim]);
+var styleWrap = function styleWrap(delim, toStyle, options) {
+    var span = makeSpan(["style-wrap", options.style.reset(), toStyle.cls()], [delim]);
 
     var multiplier = toStyle.sizeMultiplier / options.style.sizeMultiplier;
 
@@ -8398,15 +8069,13 @@ var styleWrap = function(delim, toStyle, options) {
  * font, but is restyled to either be in textstyle, scriptstyle, or
  * scriptscriptstyle.
  */
-var makeSmallDelim = function(delim, style, center, options, mode) {
+var makeSmallDelim = function makeSmallDelim(delim, style, center, options, mode) {
     var text = buildCommon.makeSymbol(delim, "Main-Regular", mode);
 
     var span = styleWrap(text, style, options);
 
     if (center) {
-        var shift =
-            (1 - options.style.sizeMultiplier / style.sizeMultiplier) *
-            fontMetrics.metrics.axisHeight;
+        var shift = (1 - options.style.sizeMultiplier / style.sizeMultiplier) * fontMetrics.metrics.axisHeight;
 
         span.style.top = shift + "em";
         span.height -= shift;
@@ -8420,17 +8089,13 @@ var makeSmallDelim = function(delim, style, center, options, mode) {
  * Makes a large delimiter. This is a delimiter that comes in the Size1, Size2,
  * Size3, or Size4 fonts. It is always rendered in textstyle.
  */
-var makeLargeDelim = function(delim, size, center, options, mode) {
+var makeLargeDelim = function makeLargeDelim(delim, size, center, options, mode) {
     var inner = mathrmSize(delim, size, mode);
 
-    var span = styleWrap(
-        makeSpan(["delimsizing", "size" + size],
-                 [inner], options.getColor()),
-        Style.TEXT, options);
+    var span = styleWrap(makeSpan(["delimsizing", "size" + size], [inner], options.getColor()), Style.TEXT, options);
 
     if (center) {
-        var shift = (1 - options.style.sizeMultiplier) *
-            fontMetrics.metrics.axisHeight;
+        var shift = (1 - options.style.sizeMultiplier) * fontMetrics.metrics.axisHeight;
 
         span.style.top = shift + "em";
         span.height -= shift;
@@ -8444,7 +8109,7 @@ var makeLargeDelim = function(delim, size, center, options, mode) {
  * Make an inner span with the given offset and in the given font. This is used
  * in `makeStackedDelim` to make the stacking pieces for the delimiter.
  */
-var makeInner = function(symbol, font, mode) {
+var makeInner = function makeInner(symbol, font, mode) {
     var sizeClass;
     // Apply the correct CSS class to choose the right font.
     if (font === "Size1-Regular") {
@@ -8453,20 +8118,18 @@ var makeInner = function(symbol, font, mode) {
         sizeClass = "delim-size4";
     }
 
-    var inner = makeSpan(
-        ["delimsizinginner", sizeClass],
-        [makeSpan([], [buildCommon.makeSymbol(symbol, font, mode)])]);
+    var inner = makeSpan(["delimsizinginner", sizeClass], [makeSpan([], [buildCommon.makeSymbol(symbol, font, mode)])]);
 
     // Since this will be passed into `makeVList` in the end, wrap the element
     // in the appropriate tag that VList uses.
-    return {type: "elem", elem: inner};
+    return { type: "elem", elem: inner };
 };
 
 /**
  * Make a stacked delimiter out of a given delimiter, with the total height at
  * least `heightTotal`. This routine is mentioned on page 442 of the TeXbook.
  */
-var makeStackedDelim = function(delim, heightTotal, center, options, mode) {
+var makeStackedDelim = function makeStackedDelim(delim, heightTotal, center, options, mode) {
     // There are four parts, the top, an optional middle, a repeated part, and a
     // bottom.
     var top, middle, repeat, bottom;
@@ -8479,93 +8142,93 @@ var makeStackedDelim = function(delim, heightTotal, center, options, mode) {
     // '\u23d0' instead of '|' and '\u2016' instead of '\\|' for the
     // repeats of the arrows
     if (delim === "\\uparrow") {
-        repeat = bottom = "\u23d0";
+        repeat = bottom = "⏐";
     } else if (delim === "\\Uparrow") {
-        repeat = bottom = "\u2016";
+        repeat = bottom = "‖";
     } else if (delim === "\\downarrow") {
-        top = repeat = "\u23d0";
+        top = repeat = "⏐";
     } else if (delim === "\\Downarrow") {
-        top = repeat = "\u2016";
+        top = repeat = "‖";
     } else if (delim === "\\updownarrow") {
         top = "\\uparrow";
-        repeat = "\u23d0";
+        repeat = "⏐";
         bottom = "\\downarrow";
     } else if (delim === "\\Updownarrow") {
         top = "\\Uparrow";
-        repeat = "\u2016";
+        repeat = "‖";
         bottom = "\\Downarrow";
     } else if (delim === "[" || delim === "\\lbrack") {
-        top = "\u23a1";
-        repeat = "\u23a2";
-        bottom = "\u23a3";
+        top = "⎡";
+        repeat = "⎢";
+        bottom = "⎣";
         font = "Size4-Regular";
     } else if (delim === "]" || delim === "\\rbrack") {
-        top = "\u23a4";
-        repeat = "\u23a5";
-        bottom = "\u23a6";
+        top = "⎤";
+        repeat = "⎥";
+        bottom = "⎦";
         font = "Size4-Regular";
     } else if (delim === "\\lfloor") {
-        repeat = top = "\u23a2";
-        bottom = "\u23a3";
+        repeat = top = "⎢";
+        bottom = "⎣";
         font = "Size4-Regular";
     } else if (delim === "\\lceil") {
-        top = "\u23a1";
-        repeat = bottom = "\u23a2";
+        top = "⎡";
+        repeat = bottom = "⎢";
         font = "Size4-Regular";
     } else if (delim === "\\rfloor") {
-        repeat = top = "\u23a5";
-        bottom = "\u23a6";
+        repeat = top = "⎥";
+        bottom = "⎦";
         font = "Size4-Regular";
     } else if (delim === "\\rceil") {
-        top = "\u23a4";
-        repeat = bottom = "\u23a5";
+        top = "⎤";
+        repeat = bottom = "⎥";
         font = "Size4-Regular";
     } else if (delim === "(") {
-        top = "\u239b";
-        repeat = "\u239c";
-        bottom = "\u239d";
+        top = "⎛";
+        repeat = "⎜";
+        bottom = "⎝";
         font = "Size4-Regular";
     } else if (delim === ")") {
-        top = "\u239e";
-        repeat = "\u239f";
-        bottom = "\u23a0";
+        top = "⎞";
+        repeat = "⎟";
+        bottom = "⎠";
         font = "Size4-Regular";
     } else if (delim === "\\{" || delim === "\\lbrace") {
-        top = "\u23a7";
-        middle = "\u23a8";
-        bottom = "\u23a9";
-        repeat = "\u23aa";
+        top = "⎧";
+        middle = "⎨";
+        bottom = "⎩";
+        repeat = "⎪";
         font = "Size4-Regular";
     } else if (delim === "\\}" || delim === "\\rbrace") {
-        top = "\u23ab";
-        middle = "\u23ac";
-        bottom = "\u23ad";
-        repeat = "\u23aa";
+        top = "⎫";
+        middle = "⎬";
+        bottom = "⎭";
+        repeat = "⎪";
         font = "Size4-Regular";
     } else if (delim === "\\lgroup") {
-        top = "\u23a7";
-        bottom = "\u23a9";
-        repeat = "\u23aa";
+        top = "⎧";
+        bottom = "⎩";
+        repeat = "⎪";
         font = "Size4-Regular";
     } else if (delim === "\\rgroup") {
-        top = "\u23ab";
-        bottom = "\u23ad";
-        repeat = "\u23aa";
+        top = "⎫";
+        bottom = "⎭";
+        repeat = "⎪";
         font = "Size4-Regular";
     } else if (delim === "\\lmoustache") {
-        top = "\u23a7";
-        bottom = "\u23ad";
-        repeat = "\u23aa";
+        top = "⎧";
+        bottom = "⎭";
+        repeat = "⎪";
         font = "Size4-Regular";
     } else if (delim === "\\rmoustache") {
-        top = "\u23ab";
-        bottom = "\u23a9";
-        repeat = "\u23aa";
+        top = "⎫";
+        bottom = "⎩";
+        repeat = "⎪";
         font = "Size4-Regular";
     } else if (delim === "\\surd") {
-        top = "\ue001";
-        bottom = "\u23b7";
-        repeat = "\ue000";
+        top = "";
+        bottom = "⎷";
+        repeat = "";
         font = "Size4-Regular";
     }
 
@@ -8589,12 +8252,10 @@ var makeStackedDelim = function(delim, heightTotal, center, options, mode) {
     var minHeight = topHeightTotal + bottomHeightTotal + middleHeightTotal;
 
     // Compute the number of copies of the repeat symbol we will need
-    var repeatCount = Math.ceil(
-        (heightTotal - minHeight) / (middleFactor * repeatHeightTotal));
+    var repeatCount = Math.ceil((heightTotal - minHeight) / (middleFactor * repeatHeightTotal));
 
     // Compute the total height of the delimiter including all the symbols
-    var realHeightTotal =
-        minHeight + repeatCount * middleFactor * repeatHeightTotal;
+    var realHeightTotal = minHeight + repeatCount * middleFactor * repeatHeightTotal;
 
     // The center of the delimiter is placed at the center of the axis. Note
     // that in this context, "center" means that the delimiter should be
@@ -8639,43 +8300,28 @@ var makeStackedDelim = function(delim, heightTotal, center, options, mode) {
     // Finally, build the vlist
     var inner = buildCommon.makeVList(inners, "bottom", depth, options);
 
-    return styleWrap(
-        makeSpan(["delimsizing", "mult"], [inner], options.getColor()),
-        Style.TEXT, options);
+    return styleWrap(makeSpan(["delimsizing", "mult"], [inner], options.getColor()), Style.TEXT, options);
 };
 
 // There are three kinds of delimiters, delimiters that stack when they become
 // too large
-var stackLargeDelimiters = [
-    "(", ")", "[", "\\lbrack", "]", "\\rbrack",
-    "\\{", "\\lbrace", "\\}", "\\rbrace",
-    "\\lfloor", "\\rfloor", "\\lceil", "\\rceil",
-    "\\surd"
-];
+var stackLargeDelimiters = ["(", ")", "[", "\\lbrack", "]", "\\rbrack", "\\{", "\\lbrace", "\\}", "\\rbrace", "\\lfloor", "\\rfloor", "\\lceil", "\\rceil", "\\surd"];
 
 // delimiters that always stack
-var stackAlwaysDelimiters = [
-    "\\uparrow", "\\downarrow", "\\updownarrow",
-    "\\Uparrow", "\\Downarrow", "\\Updownarrow",
-    "|", "\\|", "\\vert", "\\Vert",
-    "\\lvert", "\\rvert", "\\lVert", "\\rVert",
-    "\\lgroup", "\\rgroup", "\\lmoustache", "\\rmoustache"
-];
+var stackAlwaysDelimiters = ["\\uparrow", "\\downarrow", "\\updownarrow", "\\Uparrow", "\\Downarrow", "\\Updownarrow", "|", "\\|", "\\vert", "\\Vert", "\\lvert", "\\rvert", "\\lVert", "\\rVert", "\\lgroup", "\\rgroup", "\\lmoustache", "\\rmoustache"];
 
 // and delimiters that never stack
-var stackNeverDelimiters = [
-    "<", ">", "\\langle", "\\rangle", "/", "\\backslash"
-];
+var stackNeverDelimiters = ["<", ">", "\\langle", "\\rangle", "/", "\\backslash"];
 
 // Metrics of the different sizes. Found by looking at TeX's output of
 // $\bigl| // \Bigl| \biggl| \Biggl| \showlists$
 // Used to create stacked delimiters of appropriate sizes in makeSizedDelim.
-var sizeToMaxHeight = [0, 1.2, 1.8, 2.4, 3.0];
+var sizeToMaxHeight = [0, 1.2, 1.8, 2.4, 3];
 
 /**
  * Used to create a delimiter of a specific size, where `size` is 1, 2, 3, or 4.
  */
-var makeSizedDelim = function(delim, size, options, mode) {
+var makeSizedDelim = function makeSizedDelim(delim, size, options, mode) {
     // < and > turn into \langle and \rangle in delimiters
     if (delim === "<") {
         delim = "\\langle";
@@ -8684,12 +8330,10 @@ var makeSizedDelim = function(delim, size, options, mode) {
     }
 
     // Sized delimiters are never centered.
-    if (utils.contains(stackLargeDelimiters, delim) ||
-        utils.contains(stackNeverDelimiters, delim)) {
+    if (utils.contains(stackLargeDelimiters, delim) || utils.contains(stackNeverDelimiters, delim)) {
         return makeLargeDelim(delim, size, false, options, mode);
     } else if (utils.contains(stackAlwaysDelimiters, delim)) {
-        return makeStackedDelim(
-            delim, sizeToMaxHeight[size], false, options, mode);
+        return makeStackedDelim(delim, sizeToMaxHeight[size], false, options, mode);
     } else {
         throw new ParseError("Illegal delimiter: '" + delim + "'");
     }
@@ -8708,41 +8352,19 @@ var makeSizedDelim = function(delim, size, options, mode) {
  */
 
 // Delimiters that never stack try small delimiters and large delimiters only
-var stackNeverDelimiterSequence = [
-    {type: "small", style: Style.SCRIPTSCRIPT},
-    {type: "small", style: Style.SCRIPT},
-    {type: "small", style: Style.TEXT},
-    {type: "large", size: 1},
-    {type: "large", size: 2},
-    {type: "large", size: 3},
-    {type: "large", size: 4}
-];
+var stackNeverDelimiterSequence = [{ type: "small", style: Style.SCRIPTSCRIPT }, { type: "small", style: Style.SCRIPT }, { type: "small", style: Style.TEXT }, { type: "large", size: 1 }, { type: "large", size: 2 }, { type: "large", size: 3 }, { type: "large", size: 4 }];
 
 // Delimiters that always stack try the small delimiters first, then stack
-var stackAlwaysDelimiterSequence = [
-    {type: "small", style: Style.SCRIPTSCRIPT},
-    {type: "small", style: Style.SCRIPT},
-    {type: "small", style: Style.TEXT},
-    {type: "stack"}
-];
+var stackAlwaysDelimiterSequence = [{ type: "small", style: Style.SCRIPTSCRIPT }, { type: "small", style: Style.SCRIPT }, { type: "small", style: Style.TEXT }, { type: "stack" }];
 
 // Delimiters that stack when large try the small and then large delimiters, and
 // stack afterwards
-var stackLargeDelimiterSequence = [
-    {type: "small", style: Style.SCRIPTSCRIPT},
-    {type: "small", style: Style.SCRIPT},
-    {type: "small", style: Style.TEXT},
-    {type: "large", size: 1},
-    {type: "large", size: 2},
-    {type: "large", size: 3},
-    {type: "large", size: 4},
-    {type: "stack"}
-];
+var stackLargeDelimiterSequence = [{ type: "small", style: Style.SCRIPTSCRIPT }, { type: "small", style: Style.SCRIPT }, { type: "small", style: Style.TEXT }, { type: "large", size: 1 }, { type: "large", size: 2 }, { type: "large", size: 3 }, { type: "large", size: 4 }, { type: "stack" }];
 
 /**
  * Get the font used in a delimiter based on what kind of delimiter it is.
  */
-var delimTypeToFont = function(type) {
+var delimTypeToFont = function delimTypeToFont(type) {
     if (type.type === "small") {
         return "Main-Regular";
     } else if (type.type === "large") {
@@ -8756,7 +8378,7 @@ var delimTypeToFont = function(type) {
  * Traverse a sequence of types of delimiters to decide what kind of delimiter
  * should be used to create a delimiter of the given height+depth.
  */
-var traverseSequence = function(delim, height, sequence, options) {
+var traverseSequence = function traverseSequence(delim, height, sequence, options) {
     // Here, we choose the index we should start at in the sequences. In smaller
     // sizes (which correspond to larger numbers in style.size) we start earlier
     // in the sequence. Thus, scriptscript starts at index 3-3=0, script starts
@@ -8792,7 +8414,7 @@ var traverseSequence = function(delim, height, sequence, options) {
  * Make a delimiter of a given height+depth, with optional centering. Here, we
  * traverse the sequences, and create a delimiter that the sequence tells us to.
  */
-var makeCustomSizedDelim = function(delim, height, center, options, mode) {
+var makeCustomSizedDelim = function makeCustomSizedDelim(delim, height, center, options, mode) {
     if (delim === "<") {
         delim = "\\langle";
     } else if (delim === ">") {
@@ -8827,30 +8449,27 @@ var makeCustomSizedDelim = function(delim, height, center, options, mode) {
  * Make a delimiter for use with `\left` and `\right`, given a height and depth
  * of an expression that the delimiters surround.
  */
-var makeLeftRightDelim = function(delim, height, depth, options, mode) {
+var makeLeftRightDelim = function makeLeftRightDelim(delim, height, depth, options, mode) {
     // We always center \left/\right delimiters, so the axis is always shifted
-    var axisHeight =
-        fontMetrics.metrics.axisHeight * options.style.sizeMultiplier;
+    var axisHeight = fontMetrics.metrics.axisHeight * options.style.sizeMultiplier;
 
     // Taken from TeX source, tex.web, function make_left_right
     var delimiterFactor = 901;
-    var delimiterExtend = 5.0 / fontMetrics.metrics.ptPerEm;
+    var delimiterExtend = 5 / fontMetrics.metrics.ptPerEm;
 
-    var maxDistFromAxis = Math.max(
-        height - axisHeight, depth + axisHeight);
+    var maxDistFromAxis = Math.max(height - axisHeight, depth + axisHeight);
 
     var totalHeight = Math.max(
-        // In real TeX, calculations are done using integral values which are
-        // 65536 per pt, or 655360 per em. So, the division here truncates in
-        // TeX but doesn't here, producing different results. If we wanted to
-        // exactly match TeX's calculation, we could do
-        //   Math.floor(655360 * maxDistFromAxis / 500) *
-        //    delimiterFactor / 655360
-        // (To see the difference, compare
-        //    x^{x^{\left(\rule{0.1em}{0.68em}\right)}}
-        // in TeX and KaTeX)
-        maxDistFromAxis / 500 * delimiterFactor,
-        2 * maxDistFromAxis - delimiterExtend);
+    // In real TeX, calculations are done using integral values which are
+    // 65536 per pt, or 655360 per em. So, the division here truncates in
+    // TeX but doesn't here, producing different results. If we wanted to
+    // exactly match TeX's calculation, we could do
+    //   Math.floor(655360 * maxDistFromAxis / 500) *
+    //    delimiterFactor / 655360
+    // (To see the difference, compare
+    //    x^{x^{\left(\rule{0.1em}{0.68em}\right)}}
+    // in TeX and KaTeX)
+    maxDistFromAxis / 500 * delimiterFactor, 2 * maxDistFromAxis - delimiterExtend);
 
     // Finally, we defer to `makeCustomSizedDelim` with our calculated total
     // height
@@ -8863,7 +8482,7 @@ module.exports = {
     leftRightDelim: makeLeftRightDelim
 };
 
-},{"./ParseError":86,"./Style":89,"./buildCommon":90,"./fontMetrics":97,"./symbols":103,"./utils":104}],95:[function(require,module,exports){
+},{"./ParseError":87,"./Style":90,"./buildCommon":91,"./fontMetrics":98,"./symbols":104,"./utils":105}],96:[function(require,module,exports){
 /**
  * These objects store the data about the DOM nodes we create, as well as some
  * extra data. They can then be transformed into real DOM nodes with the
@@ -8874,13 +8493,15 @@ module.exports = {
  * Similar functions for working with MathML nodes exist in mathMLTree.js.
  */
 
+"use strict";
+
 var utils = require("./utils");
 
 /**
  * Create an HTML className based on a list of classes. In addition to joining
  * with spaces, we also remove null or empty classes.
  */
-var createClass = function(classes) {
+var createClass = function createClass(classes) {
     classes = classes.slice();
     for (var i = classes.length - 1; i >= 0; i--) {
         if (!classes[i]) {
@@ -8911,14 +8532,14 @@ function span(classes, children, height, depth, maxFontSize, style) {
  * browsers support attributes the same, and having too many custom attributes
  * is probably bad.
  */
-span.prototype.setAttribute = function(attribute, value) {
+span.prototype.setAttribute = function (attribute, value) {
     this.attributes[attribute] = value;
 };
 
 /**
  * Convert the span into an HTML node
  */
-span.prototype.toNode = function() {
+span.prototype.toNode = function () {
     var span = document.createElement("span");
 
     // Apply the class
@@ -8949,7 +8570,7 @@ span.prototype.toNode = function() {
 /**
  * Convert the span into an HTML markup string
  */
-span.prototype.toMarkup = function() {
+span.prototype.toMarkup = function () {
     var markup = "<span";
 
     // Add the class
@@ -9009,7 +8630,7 @@ function documentFragment(children, height, depth, maxFontSize) {
 /**
  * Convert the fragment into a node
  */
-documentFragment.prototype.toNode = function() {
+documentFragment.prototype.toNode = function () {
     // Create a fragment
     var frag = document.createDocumentFragment();
 
@@ -9024,7 +8645,7 @@ documentFragment.prototype.toNode = function() {
 /**
  * Convert the fragment into HTML markup
  */
-documentFragment.prototype.toMarkup = function() {
+documentFragment.prototype.toMarkup = function () {
     var markup = "";
 
     // Simply concatenate the markup for the children together
@@ -9055,7 +8676,7 @@ function symbolNode(value, height, depth, italic, skew, classes, style) {
  * Creates a text node or span from a symbol node. Note that a span is only
  * created if it is needed.
  */
-symbolNode.prototype.toNode = function() {
+symbolNode.prototype.toNode = function () {
     var node = document.createTextNode(this.value);
     var span = null;
 
@@ -9087,7 +8708,7 @@ symbolNode.prototype.toNode = function() {
 /**
  * Creates markup for a symbol node.
  */
-symbolNode.prototype.toMarkup = function() {
+symbolNode.prototype.toMarkup = function () {
     // TODO(alpert): More duplication than I'd like from
     // span.prototype.toMarkup and symbolNode.prototype.toNode...
     var needsSpan = false;
@@ -9134,7 +8755,9 @@ module.exports = {
     symbolNode: symbolNode
 };
 
-},{"./utils":104}],96:[function(require,module,exports){
+},{"./utils":105}],97:[function(require,module,exports){
+"use strict";
+
 var fontMetrics = require("./fontMetrics");
 var parseData = require("./parseData");
 var ParseError = require("./ParseError");
@@ -9148,7 +8771,9 @@ var ParseResult = parseData.ParseResult;
  * with one group per cell.
  */
 function parseArray(parser, pos, mode, result) {
-    var row = [], body = [row], rowGaps = [];
+    var row = [],
+        body = [row],
+        rowGaps = [];
     while (true) {
         var cell = parser.parseExpression(pos, mode, false, null);
         row.push(new ParseNode("ordgroup", cell.result, mode));
@@ -9165,8 +8790,7 @@ function parseArray(parser, pos, mode, result) {
             row = [];
             body.push(row);
         } else {
-            throw new ParseError("Expected & or \\\\ or \\end",
-                                 parser.lexer, cell.peek.position);
+            throw new ParseError("Expected & or \\\\ or \\end", parser.lexer, cell.peek.position);
         }
     }
     result.body = body;
@@ -9195,110 +8819,100 @@ function parseArray(parser, pos, mode, result) {
 
 var environmentDefinitions = [
 
-    // Arrays are part of LaTeX, defined in lttab.dtx so its documentation
-    // is part of the source2e.pdf file of LaTeX2e source documentation.
-    {
-        names: ["array"],
-        numArgs: 1,
-        handler: function(pos, mode, envName, colalign, positions) {
-            var parser = this;
-            colalign = colalign.value.map ? colalign.value : [colalign];
-            var cols = colalign.map(function(node) {
-                var ca = node.value;
-                if ("lcr".indexOf(ca) !== -1) {
-                    return {
-                        type: "align",
-                        align: ca
-                    };
-                } else if (ca === "|") {
-                    return {
-                        type: "separator",
-                        separator: "|"
-                    };
-                }
-                throw new ParseError(
-                    "Unknown column alignment: " + node.value,
-                    parser.lexer, positions[1]);
-            });
-            var res = {
-                type: "array",
-                cols: cols,
-                hskipBeforeAndAfter: true // \@preamble in lttab.dtx
-            };
-            res = parseArray(parser, pos, mode, res);
-            return res;
-        }
-    },
-
-    // The matrix environments of amsmath builds on the array environment
-    // of LaTeX, which is discussed above.
-    {
-        names: [
-            "matrix",
-            "pmatrix",
-            "bmatrix",
-            "Bmatrix",
-            "vmatrix",
-            "Vmatrix"
-        ],
-        handler: function(pos, mode, envName) {
-            var delimiters = {
-                "matrix": null,
-                "pmatrix": ["(", ")"],
-                "bmatrix": ["[", "]"],
-                "Bmatrix": ["\\{", "\\}"],
-                "vmatrix": ["|", "|"],
-                "Vmatrix": ["\\Vert", "\\Vert"]
-            }[envName];
-            var res = {
-                type: "array",
-                hskipBeforeAndAfter: false // \hskip -\arraycolsep in amsmath
-            };
-            res = parseArray(this, pos, mode, res);
-            if (delimiters) {
-                res.result = new ParseNode("leftright", {
-                    body: [res.result],
-                    left: delimiters[0],
-                    right: delimiters[1]
-                }, mode);
+// Arrays are part of LaTeX, defined in lttab.dtx so its documentation
+// is part of the source2e.pdf file of LaTeX2e source documentation.
+{
+    names: ["array"],
+    numArgs: 1,
+    handler: function handler(pos, mode, envName, colalign, positions) {
+        var parser = this;
+        colalign = colalign.value.map ? colalign.value : [colalign];
+        var cols = colalign.map(function (node) {
+            var ca = node.value;
+            if ("lcr".indexOf(ca) !== -1) {
+                return {
+                    type: "align",
+                    align: ca
+                };
+            } else if (ca === "|") {
+                return {
+                    type: "separator",
+                    separator: "|"
+                };
             }
-            return res;
-        }
-    },
+            throw new ParseError("Unknown column alignment: " + node.value, parser.lexer, positions[1]);
+        });
+        var res = {
+            type: "array",
+            cols: cols,
+            hskipBeforeAndAfter: true // \@preamble in lttab.dtx
+        };
+        res = parseArray(parser, pos, mode, res);
+        return res;
+    }
+},
 
-    // A cases environment (in amsmath.sty) is almost equivalent to
-    // \def\arraystretch{1.2}%
-    // \left\{\begin{array}{@{}l@{\quad}l@{}} … \end{array}\right.
-    {
-        names: ["cases"],
-        handler: function(pos, mode, envName) {
-            var res = {
-                type: "array",
-                arraystretch: 1.2,
-                cols: [{
-                    type: "align",
-                    align: "l",
-                    pregap: 0,
-                    postgap: fontMetrics.metrics.quad
-                }, {
-                    type: "align",
-                    align: "l",
-                    pregap: 0,
-                    postgap: 0
-                }]
-            };
-            res = parseArray(this, pos, mode, res);
+// The matrix environments of amsmath builds on the array environment
+// of LaTeX, which is discussed above.
+{
+    names: ["matrix", "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix"],
+    handler: function handler(pos, mode, envName) {
+        var delimiters = ({
+            matrix: null,
+            pmatrix: ["(", ")"],
+            bmatrix: ["[", "]"],
+            Bmatrix: ["\\{", "\\}"],
+            vmatrix: ["|", "|"],
+            Vmatrix: ["\\Vert", "\\Vert"]
+        })[envName];
+        var res = {
+            type: "array",
+            hskipBeforeAndAfter: false // \hskip -\arraycolsep in amsmath
+        };
+        res = parseArray(this, pos, mode, res);
+        if (delimiters) {
             res.result = new ParseNode("leftright", {
                 body: [res.result],
-                left: "\\{",
-                right: "."
+                left: delimiters[0],
+                right: delimiters[1]
             }, mode);
-            return res;
         }
+        return res;
     }
-];
+},
 
-module.exports = (function() {
+// A cases environment (in amsmath.sty) is almost equivalent to
+// \def\arraystretch{1.2}%
+// \left\{\begin{array}{@{}l@{\quad}l@{}} … \end{array}\right.
+{
+    names: ["cases"],
+    handler: function handler(pos, mode, envName) {
+        var res = {
+            type: "array",
+            arraystretch: 1.2,
+            cols: [{
+                type: "align",
+                align: "l",
+                pregap: 0,
+                postgap: fontMetrics.metrics.quad
+            }, {
+                type: "align",
+                align: "l",
+                pregap: 0,
+                postgap: 0
+            }]
+        };
+        res = parseArray(this, pos, mode, res);
+        res.result = new ParseNode("leftright", {
+            body: [res.result],
+            left: "\\{",
+            right: "."
+        }, mode);
+        return res;
+    }
+}];
+
+module.exports = (function () {
     // nested function so we don't leak i and j into the module scope
     var exports = {};
     for (var i = 0; i < environmentDefinitions.length; ++i) {
@@ -9314,8 +8928,10 @@ module.exports = (function() {
     return exports;
 })();
 
-},{"./ParseError":86,"./fontMetrics":97,"./parseData":101}],97:[function(require,module,exports){
+},{"./ParseError":87,"./fontMetrics":98,"./parseData":102}],98:[function(require,module,exports){
 /* jshint unused:false */
+
+"use strict";
 
 var Style = require("./Style");
 
@@ -9349,15 +8965,15 @@ var sigma12 = 0.345;
 var sigma13 = 0.413;
 var sigma14 = 0.363;
 var sigma15 = 0.289;
-var sigma16 = 0.150;
+var sigma16 = 0.15;
 var sigma17 = 0.247;
 var sigma18 = 0.386;
-var sigma19 = 0.050;
-var sigma20 = 2.390;
+var sigma19 = 0.05;
+var sigma20 = 2.39;
 var sigma21 = 1.01;
 var sigma21Script = 0.81;
 var sigma21ScriptScript = 0.71;
-var sigma22 = 0.250;
+var sigma22 = 0.25;
 
 // These font metrics are extracted from TeX by using
 // \font\a=cmex10
@@ -9382,11 +8998,11 @@ var xi13 = 0.1;
 // terms of pts.
 // This value is also used in katex.less; if you change it make sure the values
 // match.
-var ptPerEm = 10.0;
+var ptPerEm = 10;
 
 // The space between adjacent `|` columns in an array definition. From
 // `\showthe\doublerulesep` in LaTeX.
-var doubleRuleSep = 2.0 / ptPerEm;
+var doubleRuleSep = 2 / ptPerEm;
 
 /**
  * This is just a mapping from common names to real metrics
@@ -9420,7 +9036,7 @@ var metrics = {
     // TODO(alpert): Missing parallel structure here. We should probably add
     // style-specific metrics for all of these.
     delim1: sigma20,
-    getDelim2: function(style) {
+    getDelim2: function getDelim2(style) {
         if (style.size === Style.TEXT.size) {
             return sigma21;
         } else if (style.size === Style.SCRIPT.size) {
@@ -9442,7 +9058,7 @@ var metricMap = require("./fontMetricsData");
  * This function is a convience function for looking up information in the
  * metricMap table. It takes a character as a string, and a style
  */
-var getCharacterMetrics = function(character, style) {
+var getCharacterMetrics = function getCharacterMetrics(character, style) {
     return metricMap[style][character.charCodeAt(0)];
 };
 
@@ -9451,1760 +9067,12 @@ module.exports = {
     getCharacterMetrics: getCharacterMetrics
 };
 
-},{"./Style":89,"./fontMetricsData":98}],98:[function(require,module,exports){
-module.exports = {
-"AMS-Regular": {
-  "65": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "66": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "67": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "68": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "69": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "70": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "71": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "72": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "73": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "74": {"depth": 0.16667, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "75": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "76": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "77": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "78": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "79": {"depth": 0.16667, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "80": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "81": {"depth": 0.16667, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "82": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "83": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "84": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "86": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "89": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "165": {"depth": 0.0, "height": 0.675, "italic": 0.025, "skew": 0.0},
-  "174": {"depth": 0.15559, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "240": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "295": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "710": {"depth": 0.0, "height": 0.825, "italic": 0.0, "skew": 0.0},
-  "732": {"depth": 0.0, "height": 0.9, "italic": 0.0, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.825, "italic": 0.0, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.9, "italic": 0.0, "skew": 0.0},
-  "989": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "1008": {"depth": 0.0, "height": 0.43056, "italic": 0.04028, "skew": 0.0},
-  "8245": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8463": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8487": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8498": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8502": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8503": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8504": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8513": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8592": {"depth": -0.03598, "height": 0.46402, "italic": 0.0, "skew": 0.0},
-  "8594": {"depth": -0.03598, "height": 0.46402, "italic": 0.0, "skew": 0.0},
-  "8602": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8603": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8606": {"depth": 0.01354, "height": 0.52239, "italic": 0.0, "skew": 0.0},
-  "8608": {"depth": 0.01354, "height": 0.52239, "italic": 0.0, "skew": 0.0},
-  "8610": {"depth": 0.01354, "height": 0.52239, "italic": 0.0, "skew": 0.0},
-  "8611": {"depth": 0.01354, "height": 0.52239, "italic": 0.0, "skew": 0.0},
-  "8619": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8620": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8621": {"depth": -0.13313, "height": 0.37788, "italic": 0.0, "skew": 0.0},
-  "8622": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8624": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8625": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8630": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "8631": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "8634": {"depth": 0.08198, "height": 0.58198, "italic": 0.0, "skew": 0.0},
-  "8635": {"depth": 0.08198, "height": 0.58198, "italic": 0.0, "skew": 0.0},
-  "8638": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8639": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8642": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8643": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8644": {"depth": 0.1808, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8646": {"depth": 0.1808, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8647": {"depth": 0.1808, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8648": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8649": {"depth": 0.1808, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8650": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8651": {"depth": 0.01354, "height": 0.52239, "italic": 0.0, "skew": 0.0},
-  "8652": {"depth": 0.01354, "height": 0.52239, "italic": 0.0, "skew": 0.0},
-  "8653": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8654": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8655": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8666": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "8667": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "8669": {"depth": -0.13313, "height": 0.37788, "italic": 0.0, "skew": 0.0},
-  "8672": {"depth": -0.064, "height": 0.437, "italic": 0, "skew": 0},
-  "8674": {"depth": -0.064, "height": 0.437, "italic": 0, "skew": 0},
-  "8705": {"depth": 0.0, "height": 0.825, "italic": 0.0, "skew": 0.0},
-  "8708": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8709": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "8717": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "8722": {"depth": -0.03598, "height": 0.46402, "italic": 0.0, "skew": 0.0},
-  "8724": {"depth": 0.08198, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8726": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "8733": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8736": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8737": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8738": {"depth": 0.03517, "height": 0.52239, "italic": 0.0, "skew": 0.0},
-  "8739": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "8740": {"depth": 0.25142, "height": 0.74111, "italic": 0.0, "skew": 0.0},
-  "8741": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "8742": {"depth": 0.25142, "height": 0.74111, "italic": 0.0, "skew": 0.0},
-  "8756": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8757": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8764": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8765": {"depth": -0.13313, "height": 0.37788, "italic": 0.0, "skew": 0.0},
-  "8769": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8770": {"depth": -0.03625, "height": 0.46375, "italic": 0.0, "skew": 0.0},
-  "8774": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "8776": {"depth": -0.01688, "height": 0.48312, "italic": 0.0, "skew": 0.0},
-  "8778": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "8782": {"depth": 0.06062, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8783": {"depth": 0.06062, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8785": {"depth": 0.08198, "height": 0.58198, "italic": 0.0, "skew": 0.0},
-  "8786": {"depth": 0.08198, "height": 0.58198, "italic": 0.0, "skew": 0.0},
-  "8787": {"depth": 0.08198, "height": 0.58198, "italic": 0.0, "skew": 0.0},
-  "8790": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8791": {"depth": 0.22958, "height": 0.72958, "italic": 0.0, "skew": 0.0},
-  "8796": {"depth": 0.08198, "height": 0.91667, "italic": 0.0, "skew": 0.0},
-  "8806": {"depth": 0.25583, "height": 0.75583, "italic": 0.0, "skew": 0.0},
-  "8807": {"depth": 0.25583, "height": 0.75583, "italic": 0.0, "skew": 0.0},
-  "8808": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "8809": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "8812": {"depth": 0.25583, "height": 0.75583, "italic": 0.0, "skew": 0.0},
-  "8814": {"depth": 0.20576, "height": 0.70576, "italic": 0.0, "skew": 0.0},
-  "8815": {"depth": 0.20576, "height": 0.70576, "italic": 0.0, "skew": 0.0},
-  "8816": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "8817": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "8818": {"depth": 0.22958, "height": 0.72958, "italic": 0.0, "skew": 0.0},
-  "8819": {"depth": 0.22958, "height": 0.72958, "italic": 0.0, "skew": 0.0},
-  "8822": {"depth": 0.1808, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8823": {"depth": 0.1808, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8828": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "8829": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "8830": {"depth": 0.22958, "height": 0.72958, "italic": 0.0, "skew": 0.0},
-  "8831": {"depth": 0.22958, "height": 0.72958, "italic": 0.0, "skew": 0.0},
-  "8832": {"depth": 0.20576, "height": 0.70576, "italic": 0.0, "skew": 0.0},
-  "8833": {"depth": 0.20576, "height": 0.70576, "italic": 0.0, "skew": 0.0},
-  "8840": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "8841": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "8842": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "8843": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "8847": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8848": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8858": {"depth": 0.08198, "height": 0.58198, "italic": 0.0, "skew": 0.0},
-  "8859": {"depth": 0.08198, "height": 0.58198, "italic": 0.0, "skew": 0.0},
-  "8861": {"depth": 0.08198, "height": 0.58198, "italic": 0.0, "skew": 0.0},
-  "8862": {"depth": 0.0, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8863": {"depth": 0.0, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8864": {"depth": 0.0, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8865": {"depth": 0.0, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "8872": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8873": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8874": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8876": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8877": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8878": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8879": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8882": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8883": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8884": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "8885": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "8888": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8890": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "8891": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8892": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8901": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8903": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "8905": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "8906": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "8907": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8908": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8909": {"depth": -0.03598, "height": 0.46402, "italic": 0.0, "skew": 0.0},
-  "8910": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8911": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8912": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8913": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8914": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8915": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8916": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8918": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8919": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8920": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8921": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "8922": {"depth": 0.38569, "height": 0.88569, "italic": 0.0, "skew": 0.0},
-  "8923": {"depth": 0.38569, "height": 0.88569, "italic": 0.0, "skew": 0.0},
-  "8926": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "8927": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "8928": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "8929": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "8934": {"depth": 0.23222, "height": 0.74111, "italic": 0.0, "skew": 0.0},
-  "8935": {"depth": 0.23222, "height": 0.74111, "italic": 0.0, "skew": 0.0},
-  "8936": {"depth": 0.23222, "height": 0.74111, "italic": 0.0, "skew": 0.0},
-  "8937": {"depth": 0.23222, "height": 0.74111, "italic": 0.0, "skew": 0.0},
-  "8938": {"depth": 0.20576, "height": 0.70576, "italic": 0.0, "skew": 0.0},
-  "8939": {"depth": 0.20576, "height": 0.70576, "italic": 0.0, "skew": 0.0},
-  "8940": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "8941": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "8994": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8995": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "9416": {"depth": 0.15559, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "9484": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "9488": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "9492": {"depth": 0.0, "height": 0.37788, "italic": 0.0, "skew": 0.0},
-  "9496": {"depth": 0.0, "height": 0.37788, "italic": 0.0, "skew": 0.0},
-  "9585": {"depth": 0.19444, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "9586": {"depth": 0.19444, "height": 0.74111, "italic": 0.0, "skew": 0.0},
-  "9632": {"depth": 0.0, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "9633": {"depth": 0.0, "height": 0.675, "italic": 0.0, "skew": 0.0},
-  "9650": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "9651": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "9654": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "9660": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "9661": {"depth": 0.0, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "9664": {"depth": 0.03517, "height": 0.54986, "italic": 0.0, "skew": 0.0},
-  "9674": {"depth": 0.11111, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "9733": {"depth": 0.19444, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "10003": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "10016": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "10731": {"depth": 0.11111, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "10846": {"depth": 0.19444, "height": 0.75583, "italic": 0.0, "skew": 0.0},
-  "10877": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "10878": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "10885": {"depth": 0.25583, "height": 0.75583, "italic": 0.0, "skew": 0.0},
-  "10886": {"depth": 0.25583, "height": 0.75583, "italic": 0.0, "skew": 0.0},
-  "10887": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "10888": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "10889": {"depth": 0.26167, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "10890": {"depth": 0.26167, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "10891": {"depth": 0.48256, "height": 0.98256, "italic": 0.0, "skew": 0.0},
-  "10892": {"depth": 0.48256, "height": 0.98256, "italic": 0.0, "skew": 0.0},
-  "10901": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "10902": {"depth": 0.13667, "height": 0.63667, "italic": 0.0, "skew": 0.0},
-  "10933": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "10934": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "10935": {"depth": 0.26167, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "10936": {"depth": 0.26167, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "10937": {"depth": 0.26167, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "10938": {"depth": 0.26167, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "10949": {"depth": 0.25583, "height": 0.75583, "italic": 0.0, "skew": 0.0},
-  "10950": {"depth": 0.25583, "height": 0.75583, "italic": 0.0, "skew": 0.0},
-  "10955": {"depth": 0.28481, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "10956": {"depth": 0.28481, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "57350": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "57351": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "57352": {"depth": 0.08167, "height": 0.58167, "italic": 0.0, "skew": 0.0},
-  "57353": {"depth": 0.0, "height": 0.43056, "italic": 0.04028, "skew": 0.0},
-  "57356": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "57357": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "57358": {"depth": 0.41951, "height": 0.91951, "italic": 0.0, "skew": 0.0},
-  "57359": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "57360": {"depth": 0.30274, "height": 0.79383, "italic": 0.0, "skew": 0.0},
-  "57361": {"depth": 0.41951, "height": 0.91951, "italic": 0.0, "skew": 0.0},
-  "57366": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "57367": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "57368": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "57369": {"depth": 0.25142, "height": 0.75726, "italic": 0.0, "skew": 0.0},
-  "57370": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "57371": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0}
-},
-"Caligraphic-Regular": {
-  "48": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "49": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "50": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "51": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "52": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "53": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "54": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "55": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "56": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "57": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "65": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.19445},
-  "66": {"depth": 0.0, "height": 0.68333, "italic": 0.03041, "skew": 0.13889},
-  "67": {"depth": 0.0, "height": 0.68333, "italic": 0.05834, "skew": 0.13889},
-  "68": {"depth": 0.0, "height": 0.68333, "italic": 0.02778, "skew": 0.08334},
-  "69": {"depth": 0.0, "height": 0.68333, "italic": 0.08944, "skew": 0.11111},
-  "70": {"depth": 0.0, "height": 0.68333, "italic": 0.09931, "skew": 0.11111},
-  "71": {"depth": 0.09722, "height": 0.68333, "italic": 0.0593, "skew": 0.11111},
-  "72": {"depth": 0.0, "height": 0.68333, "italic": 0.00965, "skew": 0.11111},
-  "73": {"depth": 0.0, "height": 0.68333, "italic": 0.07382, "skew": 0.0},
-  "74": {"depth": 0.09722, "height": 0.68333, "italic": 0.18472, "skew": 0.16667},
-  "75": {"depth": 0.0, "height": 0.68333, "italic": 0.01445, "skew": 0.05556},
-  "76": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.13889},
-  "77": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.13889},
-  "78": {"depth": 0.0, "height": 0.68333, "italic": 0.14736, "skew": 0.08334},
-  "79": {"depth": 0.0, "height": 0.68333, "italic": 0.02778, "skew": 0.11111},
-  "80": {"depth": 0.0, "height": 0.68333, "italic": 0.08222, "skew": 0.08334},
-  "81": {"depth": 0.09722, "height": 0.68333, "italic": 0.0, "skew": 0.11111},
-  "82": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.08334},
-  "83": {"depth": 0.0, "height": 0.68333, "italic": 0.075, "skew": 0.13889},
-  "84": {"depth": 0.0, "height": 0.68333, "italic": 0.25417, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.68333, "italic": 0.09931, "skew": 0.08334},
-  "86": {"depth": 0.0, "height": 0.68333, "italic": 0.08222, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.68333, "italic": 0.08222, "skew": 0.08334},
-  "88": {"depth": 0.0, "height": 0.68333, "italic": 0.14643, "skew": 0.13889},
-  "89": {"depth": 0.09722, "height": 0.68333, "italic": 0.08222, "skew": 0.08334},
-  "90": {"depth": 0.0, "height": 0.68333, "italic": 0.07944, "skew": 0.13889}
-},
-"Fraktur-Regular": {
-  "33": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "34": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "38": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "39": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "40": {"depth": 0.24982, "height": 0.74947, "italic": 0.0, "skew": 0.0},
-  "41": {"depth": 0.24982, "height": 0.74947, "italic": 0.0, "skew": 0.0},
-  "42": {"depth": 0.0, "height": 0.62119, "italic": 0.0, "skew": 0.0},
-  "43": {"depth": 0.08319, "height": 0.58283, "italic": 0.0, "skew": 0.0},
-  "44": {"depth": 0.0, "height": 0.10803, "italic": 0.0, "skew": 0.0},
-  "45": {"depth": 0.08319, "height": 0.58283, "italic": 0.0, "skew": 0.0},
-  "46": {"depth": 0.0, "height": 0.10803, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 0.24982, "height": 0.74947, "italic": 0.0, "skew": 0.0},
-  "48": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "49": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "50": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "51": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "52": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "53": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "54": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "55": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "56": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "57": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "58": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "59": {"depth": 0.12604, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "61": {"depth": -0.13099, "height": 0.36866, "italic": 0.0, "skew": 0.0},
-  "63": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "65": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "66": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "67": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "68": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "69": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "70": {"depth": 0.12604, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "71": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "72": {"depth": 0.06302, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "73": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "74": {"depth": 0.12604, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "75": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "76": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "77": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "78": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "79": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "80": {"depth": 0.18906, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "81": {"depth": 0.03781, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "82": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "83": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "84": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "86": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "89": {"depth": 0.18906, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "90": {"depth": 0.12604, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "91": {"depth": 0.24982, "height": 0.74947, "italic": 0.0, "skew": 0.0},
-  "93": {"depth": 0.24982, "height": 0.74947, "italic": 0.0, "skew": 0.0},
-  "94": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "97": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "98": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "99": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "100": {"depth": 0.0, "height": 0.62119, "italic": 0.0, "skew": 0.0},
-  "101": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "102": {"depth": 0.18906, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "103": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "104": {"depth": 0.18906, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "105": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "106": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "108": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "109": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "110": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "111": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "112": {"depth": 0.18906, "height": 0.52396, "italic": 0.0, "skew": 0.0},
-  "113": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "114": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "115": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "116": {"depth": 0.0, "height": 0.62119, "italic": 0.0, "skew": 0.0},
-  "117": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "118": {"depth": 0.0, "height": 0.52396, "italic": 0.0, "skew": 0.0},
-  "119": {"depth": 0.0, "height": 0.52396, "italic": 0.0, "skew": 0.0},
-  "120": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "121": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "122": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "8216": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "8217": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "58112": {"depth": 0.0, "height": 0.62119, "italic": 0.0, "skew": 0.0},
-  "58113": {"depth": 0.0, "height": 0.62119, "italic": 0.0, "skew": 0.0},
-  "58114": {"depth": 0.18906, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "58115": {"depth": 0.18906, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "58116": {"depth": 0.18906, "height": 0.47534, "italic": 0.0, "skew": 0.0},
-  "58117": {"depth": 0.0, "height": 0.69141, "italic": 0.0, "skew": 0.0},
-  "58118": {"depth": 0.0, "height": 0.62119, "italic": 0.0, "skew": 0.0},
-  "58119": {"depth": 0.0, "height": 0.47534, "italic": 0.0, "skew": 0.0}
-},
-"Main-Bold": {
-  "33": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "34": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "35": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "36": {"depth": 0.05556, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "37": {"depth": 0.05556, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "38": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "39": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "40": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "41": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "42": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "43": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "44": {"depth": 0.19444, "height": 0.15556, "italic": 0.0, "skew": 0.0},
-  "45": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "46": {"depth": 0.0, "height": 0.15556, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "48": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "49": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "50": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "51": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "52": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "53": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "54": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "55": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "56": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "57": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "58": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "59": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "60": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "61": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "62": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "63": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "64": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "65": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "66": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "67": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "68": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "69": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "70": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "71": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "72": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "73": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "74": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "75": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "76": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "77": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "78": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "79": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "80": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "81": {"depth": 0.19444, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "82": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "83": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "84": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "86": {"depth": 0.0, "height": 0.68611, "italic": 0.01597, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.68611, "italic": 0.01597, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "89": {"depth": 0.0, "height": 0.68611, "italic": 0.02875, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "91": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "92": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "93": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "94": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "95": {"depth": 0.31, "height": 0.13444, "italic": 0.03194, "skew": 0.0},
-  "96": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "97": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "98": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "99": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "100": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "101": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "102": {"depth": 0.0, "height": 0.69444, "italic": 0.10903, "skew": 0.0},
-  "103": {"depth": 0.19444, "height": 0.44444, "italic": 0.01597, "skew": 0.0},
-  "104": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "105": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "106": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "108": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "109": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "110": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "111": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "112": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "113": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "114": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "115": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "116": {"depth": 0.0, "height": 0.63492, "italic": 0.0, "skew": 0.0},
-  "117": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "118": {"depth": 0.0, "height": 0.44444, "italic": 0.01597, "skew": 0.0},
-  "119": {"depth": 0.0, "height": 0.44444, "italic": 0.01597, "skew": 0.0},
-  "120": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "121": {"depth": 0.19444, "height": 0.44444, "italic": 0.01597, "skew": 0.0},
-  "122": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "123": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "124": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "125": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "126": {"depth": 0.35, "height": 0.34444, "italic": 0.0, "skew": 0.0},
-  "168": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "172": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "175": {"depth": 0.0, "height": 0.59611, "italic": 0.0, "skew": 0.0},
-  "176": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "177": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "180": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "215": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "247": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "305": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "567": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "710": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "711": {"depth": 0.0, "height": 0.63194, "italic": 0.0, "skew": 0.0},
-  "713": {"depth": 0.0, "height": 0.59611, "italic": 0.0, "skew": 0.0},
-  "714": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "715": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "728": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "729": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "730": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "732": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "768": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "769": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "772": {"depth": 0.0, "height": 0.59611, "italic": 0.0, "skew": 0.0},
-  "774": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "775": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "776": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "778": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "779": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "780": {"depth": 0.0, "height": 0.63194, "italic": 0.0, "skew": 0.0},
-  "824": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "915": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "916": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "920": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "923": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "926": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "928": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "931": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "933": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "934": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "936": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "937": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "8211": {"depth": 0.0, "height": 0.44444, "italic": 0.03194, "skew": 0.0},
-  "8212": {"depth": 0.0, "height": 0.44444, "italic": 0.03194, "skew": 0.0},
-  "8216": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8217": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8220": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8221": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8224": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8225": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8242": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8407": {"depth": 0.0, "height": 0.72444, "italic": 0.15486, "skew": 0.0},
-  "8463": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8465": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8467": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8472": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "8476": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8501": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8592": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8593": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8594": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8595": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8596": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8597": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8598": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8599": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8600": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8601": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8636": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8637": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8640": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8641": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8656": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8657": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8658": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8659": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8660": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8661": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8704": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8706": {"depth": 0.0, "height": 0.69444, "italic": 0.06389, "skew": 0.0},
-  "8707": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8709": {"depth": 0.05556, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8711": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "8712": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "8715": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "8722": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "8723": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "8725": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8726": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8727": {"depth": -0.02778, "height": 0.47222, "italic": 0.0, "skew": 0.0},
-  "8728": {"depth": -0.02639, "height": 0.47361, "italic": 0.0, "skew": 0.0},
-  "8729": {"depth": -0.02639, "height": 0.47361, "italic": 0.0, "skew": 0.0},
-  "8730": {"depth": 0.18, "height": 0.82, "italic": 0.0, "skew": 0.0},
-  "8733": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "8734": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "8736": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8739": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8741": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8743": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8744": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8745": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8746": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8747": {"depth": 0.19444, "height": 0.69444, "italic": 0.12778, "skew": 0.0},
-  "8764": {"depth": -0.10889, "height": 0.39111, "italic": 0.0, "skew": 0.0},
-  "8768": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8771": {"depth": 0.00222, "height": 0.50222, "italic": 0.0, "skew": 0.0},
-  "8776": {"depth": 0.02444, "height": 0.52444, "italic": 0.0, "skew": 0.0},
-  "8781": {"depth": 0.00222, "height": 0.50222, "italic": 0.0, "skew": 0.0},
-  "8801": {"depth": 0.00222, "height": 0.50222, "italic": 0.0, "skew": 0.0},
-  "8804": {"depth": 0.19667, "height": 0.69667, "italic": 0.0, "skew": 0.0},
-  "8805": {"depth": 0.19667, "height": 0.69667, "italic": 0.0, "skew": 0.0},
-  "8810": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "8811": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "8826": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "8827": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "8834": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "8835": {"depth": 0.08556, "height": 0.58556, "italic": 0.0, "skew": 0.0},
-  "8838": {"depth": 0.19667, "height": 0.69667, "italic": 0.0, "skew": 0.0},
-  "8839": {"depth": 0.19667, "height": 0.69667, "italic": 0.0, "skew": 0.0},
-  "8846": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8849": {"depth": 0.19667, "height": 0.69667, "italic": 0.0, "skew": 0.0},
-  "8850": {"depth": 0.19667, "height": 0.69667, "italic": 0.0, "skew": 0.0},
-  "8851": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8852": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8853": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "8854": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "8855": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "8856": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "8857": {"depth": 0.13333, "height": 0.63333, "italic": 0.0, "skew": 0.0},
-  "8866": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8867": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8868": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8869": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8900": {"depth": -0.02639, "height": 0.47361, "italic": 0.0, "skew": 0.0},
-  "8901": {"depth": -0.02639, "height": 0.47361, "italic": 0.0, "skew": 0.0},
-  "8902": {"depth": -0.02778, "height": 0.47222, "italic": 0.0, "skew": 0.0},
-  "8968": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8969": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8970": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8971": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8994": {"depth": -0.13889, "height": 0.36111, "italic": 0.0, "skew": 0.0},
-  "8995": {"depth": -0.13889, "height": 0.36111, "italic": 0.0, "skew": 0.0},
-  "9651": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9657": {"depth": -0.02778, "height": 0.47222, "italic": 0.0, "skew": 0.0},
-  "9661": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9667": {"depth": -0.02778, "height": 0.47222, "italic": 0.0, "skew": 0.0},
-  "9711": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9824": {"depth": 0.12963, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9825": {"depth": 0.12963, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9826": {"depth": 0.12963, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9827": {"depth": 0.12963, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9837": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "9838": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9839": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "10216": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "10217": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "10815": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "10927": {"depth": 0.19667, "height": 0.69667, "italic": 0.0, "skew": 0.0},
-  "10928": {"depth": 0.19667, "height": 0.69667, "italic": 0.0, "skew": 0.0}
-},
-"Main-Italic": {
-  "33": {"depth": 0.0, "height": 0.69444, "italic": 0.12417, "skew": 0.0},
-  "34": {"depth": 0.0, "height": 0.69444, "italic": 0.06961, "skew": 0.0},
-  "35": {"depth": 0.19444, "height": 0.69444, "italic": 0.06616, "skew": 0.0},
-  "37": {"depth": 0.05556, "height": 0.75, "italic": 0.13639, "skew": 0.0},
-  "38": {"depth": 0.0, "height": 0.69444, "italic": 0.09694, "skew": 0.0},
-  "39": {"depth": 0.0, "height": 0.69444, "italic": 0.12417, "skew": 0.0},
-  "40": {"depth": 0.25, "height": 0.75, "italic": 0.16194, "skew": 0.0},
-  "41": {"depth": 0.25, "height": 0.75, "italic": 0.03694, "skew": 0.0},
-  "42": {"depth": 0.0, "height": 0.75, "italic": 0.14917, "skew": 0.0},
-  "43": {"depth": 0.05667, "height": 0.56167, "italic": 0.03694, "skew": 0.0},
-  "44": {"depth": 0.19444, "height": 0.10556, "italic": 0.0, "skew": 0.0},
-  "45": {"depth": 0.0, "height": 0.43056, "italic": 0.02826, "skew": 0.0},
-  "46": {"depth": 0.0, "height": 0.10556, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 0.25, "height": 0.75, "italic": 0.16194, "skew": 0.0},
-  "48": {"depth": 0.0, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "49": {"depth": 0.0, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "50": {"depth": 0.0, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "51": {"depth": 0.0, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "52": {"depth": 0.19444, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "53": {"depth": 0.0, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "54": {"depth": 0.0, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "55": {"depth": 0.19444, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "56": {"depth": 0.0, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "57": {"depth": 0.0, "height": 0.64444, "italic": 0.13556, "skew": 0.0},
-  "58": {"depth": 0.0, "height": 0.43056, "italic": 0.0582, "skew": 0.0},
-  "59": {"depth": 0.19444, "height": 0.43056, "italic": 0.0582, "skew": 0.0},
-  "61": {"depth": -0.13313, "height": 0.36687, "italic": 0.06616, "skew": 0.0},
-  "63": {"depth": 0.0, "height": 0.69444, "italic": 0.1225, "skew": 0.0},
-  "64": {"depth": 0.0, "height": 0.69444, "italic": 0.09597, "skew": 0.0},
-  "65": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "66": {"depth": 0.0, "height": 0.68333, "italic": 0.10257, "skew": 0.0},
-  "67": {"depth": 0.0, "height": 0.68333, "italic": 0.14528, "skew": 0.0},
-  "68": {"depth": 0.0, "height": 0.68333, "italic": 0.09403, "skew": 0.0},
-  "69": {"depth": 0.0, "height": 0.68333, "italic": 0.12028, "skew": 0.0},
-  "70": {"depth": 0.0, "height": 0.68333, "italic": 0.13305, "skew": 0.0},
-  "71": {"depth": 0.0, "height": 0.68333, "italic": 0.08722, "skew": 0.0},
-  "72": {"depth": 0.0, "height": 0.68333, "italic": 0.16389, "skew": 0.0},
-  "73": {"depth": 0.0, "height": 0.68333, "italic": 0.15806, "skew": 0.0},
-  "74": {"depth": 0.0, "height": 0.68333, "italic": 0.14028, "skew": 0.0},
-  "75": {"depth": 0.0, "height": 0.68333, "italic": 0.14528, "skew": 0.0},
-  "76": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "77": {"depth": 0.0, "height": 0.68333, "italic": 0.16389, "skew": 0.0},
-  "78": {"depth": 0.0, "height": 0.68333, "italic": 0.16389, "skew": 0.0},
-  "79": {"depth": 0.0, "height": 0.68333, "italic": 0.09403, "skew": 0.0},
-  "80": {"depth": 0.0, "height": 0.68333, "italic": 0.10257, "skew": 0.0},
-  "81": {"depth": 0.19444, "height": 0.68333, "italic": 0.09403, "skew": 0.0},
-  "82": {"depth": 0.0, "height": 0.68333, "italic": 0.03868, "skew": 0.0},
-  "83": {"depth": 0.0, "height": 0.68333, "italic": 0.11972, "skew": 0.0},
-  "84": {"depth": 0.0, "height": 0.68333, "italic": 0.13305, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.68333, "italic": 0.16389, "skew": 0.0},
-  "86": {"depth": 0.0, "height": 0.68333, "italic": 0.18361, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.68333, "italic": 0.18361, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.68333, "italic": 0.15806, "skew": 0.0},
-  "89": {"depth": 0.0, "height": 0.68333, "italic": 0.19383, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.68333, "italic": 0.14528, "skew": 0.0},
-  "91": {"depth": 0.25, "height": 0.75, "italic": 0.1875, "skew": 0.0},
-  "93": {"depth": 0.25, "height": 0.75, "italic": 0.10528, "skew": 0.0},
-  "94": {"depth": 0.0, "height": 0.69444, "italic": 0.06646, "skew": 0.0},
-  "95": {"depth": 0.31, "height": 0.12056, "italic": 0.09208, "skew": 0.0},
-  "97": {"depth": 0.0, "height": 0.43056, "italic": 0.07671, "skew": 0.0},
-  "98": {"depth": 0.0, "height": 0.69444, "italic": 0.06312, "skew": 0.0},
-  "99": {"depth": 0.0, "height": 0.43056, "italic": 0.05653, "skew": 0.0},
-  "100": {"depth": 0.0, "height": 0.69444, "italic": 0.10333, "skew": 0.0},
-  "101": {"depth": 0.0, "height": 0.43056, "italic": 0.07514, "skew": 0.0},
-  "102": {"depth": 0.19444, "height": 0.69444, "italic": 0.21194, "skew": 0.0},
-  "103": {"depth": 0.19444, "height": 0.43056, "italic": 0.08847, "skew": 0.0},
-  "104": {"depth": 0.0, "height": 0.69444, "italic": 0.07671, "skew": 0.0},
-  "105": {"depth": 0.0, "height": 0.65536, "italic": 0.1019, "skew": 0.0},
-  "106": {"depth": 0.19444, "height": 0.65536, "italic": 0.14467, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.69444, "italic": 0.10764, "skew": 0.0},
-  "108": {"depth": 0.0, "height": 0.69444, "italic": 0.10333, "skew": 0.0},
-  "109": {"depth": 0.0, "height": 0.43056, "italic": 0.07671, "skew": 0.0},
-  "110": {"depth": 0.0, "height": 0.43056, "italic": 0.07671, "skew": 0.0},
-  "111": {"depth": 0.0, "height": 0.43056, "italic": 0.06312, "skew": 0.0},
-  "112": {"depth": 0.19444, "height": 0.43056, "italic": 0.06312, "skew": 0.0},
-  "113": {"depth": 0.19444, "height": 0.43056, "italic": 0.08847, "skew": 0.0},
-  "114": {"depth": 0.0, "height": 0.43056, "italic": 0.10764, "skew": 0.0},
-  "115": {"depth": 0.0, "height": 0.43056, "italic": 0.08208, "skew": 0.0},
-  "116": {"depth": 0.0, "height": 0.61508, "italic": 0.09486, "skew": 0.0},
-  "117": {"depth": 0.0, "height": 0.43056, "italic": 0.07671, "skew": 0.0},
-  "118": {"depth": 0.0, "height": 0.43056, "italic": 0.10764, "skew": 0.0},
-  "119": {"depth": 0.0, "height": 0.43056, "italic": 0.10764, "skew": 0.0},
-  "120": {"depth": 0.0, "height": 0.43056, "italic": 0.12042, "skew": 0.0},
-  "121": {"depth": 0.19444, "height": 0.43056, "italic": 0.08847, "skew": 0.0},
-  "122": {"depth": 0.0, "height": 0.43056, "italic": 0.12292, "skew": 0.0},
-  "126": {"depth": 0.35, "height": 0.31786, "italic": 0.11585, "skew": 0.0},
-  "163": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "305": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.02778},
-  "567": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "768": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "769": {"depth": 0.0, "height": 0.69444, "italic": 0.09694, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.69444, "italic": 0.06646, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.66786, "italic": 0.11585, "skew": 0.0},
-  "772": {"depth": 0.0, "height": 0.56167, "italic": 0.10333, "skew": 0.0},
-  "774": {"depth": 0.0, "height": 0.69444, "italic": 0.10806, "skew": 0.0},
-  "775": {"depth": 0.0, "height": 0.66786, "italic": 0.11752, "skew": 0.0},
-  "776": {"depth": 0.0, "height": 0.66786, "italic": 0.10474, "skew": 0.0},
-  "778": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "779": {"depth": 0.0, "height": 0.69444, "italic": 0.1225, "skew": 0.0},
-  "780": {"depth": 0.0, "height": 0.62847, "italic": 0.08295, "skew": 0.0},
-  "915": {"depth": 0.0, "height": 0.68333, "italic": 0.13305, "skew": 0.0},
-  "916": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "920": {"depth": 0.0, "height": 0.68333, "italic": 0.09403, "skew": 0.0},
-  "923": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "926": {"depth": 0.0, "height": 0.68333, "italic": 0.15294, "skew": 0.0},
-  "928": {"depth": 0.0, "height": 0.68333, "italic": 0.16389, "skew": 0.0},
-  "931": {"depth": 0.0, "height": 0.68333, "italic": 0.12028, "skew": 0.0},
-  "933": {"depth": 0.0, "height": 0.68333, "italic": 0.11111, "skew": 0.0},
-  "934": {"depth": 0.0, "height": 0.68333, "italic": 0.05986, "skew": 0.0},
-  "936": {"depth": 0.0, "height": 0.68333, "italic": 0.11111, "skew": 0.0},
-  "937": {"depth": 0.0, "height": 0.68333, "italic": 0.10257, "skew": 0.0},
-  "8211": {"depth": 0.0, "height": 0.43056, "italic": 0.09208, "skew": 0.0},
-  "8212": {"depth": 0.0, "height": 0.43056, "italic": 0.09208, "skew": 0.0},
-  "8216": {"depth": 0.0, "height": 0.69444, "italic": 0.12417, "skew": 0.0},
-  "8217": {"depth": 0.0, "height": 0.69444, "italic": 0.12417, "skew": 0.0},
-  "8220": {"depth": 0.0, "height": 0.69444, "italic": 0.1685, "skew": 0.0},
-  "8221": {"depth": 0.0, "height": 0.69444, "italic": 0.06961, "skew": 0.0},
-  "8463": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0}
-},
-"Main-Regular": {
-  "32": {"depth": 0.0, "height": 0.0, "italic": 0, "skew": 0},
-  "33": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "34": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "35": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "36": {"depth": 0.05556, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "37": {"depth": 0.05556, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "38": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "39": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "40": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "41": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "42": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "43": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "44": {"depth": 0.19444, "height": 0.10556, "italic": 0.0, "skew": 0.0},
-  "45": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "46": {"depth": 0.0, "height": 0.10556, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "48": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "49": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "50": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "51": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "52": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "53": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "54": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "55": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "56": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "57": {"depth": 0.0, "height": 0.64444, "italic": 0.0, "skew": 0.0},
-  "58": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "59": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "60": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "61": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "62": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "63": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "64": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "65": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "66": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "67": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "68": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "69": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "70": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "71": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "72": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "73": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "74": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "75": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "76": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "77": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "78": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "79": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "80": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "81": {"depth": 0.19444, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "82": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "83": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "84": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "86": {"depth": 0.0, "height": 0.68333, "italic": 0.01389, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.68333, "italic": 0.01389, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "89": {"depth": 0.0, "height": 0.68333, "italic": 0.025, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "91": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "92": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "93": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "94": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "95": {"depth": 0.31, "height": 0.12056, "italic": 0.02778, "skew": 0.0},
-  "96": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "97": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "98": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "99": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "100": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "101": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "102": {"depth": 0.0, "height": 0.69444, "italic": 0.07778, "skew": 0.0},
-  "103": {"depth": 0.19444, "height": 0.43056, "italic": 0.01389, "skew": 0.0},
-  "104": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "105": {"depth": 0.0, "height": 0.66786, "italic": 0.0, "skew": 0.0},
-  "106": {"depth": 0.19444, "height": 0.66786, "italic": 0.0, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "108": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "109": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "110": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "111": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "112": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "113": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "114": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "115": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "116": {"depth": 0.0, "height": 0.61508, "italic": 0.0, "skew": 0.0},
-  "117": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "118": {"depth": 0.0, "height": 0.43056, "italic": 0.01389, "skew": 0.0},
-  "119": {"depth": 0.0, "height": 0.43056, "italic": 0.01389, "skew": 0.0},
-  "120": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "121": {"depth": 0.19444, "height": 0.43056, "italic": 0.01389, "skew": 0.0},
-  "122": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "123": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "124": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "125": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "126": {"depth": 0.35, "height": 0.31786, "italic": 0.0, "skew": 0.0},
-  "160": {"depth": 0.0, "height": 0.0, "italic": 0, "skew": 0},
-  "168": {"depth": 0.0, "height": 0.66786, "italic": 0.0, "skew": 0.0},
-  "172": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "175": {"depth": 0.0, "height": 0.56778, "italic": 0.0, "skew": 0.0},
-  "176": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "177": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "180": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "215": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "247": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "305": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "567": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "710": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "711": {"depth": 0.0, "height": 0.62847, "italic": 0.0, "skew": 0.0},
-  "713": {"depth": 0.0, "height": 0.56778, "italic": 0.0, "skew": 0.0},
-  "714": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "715": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "728": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "729": {"depth": 0.0, "height": 0.66786, "italic": 0.0, "skew": 0.0},
-  "730": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "732": {"depth": 0.0, "height": 0.66786, "italic": 0.0, "skew": 0.0},
-  "768": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "769": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.66786, "italic": 0.0, "skew": 0.0},
-  "772": {"depth": 0.0, "height": 0.56778, "italic": 0.0, "skew": 0.0},
-  "774": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "775": {"depth": 0.0, "height": 0.66786, "italic": 0.0, "skew": 0.0},
-  "776": {"depth": 0.0, "height": 0.66786, "italic": 0.0, "skew": 0.0},
-  "778": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "779": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "780": {"depth": 0.0, "height": 0.62847, "italic": 0.0, "skew": 0.0},
-  "824": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "915": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "916": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "920": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "923": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "926": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "928": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "931": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "933": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "934": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "936": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "937": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "8211": {"depth": 0.0, "height": 0.43056, "italic": 0.02778, "skew": 0.0},
-  "8212": {"depth": 0.0, "height": 0.43056, "italic": 0.02778, "skew": 0.0},
-  "8216": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8217": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8220": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8221": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8224": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8225": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8230": {"depth": 0.0, "height": 0.12, "italic": 0, "skew": 0},
-  "8242": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8407": {"depth": 0.0, "height": 0.71444, "italic": 0.15382, "skew": 0.0},
-  "8463": {"depth": 0.0, "height": 0.68889, "italic": 0.0, "skew": 0.0},
-  "8465": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8467": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.11111},
-  "8472": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.11111},
-  "8476": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8501": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8592": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8593": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8594": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8595": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8596": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8597": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8598": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8599": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8600": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8601": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8614": {"depth": 0.011, "height": 0.511, "italic": 0, "skew": 0},
-  "8617": {"depth": 0.011, "height": 0.511, "italic": 0, "skew": 0},
-  "8618": {"depth": 0.011, "height": 0.511, "italic": 0, "skew": 0},
-  "8636": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8637": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8640": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8641": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8652": {"depth": 0.011, "height": 0.671, "italic": 0, "skew": 0},
-  "8656": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8657": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8658": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8659": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8660": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8661": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8704": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8706": {"depth": 0.0, "height": 0.69444, "italic": 0.05556, "skew": 0.08334},
-  "8707": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8709": {"depth": 0.05556, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8711": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "8712": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8715": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8722": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "8723": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "8725": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8726": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8727": {"depth": -0.03472, "height": 0.46528, "italic": 0.0, "skew": 0.0},
-  "8728": {"depth": -0.05555, "height": 0.44445, "italic": 0.0, "skew": 0.0},
-  "8729": {"depth": -0.05555, "height": 0.44445, "italic": 0.0, "skew": 0.0},
-  "8730": {"depth": 0.2, "height": 0.8, "italic": 0.0, "skew": 0.0},
-  "8733": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "8734": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "8736": {"depth": 0.0, "height": 0.69224, "italic": 0.0, "skew": 0.0},
-  "8739": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8741": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8743": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8744": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8745": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8746": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8747": {"depth": 0.19444, "height": 0.69444, "italic": 0.11111, "skew": 0.0},
-  "8764": {"depth": -0.13313, "height": 0.36687, "italic": 0.0, "skew": 0.0},
-  "8768": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8771": {"depth": -0.03625, "height": 0.46375, "italic": 0.0, "skew": 0.0},
-  "8773": {"depth": -0.022, "height": 0.589, "italic": 0, "skew": 0},
-  "8776": {"depth": -0.01688, "height": 0.48312, "italic": 0.0, "skew": 0.0},
-  "8781": {"depth": -0.03625, "height": 0.46375, "italic": 0.0, "skew": 0.0},
-  "8784": {"depth": -0.133, "height": 0.67, "italic": 0, "skew": 0},
-  "8800": {"depth": 0.215, "height": 0.716, "italic": 0, "skew": 0},
-  "8801": {"depth": -0.03625, "height": 0.46375, "italic": 0.0, "skew": 0.0},
-  "8804": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "8805": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "8810": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8811": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8826": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8827": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8834": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8835": {"depth": 0.0391, "height": 0.5391, "italic": 0.0, "skew": 0.0},
-  "8838": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "8839": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "8846": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8849": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "8850": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "8851": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8852": {"depth": 0.0, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "8853": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "8854": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "8855": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "8856": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "8857": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "8866": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8867": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8868": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8869": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8872": {"depth": 0.249, "height": 0.75, "italic": 0, "skew": 0},
-  "8900": {"depth": -0.05555, "height": 0.44445, "italic": 0.0, "skew": 0.0},
-  "8901": {"depth": -0.05555, "height": 0.44445, "italic": 0.0, "skew": 0.0},
-  "8902": {"depth": -0.03472, "height": 0.46528, "italic": 0.0, "skew": 0.0},
-  "8904": {"depth": 0.005, "height": 0.505, "italic": 0, "skew": 0},
-  "8942": {"depth": 0.03, "height": 0.9, "italic": 0, "skew": 0},
-  "8943": {"depth": -0.19, "height": 0.31, "italic": 0, "skew": 0},
-  "8945": {"depth": -0.1, "height": 0.82, "italic": 0, "skew": 0},
-  "8968": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8969": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8970": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8971": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8994": {"depth": -0.14236, "height": 0.35764, "italic": 0.0, "skew": 0.0},
-  "8995": {"depth": -0.14236, "height": 0.35764, "italic": 0.0, "skew": 0.0},
-  "9136": {"depth": 0.244, "height": 0.744, "italic": 0, "skew": 0},
-  "9137": {"depth": 0.244, "height": 0.744, "italic": 0, "skew": 0},
-  "9651": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9657": {"depth": -0.03472, "height": 0.46528, "italic": 0.0, "skew": 0.0},
-  "9661": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9667": {"depth": -0.03472, "height": 0.46528, "italic": 0.0, "skew": 0.0},
-  "9711": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9824": {"depth": 0.12963, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9825": {"depth": 0.12963, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9826": {"depth": 0.12963, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9827": {"depth": 0.12963, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9837": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "9838": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "9839": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "10216": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "10217": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "10222": {"depth": 0.244, "height": 0.744, "italic": 0, "skew": 0},
-  "10223": {"depth": 0.244, "height": 0.744, "italic": 0, "skew": 0},
-  "10229": {"depth": 0.011, "height": 0.511, "italic": 0, "skew": 0},
-  "10230": {"depth": 0.011, "height": 0.511, "italic": 0, "skew": 0},
-  "10231": {"depth": 0.011, "height": 0.511, "italic": 0, "skew": 0},
-  "10232": {"depth": 0.024, "height": 0.525, "italic": 0, "skew": 0},
-  "10233": {"depth": 0.024, "height": 0.525, "italic": 0, "skew": 0},
-  "10234": {"depth": 0.024, "height": 0.525, "italic": 0, "skew": 0},
-  "10236": {"depth": 0.011, "height": 0.511, "italic": 0, "skew": 0},
-  "10815": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.0},
-  "10927": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0},
-  "10928": {"depth": 0.13597, "height": 0.63597, "italic": 0.0, "skew": 0.0}
-},
-"Math-BoldItalic": {
-  "47": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "65": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "66": {"depth": 0.0, "height": 0.68611, "italic": 0.04835, "skew": 0.0},
-  "67": {"depth": 0.0, "height": 0.68611, "italic": 0.06979, "skew": 0.0},
-  "68": {"depth": 0.0, "height": 0.68611, "italic": 0.03194, "skew": 0.0},
-  "69": {"depth": 0.0, "height": 0.68611, "italic": 0.05451, "skew": 0.0},
-  "70": {"depth": 0.0, "height": 0.68611, "italic": 0.15972, "skew": 0.0},
-  "71": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "72": {"depth": 0.0, "height": 0.68611, "italic": 0.08229, "skew": 0.0},
-  "73": {"depth": 0.0, "height": 0.68611, "italic": 0.07778, "skew": 0.0},
-  "74": {"depth": 0.0, "height": 0.68611, "italic": 0.10069, "skew": 0.0},
-  "75": {"depth": 0.0, "height": 0.68611, "italic": 0.06979, "skew": 0.0},
-  "76": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "77": {"depth": 0.0, "height": 0.68611, "italic": 0.11424, "skew": 0.0},
-  "78": {"depth": 0.0, "height": 0.68611, "italic": 0.11424, "skew": 0.0},
-  "79": {"depth": 0.0, "height": 0.68611, "italic": 0.03194, "skew": 0.0},
-  "80": {"depth": 0.0, "height": 0.68611, "italic": 0.15972, "skew": 0.0},
-  "81": {"depth": 0.19444, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "82": {"depth": 0.0, "height": 0.68611, "italic": 0.00421, "skew": 0.0},
-  "83": {"depth": 0.0, "height": 0.68611, "italic": 0.05382, "skew": 0.0},
-  "84": {"depth": 0.0, "height": 0.68611, "italic": 0.15972, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.68611, "italic": 0.11424, "skew": 0.0},
-  "86": {"depth": 0.0, "height": 0.68611, "italic": 0.25555, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.68611, "italic": 0.15972, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.68611, "italic": 0.07778, "skew": 0.0},
-  "89": {"depth": 0.0, "height": 0.68611, "italic": 0.25555, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.68611, "italic": 0.06979, "skew": 0.0},
-  "97": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "98": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "99": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "100": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "101": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "102": {"depth": 0.19444, "height": 0.69444, "italic": 0.11042, "skew": 0.0},
-  "103": {"depth": 0.19444, "height": 0.44444, "italic": 0.03704, "skew": 0.0},
-  "104": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "105": {"depth": 0.0, "height": 0.69326, "italic": 0.0, "skew": 0.0},
-  "106": {"depth": 0.19444, "height": 0.69326, "italic": 0.0622, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.69444, "italic": 0.01852, "skew": 0.0},
-  "108": {"depth": 0.0, "height": 0.69444, "italic": 0.0088, "skew": 0.0},
-  "109": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "110": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "111": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "112": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "113": {"depth": 0.19444, "height": 0.44444, "italic": 0.03704, "skew": 0.0},
-  "114": {"depth": 0.0, "height": 0.44444, "italic": 0.03194, "skew": 0.0},
-  "115": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "116": {"depth": 0.0, "height": 0.63492, "italic": 0.0, "skew": 0.0},
-  "117": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "118": {"depth": 0.0, "height": 0.44444, "italic": 0.03704, "skew": 0.0},
-  "119": {"depth": 0.0, "height": 0.44444, "italic": 0.02778, "skew": 0.0},
-  "120": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "121": {"depth": 0.19444, "height": 0.44444, "italic": 0.03704, "skew": 0.0},
-  "122": {"depth": 0.0, "height": 0.44444, "italic": 0.04213, "skew": 0.0},
-  "915": {"depth": 0.0, "height": 0.68611, "italic": 0.15972, "skew": 0.0},
-  "916": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "920": {"depth": 0.0, "height": 0.68611, "italic": 0.03194, "skew": 0.0},
-  "923": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "926": {"depth": 0.0, "height": 0.68611, "italic": 0.07458, "skew": 0.0},
-  "928": {"depth": 0.0, "height": 0.68611, "italic": 0.08229, "skew": 0.0},
-  "931": {"depth": 0.0, "height": 0.68611, "italic": 0.05451, "skew": 0.0},
-  "933": {"depth": 0.0, "height": 0.68611, "italic": 0.15972, "skew": 0.0},
-  "934": {"depth": 0.0, "height": 0.68611, "italic": 0.0, "skew": 0.0},
-  "936": {"depth": 0.0, "height": 0.68611, "italic": 0.11653, "skew": 0.0},
-  "937": {"depth": 0.0, "height": 0.68611, "italic": 0.04835, "skew": 0.0},
-  "945": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "946": {"depth": 0.19444, "height": 0.69444, "italic": 0.03403, "skew": 0.0},
-  "947": {"depth": 0.19444, "height": 0.44444, "italic": 0.06389, "skew": 0.0},
-  "948": {"depth": 0.0, "height": 0.69444, "italic": 0.03819, "skew": 0.0},
-  "949": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "950": {"depth": 0.19444, "height": 0.69444, "italic": 0.06215, "skew": 0.0},
-  "951": {"depth": 0.19444, "height": 0.44444, "italic": 0.03704, "skew": 0.0},
-  "952": {"depth": 0.0, "height": 0.69444, "italic": 0.03194, "skew": 0.0},
-  "953": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "954": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "955": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "956": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "957": {"depth": 0.0, "height": 0.44444, "italic": 0.06898, "skew": 0.0},
-  "958": {"depth": 0.19444, "height": 0.69444, "italic": 0.03021, "skew": 0.0},
-  "959": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "960": {"depth": 0.0, "height": 0.44444, "italic": 0.03704, "skew": 0.0},
-  "961": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "962": {"depth": 0.09722, "height": 0.44444, "italic": 0.07917, "skew": 0.0},
-  "963": {"depth": 0.0, "height": 0.44444, "italic": 0.03704, "skew": 0.0},
-  "964": {"depth": 0.0, "height": 0.44444, "italic": 0.13472, "skew": 0.0},
-  "965": {"depth": 0.0, "height": 0.44444, "italic": 0.03704, "skew": 0.0},
-  "966": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "967": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "968": {"depth": 0.19444, "height": 0.69444, "italic": 0.03704, "skew": 0.0},
-  "969": {"depth": 0.0, "height": 0.44444, "italic": 0.03704, "skew": 0.0},
-  "977": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "981": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "982": {"depth": 0.0, "height": 0.44444, "italic": 0.03194, "skew": 0.0},
-  "1009": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "1013": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0}
-},
-"Math-Italic": {
-  "47": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "65": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.13889},
-  "66": {"depth": 0.0, "height": 0.68333, "italic": 0.05017, "skew": 0.08334},
-  "67": {"depth": 0.0, "height": 0.68333, "italic": 0.07153, "skew": 0.08334},
-  "68": {"depth": 0.0, "height": 0.68333, "italic": 0.02778, "skew": 0.05556},
-  "69": {"depth": 0.0, "height": 0.68333, "italic": 0.05764, "skew": 0.08334},
-  "70": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.08334},
-  "71": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.08334},
-  "72": {"depth": 0.0, "height": 0.68333, "italic": 0.08125, "skew": 0.05556},
-  "73": {"depth": 0.0, "height": 0.68333, "italic": 0.07847, "skew": 0.11111},
-  "74": {"depth": 0.0, "height": 0.68333, "italic": 0.09618, "skew": 0.16667},
-  "75": {"depth": 0.0, "height": 0.68333, "italic": 0.07153, "skew": 0.05556},
-  "76": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.02778},
-  "77": {"depth": 0.0, "height": 0.68333, "italic": 0.10903, "skew": 0.08334},
-  "78": {"depth": 0.0, "height": 0.68333, "italic": 0.10903, "skew": 0.08334},
-  "79": {"depth": 0.0, "height": 0.68333, "italic": 0.02778, "skew": 0.08334},
-  "80": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.08334},
-  "81": {"depth": 0.19444, "height": 0.68333, "italic": 0.0, "skew": 0.08334},
-  "82": {"depth": 0.0, "height": 0.68333, "italic": 0.00773, "skew": 0.08334},
-  "83": {"depth": 0.0, "height": 0.68333, "italic": 0.05764, "skew": 0.08334},
-  "84": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.08334},
-  "85": {"depth": 0.0, "height": 0.68333, "italic": 0.10903, "skew": 0.02778},
-  "86": {"depth": 0.0, "height": 0.68333, "italic": 0.22222, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.68333, "italic": 0.07847, "skew": 0.08334},
-  "89": {"depth": 0.0, "height": 0.68333, "italic": 0.22222, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.68333, "italic": 0.07153, "skew": 0.08334},
-  "97": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "98": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "99": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "100": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.16667},
-  "101": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "102": {"depth": 0.19444, "height": 0.69444, "italic": 0.10764, "skew": 0.16667},
-  "103": {"depth": 0.19444, "height": 0.43056, "italic": 0.03588, "skew": 0.02778},
-  "104": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "105": {"depth": 0.0, "height": 0.65952, "italic": 0.0, "skew": 0.0},
-  "106": {"depth": 0.19444, "height": 0.65952, "italic": 0.05724, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.69444, "italic": 0.03148, "skew": 0.0},
-  "108": {"depth": 0.0, "height": 0.69444, "italic": 0.01968, "skew": 0.08334},
-  "109": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "110": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "111": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "112": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "113": {"depth": 0.19444, "height": 0.43056, "italic": 0.03588, "skew": 0.08334},
-  "114": {"depth": 0.0, "height": 0.43056, "italic": 0.02778, "skew": 0.05556},
-  "115": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "116": {"depth": 0.0, "height": 0.61508, "italic": 0.0, "skew": 0.08334},
-  "117": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.02778},
-  "118": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.02778},
-  "119": {"depth": 0.0, "height": 0.43056, "italic": 0.02691, "skew": 0.08334},
-  "120": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.02778},
-  "121": {"depth": 0.19444, "height": 0.43056, "italic": 0.03588, "skew": 0.05556},
-  "122": {"depth": 0.0, "height": 0.43056, "italic": 0.04398, "skew": 0.05556},
-  "915": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.08334},
-  "916": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.16667},
-  "920": {"depth": 0.0, "height": 0.68333, "italic": 0.02778, "skew": 0.08334},
-  "923": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.16667},
-  "926": {"depth": 0.0, "height": 0.68333, "italic": 0.07569, "skew": 0.08334},
-  "928": {"depth": 0.0, "height": 0.68333, "italic": 0.08125, "skew": 0.05556},
-  "931": {"depth": 0.0, "height": 0.68333, "italic": 0.05764, "skew": 0.08334},
-  "933": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.05556},
-  "934": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.08334},
-  "936": {"depth": 0.0, "height": 0.68333, "italic": 0.11, "skew": 0.05556},
-  "937": {"depth": 0.0, "height": 0.68333, "italic": 0.05017, "skew": 0.08334},
-  "945": {"depth": 0.0, "height": 0.43056, "italic": 0.0037, "skew": 0.02778},
-  "946": {"depth": 0.19444, "height": 0.69444, "italic": 0.05278, "skew": 0.08334},
-  "947": {"depth": 0.19444, "height": 0.43056, "italic": 0.05556, "skew": 0.0},
-  "948": {"depth": 0.0, "height": 0.69444, "italic": 0.03785, "skew": 0.05556},
-  "949": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "950": {"depth": 0.19444, "height": 0.69444, "italic": 0.07378, "skew": 0.08334},
-  "951": {"depth": 0.19444, "height": 0.43056, "italic": 0.03588, "skew": 0.05556},
-  "952": {"depth": 0.0, "height": 0.69444, "italic": 0.02778, "skew": 0.08334},
-  "953": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "954": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "955": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "956": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.02778},
-  "957": {"depth": 0.0, "height": 0.43056, "italic": 0.06366, "skew": 0.02778},
-  "958": {"depth": 0.19444, "height": 0.69444, "italic": 0.04601, "skew": 0.11111},
-  "959": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "960": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.0},
-  "961": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "962": {"depth": 0.09722, "height": 0.43056, "italic": 0.07986, "skew": 0.08334},
-  "963": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.0},
-  "964": {"depth": 0.0, "height": 0.43056, "italic": 0.1132, "skew": 0.02778},
-  "965": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.02778},
-  "966": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "967": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "968": {"depth": 0.19444, "height": 0.69444, "italic": 0.03588, "skew": 0.11111},
-  "969": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.0},
-  "977": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.08334},
-  "981": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.08334},
-  "982": {"depth": 0.0, "height": 0.43056, "italic": 0.02778, "skew": 0.0},
-  "1009": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "1013": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556}
-},
-"Math-Regular": {
-  "65": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.13889},
-  "66": {"depth": 0.0, "height": 0.68333, "italic": 0.05017, "skew": 0.08334},
-  "67": {"depth": 0.0, "height": 0.68333, "italic": 0.07153, "skew": 0.08334},
-  "68": {"depth": 0.0, "height": 0.68333, "italic": 0.02778, "skew": 0.05556},
-  "69": {"depth": 0.0, "height": 0.68333, "italic": 0.05764, "skew": 0.08334},
-  "70": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.08334},
-  "71": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.08334},
-  "72": {"depth": 0.0, "height": 0.68333, "italic": 0.08125, "skew": 0.05556},
-  "73": {"depth": 0.0, "height": 0.68333, "italic": 0.07847, "skew": 0.11111},
-  "74": {"depth": 0.0, "height": 0.68333, "italic": 0.09618, "skew": 0.16667},
-  "75": {"depth": 0.0, "height": 0.68333, "italic": 0.07153, "skew": 0.05556},
-  "76": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.02778},
-  "77": {"depth": 0.0, "height": 0.68333, "italic": 0.10903, "skew": 0.08334},
-  "78": {"depth": 0.0, "height": 0.68333, "italic": 0.10903, "skew": 0.08334},
-  "79": {"depth": 0.0, "height": 0.68333, "italic": 0.02778, "skew": 0.08334},
-  "80": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.08334},
-  "81": {"depth": 0.19444, "height": 0.68333, "italic": 0.0, "skew": 0.08334},
-  "82": {"depth": 0.0, "height": 0.68333, "italic": 0.00773, "skew": 0.08334},
-  "83": {"depth": 0.0, "height": 0.68333, "italic": 0.05764, "skew": 0.08334},
-  "84": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.08334},
-  "85": {"depth": 0.0, "height": 0.68333, "italic": 0.10903, "skew": 0.02778},
-  "86": {"depth": 0.0, "height": 0.68333, "italic": 0.22222, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.68333, "italic": 0.07847, "skew": 0.08334},
-  "89": {"depth": 0.0, "height": 0.68333, "italic": 0.22222, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.68333, "italic": 0.07153, "skew": 0.08334},
-  "97": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "98": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "99": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "100": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.16667},
-  "101": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "102": {"depth": 0.19444, "height": 0.69444, "italic": 0.10764, "skew": 0.16667},
-  "103": {"depth": 0.19444, "height": 0.43056, "italic": 0.03588, "skew": 0.02778},
-  "104": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "105": {"depth": 0.0, "height": 0.65952, "italic": 0.0, "skew": 0.0},
-  "106": {"depth": 0.19444, "height": 0.65952, "italic": 0.05724, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.69444, "italic": 0.03148, "skew": 0.0},
-  "108": {"depth": 0.0, "height": 0.69444, "italic": 0.01968, "skew": 0.08334},
-  "109": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "110": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "111": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "112": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "113": {"depth": 0.19444, "height": 0.43056, "italic": 0.03588, "skew": 0.08334},
-  "114": {"depth": 0.0, "height": 0.43056, "italic": 0.02778, "skew": 0.05556},
-  "115": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "116": {"depth": 0.0, "height": 0.61508, "italic": 0.0, "skew": 0.08334},
-  "117": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.02778},
-  "118": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.02778},
-  "119": {"depth": 0.0, "height": 0.43056, "italic": 0.02691, "skew": 0.08334},
-  "120": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.02778},
-  "121": {"depth": 0.19444, "height": 0.43056, "italic": 0.03588, "skew": 0.05556},
-  "122": {"depth": 0.0, "height": 0.43056, "italic": 0.04398, "skew": 0.05556},
-  "915": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.08334},
-  "916": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.16667},
-  "920": {"depth": 0.0, "height": 0.68333, "italic": 0.02778, "skew": 0.08334},
-  "923": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.16667},
-  "926": {"depth": 0.0, "height": 0.68333, "italic": 0.07569, "skew": 0.08334},
-  "928": {"depth": 0.0, "height": 0.68333, "italic": 0.08125, "skew": 0.05556},
-  "931": {"depth": 0.0, "height": 0.68333, "italic": 0.05764, "skew": 0.08334},
-  "933": {"depth": 0.0, "height": 0.68333, "italic": 0.13889, "skew": 0.05556},
-  "934": {"depth": 0.0, "height": 0.68333, "italic": 0.0, "skew": 0.08334},
-  "936": {"depth": 0.0, "height": 0.68333, "italic": 0.11, "skew": 0.05556},
-  "937": {"depth": 0.0, "height": 0.68333, "italic": 0.05017, "skew": 0.08334},
-  "945": {"depth": 0.0, "height": 0.43056, "italic": 0.0037, "skew": 0.02778},
-  "946": {"depth": 0.19444, "height": 0.69444, "italic": 0.05278, "skew": 0.08334},
-  "947": {"depth": 0.19444, "height": 0.43056, "italic": 0.05556, "skew": 0.0},
-  "948": {"depth": 0.0, "height": 0.69444, "italic": 0.03785, "skew": 0.05556},
-  "949": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "950": {"depth": 0.19444, "height": 0.69444, "italic": 0.07378, "skew": 0.08334},
-  "951": {"depth": 0.19444, "height": 0.43056, "italic": 0.03588, "skew": 0.05556},
-  "952": {"depth": 0.0, "height": 0.69444, "italic": 0.02778, "skew": 0.08334},
-  "953": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "954": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "955": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "956": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.02778},
-  "957": {"depth": 0.0, "height": 0.43056, "italic": 0.06366, "skew": 0.02778},
-  "958": {"depth": 0.19444, "height": 0.69444, "italic": 0.04601, "skew": 0.11111},
-  "959": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "960": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.0},
-  "961": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "962": {"depth": 0.09722, "height": 0.43056, "italic": 0.07986, "skew": 0.08334},
-  "963": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.0},
-  "964": {"depth": 0.0, "height": 0.43056, "italic": 0.1132, "skew": 0.02778},
-  "965": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.02778},
-  "966": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "967": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.05556},
-  "968": {"depth": 0.19444, "height": 0.69444, "italic": 0.03588, "skew": 0.11111},
-  "969": {"depth": 0.0, "height": 0.43056, "italic": 0.03588, "skew": 0.0},
-  "977": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.08334},
-  "981": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.08334},
-  "982": {"depth": 0.0, "height": 0.43056, "italic": 0.02778, "skew": 0.0},
-  "1009": {"depth": 0.19444, "height": 0.43056, "italic": 0.0, "skew": 0.08334},
-  "1013": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.05556}
-},
-"SansSerif-Regular": {
-  "33": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "34": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "35": {"depth": 0.19444, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "36": {"depth": 0.05556, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "37": {"depth": 0.05556, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "38": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "39": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "40": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "41": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "42": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "43": {"depth": 0.08333, "height": 0.58333, "italic": 0.0, "skew": 0.0},
-  "44": {"depth": 0.125, "height": 0.08333, "italic": 0.0, "skew": 0.0},
-  "45": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "46": {"depth": 0.0, "height": 0.08333, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "48": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "49": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "50": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "51": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "52": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "53": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "54": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "55": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "56": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "57": {"depth": 0.0, "height": 0.65556, "italic": 0.0, "skew": 0.0},
-  "58": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "59": {"depth": 0.125, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "61": {"depth": -0.13, "height": 0.37, "italic": 0.0, "skew": 0.0},
-  "63": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "64": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "65": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "66": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "67": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "68": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "69": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "70": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "71": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "72": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "73": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "74": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "75": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "76": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "77": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "78": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "79": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "80": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "81": {"depth": 0.125, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "82": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "83": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "84": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "86": {"depth": 0.0, "height": 0.69444, "italic": 0.01389, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.69444, "italic": 0.01389, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "89": {"depth": 0.0, "height": 0.69444, "italic": 0.025, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "91": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "93": {"depth": 0.25, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "94": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "95": {"depth": 0.35, "height": 0.09444, "italic": 0.02778, "skew": 0.0},
-  "97": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "98": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "99": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "100": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "101": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "102": {"depth": 0.0, "height": 0.69444, "italic": 0.06944, "skew": 0.0},
-  "103": {"depth": 0.19444, "height": 0.44444, "italic": 0.01389, "skew": 0.0},
-  "104": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "105": {"depth": 0.0, "height": 0.67937, "italic": 0.0, "skew": 0.0},
-  "106": {"depth": 0.19444, "height": 0.67937, "italic": 0.0, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "108": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "109": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "110": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "111": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "112": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "113": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "114": {"depth": 0.0, "height": 0.44444, "italic": 0.01389, "skew": 0.0},
-  "115": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "116": {"depth": 0.0, "height": 0.57143, "italic": 0.0, "skew": 0.0},
-  "117": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "118": {"depth": 0.0, "height": 0.44444, "italic": 0.01389, "skew": 0.0},
-  "119": {"depth": 0.0, "height": 0.44444, "italic": 0.01389, "skew": 0.0},
-  "120": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "121": {"depth": 0.19444, "height": 0.44444, "italic": 0.01389, "skew": 0.0},
-  "122": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "126": {"depth": 0.35, "height": 0.32659, "italic": 0.0, "skew": 0.0},
-  "305": {"depth": 0.0, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "567": {"depth": 0.19444, "height": 0.44444, "italic": 0.0, "skew": 0.0},
-  "768": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "769": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.67659, "italic": 0.0, "skew": 0.0},
-  "772": {"depth": 0.0, "height": 0.60889, "italic": 0.0, "skew": 0.0},
-  "774": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "775": {"depth": 0.0, "height": 0.67937, "italic": 0.0, "skew": 0.0},
-  "776": {"depth": 0.0, "height": 0.67937, "italic": 0.0, "skew": 0.0},
-  "778": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "779": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "780": {"depth": 0.0, "height": 0.63194, "italic": 0.0, "skew": 0.0},
-  "915": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "916": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "920": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "923": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "926": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "928": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "931": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "933": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "934": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "936": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "937": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8211": {"depth": 0.0, "height": 0.44444, "italic": 0.02778, "skew": 0.0},
-  "8212": {"depth": 0.0, "height": 0.44444, "italic": 0.02778, "skew": 0.0},
-  "8216": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8217": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8220": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "8221": {"depth": 0.0, "height": 0.69444, "italic": 0.0, "skew": 0.0}
-},
-"Script-Regular": {
-  "65": {"depth": 0.0, "height": 0.7, "italic": 0.22925, "skew": 0.0},
-  "66": {"depth": 0.0, "height": 0.7, "italic": 0.04087, "skew": 0.0},
-  "67": {"depth": 0.0, "height": 0.7, "italic": 0.1689, "skew": 0.0},
-  "68": {"depth": 0.0, "height": 0.7, "italic": 0.09371, "skew": 0.0},
-  "69": {"depth": 0.0, "height": 0.7, "italic": 0.18583, "skew": 0.0},
-  "70": {"depth": 0.0, "height": 0.7, "italic": 0.13634, "skew": 0.0},
-  "71": {"depth": 0.0, "height": 0.7, "italic": 0.17322, "skew": 0.0},
-  "72": {"depth": 0.0, "height": 0.7, "italic": 0.29694, "skew": 0.0},
-  "73": {"depth": 0.0, "height": 0.7, "italic": 0.19189, "skew": 0.0},
-  "74": {"depth": 0.27778, "height": 0.7, "italic": 0.19189, "skew": 0.0},
-  "75": {"depth": 0.0, "height": 0.7, "italic": 0.31259, "skew": 0.0},
-  "76": {"depth": 0.0, "height": 0.7, "italic": 0.19189, "skew": 0.0},
-  "77": {"depth": 0.0, "height": 0.7, "italic": 0.15981, "skew": 0.0},
-  "78": {"depth": 0.0, "height": 0.7, "italic": 0.3525, "skew": 0.0},
-  "79": {"depth": 0.0, "height": 0.7, "italic": 0.08078, "skew": 0.0},
-  "80": {"depth": 0.0, "height": 0.7, "italic": 0.08078, "skew": 0.0},
-  "81": {"depth": 0.0, "height": 0.7, "italic": 0.03305, "skew": 0.0},
-  "82": {"depth": 0.0, "height": 0.7, "italic": 0.06259, "skew": 0.0},
-  "83": {"depth": 0.0, "height": 0.7, "italic": 0.19189, "skew": 0.0},
-  "84": {"depth": 0.0, "height": 0.7, "italic": 0.29087, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.7, "italic": 0.25815, "skew": 0.0},
-  "86": {"depth": 0.0, "height": 0.7, "italic": 0.27523, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.7, "italic": 0.27523, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.7, "italic": 0.26006, "skew": 0.0},
-  "89": {"depth": 0.0, "height": 0.7, "italic": 0.2939, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.7, "italic": 0.24037, "skew": 0.0}
-},
-"Size1-Regular": {
-  "40": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "41": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "91": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "92": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "93": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "123": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "125": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "710": {"depth": 0.0, "height": 0.72222, "italic": 0.0, "skew": 0.0},
-  "732": {"depth": 0.0, "height": 0.72222, "italic": 0.0, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.72222, "italic": 0.0, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.72222, "italic": 0.0, "skew": 0.0},
-  "8214": {"depth": -0.00099, "height": 0.601, "italic": 0.0, "skew": 0.0},
-  "8593": {"depth": 1e-05, "height": 0.6, "italic": 0.0, "skew": 0.0},
-  "8595": {"depth": 1e-05, "height": 0.6, "italic": 0.0, "skew": 0.0},
-  "8657": {"depth": 1e-05, "height": 0.6, "italic": 0.0, "skew": 0.0},
-  "8659": {"depth": 1e-05, "height": 0.6, "italic": 0.0, "skew": 0.0},
-  "8719": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8720": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8721": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8730": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "8739": {"depth": -0.00599, "height": 0.606, "italic": 0.0, "skew": 0.0},
-  "8741": {"depth": -0.00599, "height": 0.606, "italic": 0.0, "skew": 0.0},
-  "8747": {"depth": 0.30612, "height": 0.805, "italic": 0.19445, "skew": 0.0},
-  "8748": {"depth": 0.306, "height": 0.805, "italic": 0.19445, "skew": 0.0},
-  "8749": {"depth": 0.306, "height": 0.805, "italic": 0.19445, "skew": 0.0},
-  "8750": {"depth": 0.30612, "height": 0.805, "italic": 0.19445, "skew": 0.0},
-  "8896": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8897": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8898": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8899": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8968": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "8969": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "8970": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "8971": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "9168": {"depth": -0.00099, "height": 0.601, "italic": 0.0, "skew": 0.0},
-  "10216": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "10217": {"depth": 0.35001, "height": 0.85, "italic": 0.0, "skew": 0.0},
-  "10752": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "10753": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "10754": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "10756": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "10758": {"depth": 0.25001, "height": 0.75, "italic": 0.0, "skew": 0.0}
-},
-"Size2-Regular": {
-  "40": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "41": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "91": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "92": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "93": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "123": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "125": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "710": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "732": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8719": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "8720": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "8721": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "8730": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "8747": {"depth": 0.86225, "height": 1.36, "italic": 0.44445, "skew": 0.0},
-  "8748": {"depth": 0.862, "height": 1.36, "italic": 0.44445, "skew": 0.0},
-  "8749": {"depth": 0.862, "height": 1.36, "italic": 0.44445, "skew": 0.0},
-  "8750": {"depth": 0.86225, "height": 1.36, "italic": 0.44445, "skew": 0.0},
-  "8896": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "8897": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "8898": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "8899": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "8968": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "8969": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "8970": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "8971": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "10216": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "10217": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "10752": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "10753": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "10754": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "10756": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0},
-  "10758": {"depth": 0.55001, "height": 1.05, "italic": 0.0, "skew": 0.0}
-},
-"Size3-Regular": {
-  "40": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "41": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "91": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "92": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "93": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "123": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "125": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "710": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "732": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.75, "italic": 0.0, "skew": 0.0},
-  "8730": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "8968": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "8969": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "8970": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "8971": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "10216": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0},
-  "10217": {"depth": 0.95003, "height": 1.45, "italic": 0.0, "skew": 0.0}
-},
-"Size4-Regular": {
-  "40": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "41": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "91": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "92": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "93": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "123": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "125": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "710": {"depth": 0.0, "height": 0.825, "italic": 0.0, "skew": 0.0},
-  "732": {"depth": 0.0, "height": 0.825, "italic": 0.0, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.825, "italic": 0.0, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.825, "italic": 0.0, "skew": 0.0},
-  "8730": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "8968": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "8969": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "8970": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "8971": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "9115": {"depth": 0.64502, "height": 1.155, "italic": 0.0, "skew": 0.0},
-  "9116": {"depth": 1e-05, "height": 0.6, "italic": 0.0, "skew": 0.0},
-  "9117": {"depth": 0.64502, "height": 1.155, "italic": 0.0, "skew": 0.0},
-  "9118": {"depth": 0.64502, "height": 1.155, "italic": 0.0, "skew": 0.0},
-  "9119": {"depth": 1e-05, "height": 0.6, "italic": 0.0, "skew": 0.0},
-  "9120": {"depth": 0.64502, "height": 1.155, "italic": 0.0, "skew": 0.0},
-  "9121": {"depth": 0.64502, "height": 1.155, "italic": 0.0, "skew": 0.0},
-  "9122": {"depth": -0.00099, "height": 0.601, "italic": 0.0, "skew": 0.0},
-  "9123": {"depth": 0.64502, "height": 1.155, "italic": 0.0, "skew": 0.0},
-  "9124": {"depth": 0.64502, "height": 1.155, "italic": 0.0, "skew": 0.0},
-  "9125": {"depth": -0.00099, "height": 0.601, "italic": 0.0, "skew": 0.0},
-  "9126": {"depth": 0.64502, "height": 1.155, "italic": 0.0, "skew": 0.0},
-  "9127": {"depth": 1e-05, "height": 0.9, "italic": 0.0, "skew": 0.0},
-  "9128": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "9129": {"depth": 0.90001, "height": 0.0, "italic": 0.0, "skew": 0.0},
-  "9130": {"depth": 0.0, "height": 0.3, "italic": 0.0, "skew": 0.0},
-  "9131": {"depth": 1e-05, "height": 0.9, "italic": 0.0, "skew": 0.0},
-  "9132": {"depth": 0.65002, "height": 1.15, "italic": 0.0, "skew": 0.0},
-  "9133": {"depth": 0.90001, "height": 0.0, "italic": 0.0, "skew": 0.0},
-  "9143": {"depth": 0.88502, "height": 0.915, "italic": 0.0, "skew": 0.0},
-  "10216": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "10217": {"depth": 1.25003, "height": 1.75, "italic": 0.0, "skew": 0.0},
-  "57344": {"depth": -0.00499, "height": 0.605, "italic": 0.0, "skew": 0.0},
-  "57345": {"depth": -0.00499, "height": 0.605, "italic": 0.0, "skew": 0.0},
-  "57680": {"depth": 0.0, "height": 0.12, "italic": 0.0, "skew": 0.0},
-  "57681": {"depth": 0.0, "height": 0.12, "italic": 0.0, "skew": 0.0},
-  "57682": {"depth": 0.0, "height": 0.12, "italic": 0.0, "skew": 0.0},
-  "57683": {"depth": 0.0, "height": 0.12, "italic": 0.0, "skew": 0.0}
-},
-"Typewriter-Regular": {
-  "33": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "34": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "35": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "36": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "37": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "38": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "39": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "40": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "41": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "42": {"depth": 0.0, "height": 0.52083, "italic": 0.0, "skew": 0.0},
-  "43": {"depth": -0.08056, "height": 0.53055, "italic": 0.0, "skew": 0.0},
-  "44": {"depth": 0.13889, "height": 0.125, "italic": 0.0, "skew": 0.0},
-  "45": {"depth": -0.08056, "height": 0.53055, "italic": 0.0, "skew": 0.0},
-  "46": {"depth": 0.0, "height": 0.125, "italic": 0.0, "skew": 0.0},
-  "47": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "48": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "49": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "50": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "51": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "52": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "53": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "54": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "55": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "56": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "57": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "58": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "59": {"depth": 0.13889, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "60": {"depth": -0.05556, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "61": {"depth": -0.19549, "height": 0.41562, "italic": 0.0, "skew": 0.0},
-  "62": {"depth": -0.05556, "height": 0.55556, "italic": 0.0, "skew": 0.0},
-  "63": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "64": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "65": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "66": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "67": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "68": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "69": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "70": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "71": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "72": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "73": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "74": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "75": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "76": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "77": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "78": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "79": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "80": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "81": {"depth": 0.13889, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "82": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "83": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "84": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "85": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "86": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "87": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "88": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "89": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "90": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "91": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "92": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "93": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "94": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "95": {"depth": 0.09514, "height": 0.0, "italic": 0.0, "skew": 0.0},
-  "96": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "97": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "98": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "99": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "100": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "101": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "102": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "103": {"depth": 0.22222, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "104": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "105": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "106": {"depth": 0.22222, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "107": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "108": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "109": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "110": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "111": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "112": {"depth": 0.22222, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "113": {"depth": 0.22222, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "114": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "115": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "116": {"depth": 0.0, "height": 0.55358, "italic": 0.0, "skew": 0.0},
-  "117": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "118": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "119": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "120": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "121": {"depth": 0.22222, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "122": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "123": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "124": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "125": {"depth": 0.08333, "height": 0.69444, "italic": 0.0, "skew": 0.0},
-  "126": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "127": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "305": {"depth": 0.0, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "567": {"depth": 0.22222, "height": 0.43056, "italic": 0.0, "skew": 0.0},
-  "768": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "769": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "770": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "771": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "772": {"depth": 0.0, "height": 0.56555, "italic": 0.0, "skew": 0.0},
-  "774": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "776": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "778": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "780": {"depth": 0.0, "height": 0.56597, "italic": 0.0, "skew": 0.0},
-  "915": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "916": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "920": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "923": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "926": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "928": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "931": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "933": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "934": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "936": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "937": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "2018": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "2019": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0},
-  "8242": {"depth": 0.0, "height": 0.61111, "italic": 0.0, "skew": 0.0}
-}};
+},{"./Style":90,"./fontMetricsData":99}],99:[function(require,module,exports){
+"use strict";module.exports = {"AMS-Regular":{"65":{depth:0, height:0.68889, italic:0, skew:0}, "66":{depth:0, height:0.68889, italic:0, skew:0}, "67":{depth:0, height:0.68889, italic:0, skew:0}, "68":{depth:0, height:0.68889, italic:0, skew:0}, "69":{depth:0, height:0.68889, italic:0, skew:0}, "70":{depth:0, height:0.68889, italic:0, skew:0}, "71":{depth:0, height:0.68889, italic:0, skew:0}, "72":{depth:0, height:0.68889, italic:0, skew:0}, "73":{depth:0, height:0.68889, italic:0, skew:0}, "74":{depth:0.16667, height:0.68889, italic:0, skew:0}, "75":{depth:0, height:0.68889, italic:0, skew:0}, "76":{depth:0, height:0.68889, italic:0, skew:0}, "77":{depth:0, height:0.68889, italic:0, skew:0}, "78":{depth:0, height:0.68889, italic:0, skew:0}, "79":{depth:0.16667, height:0.68889, italic:0, skew:0}, "80":{depth:0, height:0.68889, italic:0, skew:0}, "81":{depth:0.16667, height:0.68889, italic:0, skew:0}, "82":{depth:0, height:0.68889, italic:0, skew:0}, "83":{depth:0, height:0.68889, italic:0, skew:0}, "84":{depth:0, height:0.68889, italic:0, skew:0}, "85":{depth:0, height:0.68889, italic:0, skew:0}, "86":{depth:0, height:0.68889, italic:0, skew:0}, "87":{depth:0, height:0.68889, italic:0, skew:0}, "88":{depth:0, height:0.68889, italic:0, skew:0}, "89":{depth:0, height:0.68889, italic:0, skew:0}, "90":{depth:0, height:0.68889, italic:0, skew:0}, "107":{depth:0, height:0.68889, italic:0, skew:0}, "165":{depth:0, height:0.675, italic:0.025, skew:0}, "174":{depth:0.15559, height:0.69224, italic:0, skew:0}, "240":{depth:0, height:0.68889, italic:0, skew:0}, "295":{depth:0, height:0.68889, italic:0, skew:0}, "710":{depth:0, height:0.825, italic:0, skew:0}, "732":{depth:0, height:0.9, italic:0, skew:0}, "770":{depth:0, height:0.825, italic:0, skew:0}, "771":{depth:0, height:0.9, italic:0, skew:0}, "989":{depth:0.08167, height:0.58167, italic:0, skew:0}, "1008":{depth:0, height:0.43056, italic:0.04028, skew:0}, "8245":{depth:0, height:0.54986, italic:0, skew:0}, "8463":{depth:0, height:0.68889, italic:0, skew:0}, "8487":{depth:0, height:0.68889, italic:0, skew:0}, "8498":{depth:0, height:0.68889, italic:0, skew:0}, "8502":{depth:0, height:0.68889, italic:0, skew:0}, "8503":{depth:0, height:0.68889, italic:0, skew:0}, "8504":{depth:0, height:0.68889, italic:0, skew:0}, "8513":{depth:0, height:0.68889, italic:0, skew:0}, "8592":{depth:-0.03598, height:0.46402, italic:0, skew:0}, "8594":{depth:-0.03598, height:0.46402, italic:0, skew:0}, "8602":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8603":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8606":{depth:0.01354, height:0.52239, italic:0, skew:0}, "8608":{depth:0.01354, height:0.52239, italic:0, skew:0}, "8610":{depth:0.01354, height:0.52239, italic:0, skew:0}, "8611":{depth:0.01354, height:0.52239, italic:0, skew:0}, "8619":{depth:0, height:0.54986, italic:0, skew:0}, "8620":{depth:0, height:0.54986, italic:0, skew:0}, "8621":{depth:-0.13313, height:0.37788, italic:0, skew:0}, "8622":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8624":{depth:0, height:0.69224, italic:0, skew:0}, "8625":{depth:0, height:0.69224, italic:0, skew:0}, "8630":{depth:0, height:0.43056, italic:0, skew:0}, "8631":{depth:0, height:0.43056, italic:0, skew:0}, "8634":{depth:0.08198, height:0.58198, italic:0, skew:0}, "8635":{depth:0.08198, height:0.58198, italic:0, skew:0}, "8638":{depth:0.19444, height:0.69224, italic:0, skew:0}, "8639":{depth:0.19444, height:0.69224, italic:0, skew:0}, "8642":{depth:0.19444, height:0.69224, italic:0, skew:0}, "8643":{depth:0.19444, height:0.69224, italic:0, skew:0}, "8644":{depth:0.1808, height:0.675, italic:0, skew:0}, "8646":{depth:0.1808, height:0.675, italic:0, skew:0}, "8647":{depth:0.1808, height:0.675, italic:0, skew:0}, "8648":{depth:0.19444, height:0.69224, italic:0, skew:0}, "8649":{depth:0.1808, height:0.675, italic:0, skew:0}, "8650":{depth:0.19444, height:0.69224, italic:0, skew:0}, "8651":{depth:0.01354, height:0.52239, italic:0, skew:0}, "8652":{depth:0.01354, height:0.52239, italic:0, skew:0}, "8653":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8654":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8655":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8666":{depth:0.13667, height:0.63667, italic:0, skew:0}, "8667":{depth:0.13667, height:0.63667, italic:0, skew:0}, "8669":{depth:-0.13313, height:0.37788, italic:0, skew:0}, "8672":{depth:-0.064, height:0.437, italic:0, skew:0}, "8674":{depth:-0.064, height:0.437, italic:0, skew:0}, "8705":{depth:0, height:0.825, italic:0, skew:0}, "8708":{depth:0, height:0.68889, italic:0, skew:0}, "8709":{depth:0.08167, height:0.58167, italic:0, skew:0}, "8717":{depth:0, height:0.43056, italic:0, skew:0}, "8722":{depth:-0.03598, height:0.46402, italic:0, skew:0}, "8724":{depth:0.08198, height:0.69224, italic:0, skew:0}, "8726":{depth:0.08167, height:0.58167, italic:0, skew:0}, "8733":{depth:0, height:0.69224, italic:0, skew:0}, "8736":{depth:0, height:0.69224, italic:0, skew:0}, "8737":{depth:0, height:0.69224, italic:0, skew:0}, "8738":{depth:0.03517, height:0.52239, italic:0, skew:0}, "8739":{depth:0.08167, height:0.58167, italic:0, skew:0}, "8740":{depth:0.25142, height:0.74111, italic:0, skew:0}, "8741":{depth:0.08167, height:0.58167, italic:0, skew:0}, "8742":{depth:0.25142, height:0.74111, italic:0, skew:0}, "8756":{depth:0, height:0.69224, italic:0, skew:0}, "8757":{depth:0, height:0.69224, italic:0, skew:0}, "8764":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8765":{depth:-0.13313, height:0.37788, italic:0, skew:0}, "8769":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8770":{depth:-0.03625, height:0.46375, italic:0, skew:0}, "8774":{depth:0.30274, height:0.79383, italic:0, skew:0}, "8776":{depth:-0.01688, height:0.48312, italic:0, skew:0}, "8778":{depth:0.08167, height:0.58167, italic:0, skew:0}, "8782":{depth:0.06062, height:0.54986, italic:0, skew:0}, "8783":{depth:0.06062, height:0.54986, italic:0, skew:0}, "8785":{depth:0.08198, height:0.58198, italic:0, skew:0}, "8786":{depth:0.08198, height:0.58198, italic:0, skew:0}, "8787":{depth:0.08198, height:0.58198, italic:0, skew:0}, "8790":{depth:0, height:0.69224, italic:0, skew:0}, "8791":{depth:0.22958, height:0.72958, italic:0, skew:0}, "8796":{depth:0.08198, height:0.91667, italic:0, skew:0}, "8806":{depth:0.25583, height:0.75583, italic:0, skew:0}, "8807":{depth:0.25583, height:0.75583, italic:0, skew:0}, "8808":{depth:0.25142, height:0.75726, italic:0, skew:0}, "8809":{depth:0.25142, height:0.75726, italic:0, skew:0}, "8812":{depth:0.25583, height:0.75583, italic:0, skew:0}, "8814":{depth:0.20576, height:0.70576, italic:0, skew:0}, "8815":{depth:0.20576, height:0.70576, italic:0, skew:0}, "8816":{depth:0.30274, height:0.79383, italic:0, skew:0}, "8817":{depth:0.30274, height:0.79383, italic:0, skew:0}, "8818":{depth:0.22958, height:0.72958, italic:0, skew:0}, "8819":{depth:0.22958, height:0.72958, italic:0, skew:0}, "8822":{depth:0.1808, height:0.675, italic:0, skew:0}, "8823":{depth:0.1808, height:0.675, italic:0, skew:0}, "8828":{depth:0.13667, height:0.63667, italic:0, skew:0}, "8829":{depth:0.13667, height:0.63667, italic:0, skew:0}, "8830":{depth:0.22958, height:0.72958, italic:0, skew:0}, "8831":{depth:0.22958, height:0.72958, italic:0, skew:0}, "8832":{depth:0.20576, height:0.70576, italic:0, skew:0}, "8833":{depth:0.20576, height:0.70576, italic:0, skew:0}, "8840":{depth:0.30274, height:0.79383, italic:0, skew:0}, "8841":{depth:0.30274, height:0.79383, italic:0, skew:0}, "8842":{depth:0.13597, height:0.63597, italic:0, skew:0}, "8843":{depth:0.13597, height:0.63597, italic:0, skew:0}, "8847":{depth:0.03517, height:0.54986, italic:0, skew:0}, "8848":{depth:0.03517, height:0.54986, italic:0, skew:0}, "8858":{depth:0.08198, height:0.58198, italic:0, skew:0}, "8859":{depth:0.08198, height:0.58198, italic:0, skew:0}, "8861":{depth:0.08198, height:0.58198, italic:0, skew:0}, "8862":{depth:0, height:0.675, italic:0, skew:0}, "8863":{depth:0, height:0.675, italic:0, skew:0}, "8864":{depth:0, height:0.675, italic:0, skew:0}, "8865":{depth:0, height:0.675, italic:0, skew:0}, "8872":{depth:0, height:0.69224, italic:0, skew:0}, "8873":{depth:0, height:0.69224, italic:0, skew:0}, "8874":{depth:0, height:0.69224, italic:0, skew:0}, "8876":{depth:0, height:0.68889, italic:0, skew:0}, "8877":{depth:0, height:0.68889, italic:0, skew:0}, "8878":{depth:0, height:0.68889, italic:0, skew:0}, "8879":{depth:0, height:0.68889, italic:0, skew:0}, "8882":{depth:0.03517, height:0.54986, italic:0, skew:0}, "8883":{depth:0.03517, height:0.54986, italic:0, skew:0}, "8884":{depth:0.13667, height:0.63667, italic:0, skew:0}, "8885":{depth:0.13667, height:0.63667, italic:0, skew:0}, "8888":{depth:0, height:0.54986, italic:0, skew:0}, "8890":{depth:0.19444, height:0.43056, italic:0, skew:0}, "8891":{depth:0.19444, height:0.69224, italic:0, skew:0}, "8892":{depth:0.19444, height:0.69224, italic:0, skew:0}, "8901":{depth:0, height:0.54986, italic:0, skew:0}, "8903":{depth:0.08167, height:0.58167, italic:0, skew:0}, "8905":{depth:0.08167, height:0.58167, italic:0, skew:0}, "8906":{depth:0.08167, height:0.58167, italic:0, skew:0}, "8907":{depth:0, height:0.69224, italic:0, skew:0}, "8908":{depth:0, height:0.69224, italic:0, skew:0}, "8909":{depth:-0.03598, height:0.46402, italic:0, skew:0}, "8910":{depth:0, height:0.54986, italic:0, skew:0}, "8911":{depth:0, height:0.54986, italic:0, skew:0}, "8912":{depth:0.03517, height:0.54986, italic:0, skew:0}, "8913":{depth:0.03517, height:0.54986, italic:0, skew:0}, "8914":{depth:0, height:0.54986, italic:0, skew:0}, "8915":{depth:0, height:0.54986, italic:0, skew:0}, "8916":{depth:0, height:0.69224, italic:0, skew:0}, "8918":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8919":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8920":{depth:0.03517, height:0.54986, italic:0, skew:0}, "8921":{depth:0.03517, height:0.54986, italic:0, skew:0}, "8922":{depth:0.38569, height:0.88569, italic:0, skew:0}, "8923":{depth:0.38569, height:0.88569, italic:0, skew:0}, "8926":{depth:0.13667, height:0.63667, italic:0, skew:0}, "8927":{depth:0.13667, height:0.63667, italic:0, skew:0}, "8928":{depth:0.30274, height:0.79383, italic:0, skew:0}, "8929":{depth:0.30274, height:0.79383, italic:0, skew:0}, "8934":{depth:0.23222, height:0.74111, italic:0, skew:0}, "8935":{depth:0.23222, height:0.74111, italic:0, skew:0}, "8936":{depth:0.23222, height:0.74111, italic:0, skew:0}, "8937":{depth:0.23222, height:0.74111, italic:0, skew:0}, "8938":{depth:0.20576, height:0.70576, italic:0, skew:0}, "8939":{depth:0.20576, height:0.70576, italic:0, skew:0}, "8940":{depth:0.30274, height:0.79383, italic:0, skew:0}, "8941":{depth:0.30274, height:0.79383, italic:0, skew:0}, "8994":{depth:0.19444, height:0.69224, italic:0, skew:0}, "8995":{depth:0.19444, height:0.69224, italic:0, skew:0}, "9416":{depth:0.15559, height:0.69224, italic:0, skew:0}, "9484":{depth:0, height:0.69224, italic:0, skew:0}, "9488":{depth:0, height:0.69224, italic:0, skew:0}, "9492":{depth:0, height:0.37788, italic:0, skew:0}, "9496":{depth:0, height:0.37788, italic:0, skew:0}, "9585":{depth:0.19444, height:0.68889, italic:0, skew:0}, "9586":{depth:0.19444, height:0.74111, italic:0, skew:0}, "9632":{depth:0, height:0.675, italic:0, skew:0}, "9633":{depth:0, height:0.675, italic:0, skew:0}, "9650":{depth:0, height:0.54986, italic:0, skew:0}, "9651":{depth:0, height:0.54986, italic:0, skew:0}, "9654":{depth:0.03517, height:0.54986, italic:0, skew:0}, "9660":{depth:0, height:0.54986, italic:0, skew:0}, "9661":{depth:0, height:0.54986, italic:0, skew:0}, "9664":{depth:0.03517, height:0.54986, italic:0, skew:0}, "9674":{depth:0.11111, height:0.69224, italic:0, skew:0}, "9733":{depth:0.19444, height:0.69224, italic:0, skew:0}, "10003":{depth:0, height:0.69224, italic:0, skew:0}, "10016":{depth:0, height:0.69224, italic:0, skew:0}, "10731":{depth:0.11111, height:0.69224, italic:0, skew:0}, "10846":{depth:0.19444, height:0.75583, italic:0, skew:0}, "10877":{depth:0.13667, height:0.63667, italic:0, skew:0}, "10878":{depth:0.13667, height:0.63667, italic:0, skew:0}, "10885":{depth:0.25583, height:0.75583, italic:0, skew:0}, "10886":{depth:0.25583, height:0.75583, italic:0, skew:0}, "10887":{depth:0.13597, height:0.63597, italic:0, skew:0}, "10888":{depth:0.13597, height:0.63597, italic:0, skew:0}, "10889":{depth:0.26167, height:0.75726, italic:0, skew:0}, "10890":{depth:0.26167, height:0.75726, italic:0, skew:0}, "10891":{depth:0.48256, height:0.98256, italic:0, skew:0}, "10892":{depth:0.48256, height:0.98256, italic:0, skew:0}, "10901":{depth:0.13667, height:0.63667, italic:0, skew:0}, "10902":{depth:0.13667, height:0.63667, italic:0, skew:0}, "10933":{depth:0.25142, height:0.75726, italic:0, skew:0}, "10934":{depth:0.25142, height:0.75726, italic:0, skew:0}, "10935":{depth:0.26167, height:0.75726, italic:0, skew:0}, "10936":{depth:0.26167, height:0.75726, italic:0, skew:0}, "10937":{depth:0.26167, height:0.75726, italic:0, skew:0}, "10938":{depth:0.26167, height:0.75726, italic:0, skew:0}, "10949":{depth:0.25583, height:0.75583, italic:0, skew:0}, "10950":{depth:0.25583, height:0.75583, italic:0, skew:0}, "10955":{depth:0.28481, height:0.79383, italic:0, skew:0}, "10956":{depth:0.28481, height:0.79383, italic:0, skew:0}, "57350":{depth:0.08167, height:0.58167, italic:0, skew:0}, "57351":{depth:0.08167, height:0.58167, italic:0, skew:0}, "57352":{depth:0.08167, height:0.58167, italic:0, skew:0}, "57353":{depth:0, height:0.43056, italic:0.04028, skew:0}, "57356":{depth:0.25142, height:0.75726, italic:0, skew:0}, "57357":{depth:0.25142, height:0.75726, italic:0, skew:0}, "57358":{depth:0.41951, height:0.91951, italic:0, skew:0}, "57359":{depth:0.30274, height:0.79383, italic:0, skew:0}, "57360":{depth:0.30274, height:0.79383, italic:0, skew:0}, "57361":{depth:0.41951, height:0.91951, italic:0, skew:0}, "57366":{depth:0.25142, height:0.75726, italic:0, skew:0}, "57367":{depth:0.25142, height:0.75726, italic:0, skew:0}, "57368":{depth:0.25142, height:0.75726, italic:0, skew:0}, "57369":{depth:0.25142, height:0.75726, italic:0, skew:0}, "57370":{depth:0.13597, height:0.63597, italic:0, skew:0}, "57371":{depth:0.13597, height:0.63597, italic:0, skew:0}}, "Caligraphic-Regular":{"48":{depth:0, height:0.43056, italic:0, skew:0}, "49":{depth:0, height:0.43056, italic:0, skew:0}, "50":{depth:0, height:0.43056, italic:0, skew:0}, "51":{depth:0.19444, height:0.43056, italic:0, skew:0}, "52":{depth:0.19444, height:0.43056, italic:0, skew:0}, "53":{depth:0.19444, height:0.43056, italic:0, skew:0}, "54":{depth:0, height:0.64444, italic:0, skew:0}, "55":{depth:0.19444, height:0.43056, italic:0, skew:0}, "56":{depth:0, height:0.64444, italic:0, skew:0}, "57":{depth:0.19444, height:0.43056, italic:0, skew:0}, "65":{depth:0, height:0.68333, italic:0, skew:0.19445}, "66":{depth:0, height:0.68333, italic:0.03041, skew:0.13889}, "67":{depth:0, height:0.68333, italic:0.05834, skew:0.13889}, "68":{depth:0, height:0.68333, italic:0.02778, skew:0.08334}, "69":{depth:0, height:0.68333, italic:0.08944, skew:0.11111}, "70":{depth:0, height:0.68333, italic:0.09931, skew:0.11111}, "71":{depth:0.09722, height:0.68333, italic:0.0593, skew:0.11111}, "72":{depth:0, height:0.68333, italic:0.00965, skew:0.11111}, "73":{depth:0, height:0.68333, italic:0.07382, skew:0}, "74":{depth:0.09722, height:0.68333, italic:0.18472, skew:0.16667}, "75":{depth:0, height:0.68333, italic:0.01445, skew:0.05556}, "76":{depth:0, height:0.68333, italic:0, skew:0.13889}, "77":{depth:0, height:0.68333, italic:0, skew:0.13889}, "78":{depth:0, height:0.68333, italic:0.14736, skew:0.08334}, "79":{depth:0, height:0.68333, italic:0.02778, skew:0.11111}, "80":{depth:0, height:0.68333, italic:0.08222, skew:0.08334}, "81":{depth:0.09722, height:0.68333, italic:0, skew:0.11111}, "82":{depth:0, height:0.68333, italic:0, skew:0.08334}, "83":{depth:0, height:0.68333, italic:0.075, skew:0.13889}, "84":{depth:0, height:0.68333, italic:0.25417, skew:0}, "85":{depth:0, height:0.68333, italic:0.09931, skew:0.08334}, "86":{depth:0, height:0.68333, italic:0.08222, skew:0}, "87":{depth:0, height:0.68333, italic:0.08222, skew:0.08334}, "88":{depth:0, height:0.68333, italic:0.14643, skew:0.13889}, "89":{depth:0.09722, height:0.68333, italic:0.08222, skew:0.08334}, "90":{depth:0, height:0.68333, italic:0.07944, skew:0.13889}}, "Fraktur-Regular":{"33":{depth:0, height:0.69141, italic:0, skew:0}, "34":{depth:0, height:0.69141, italic:0, skew:0}, "38":{depth:0, height:0.69141, italic:0, skew:0}, "39":{depth:0, height:0.69141, italic:0, skew:0}, "40":{depth:0.24982, height:0.74947, italic:0, skew:0}, "41":{depth:0.24982, height:0.74947, italic:0, skew:0}, "42":{depth:0, height:0.62119, italic:0, skew:0}, "43":{depth:0.08319, height:0.58283, italic:0, skew:0}, "44":{depth:0, height:0.10803, italic:0, skew:0}, "45":{depth:0.08319, height:0.58283, italic:0, skew:0}, "46":{depth:0, height:0.10803, italic:0, skew:0}, "47":{depth:0.24982, height:0.74947, italic:0, skew:0}, "48":{depth:0, height:0.47534, italic:0, skew:0}, "49":{depth:0, height:0.47534, italic:0, skew:0}, "50":{depth:0, height:0.47534, italic:0, skew:0}, "51":{depth:0.18906, height:0.47534, italic:0, skew:0}, "52":{depth:0.18906, height:0.47534, italic:0, skew:0}, "53":{depth:0.18906, height:0.47534, italic:0, skew:0}, "54":{depth:0, height:0.69141, italic:0, skew:0}, "55":{depth:0.18906, height:0.47534, italic:0, skew:0}, "56":{depth:0, height:0.69141, italic:0, skew:0}, "57":{depth:0.18906, height:0.47534, italic:0, skew:0}, "58":{depth:0, height:0.47534, italic:0, skew:0}, "59":{depth:0.12604, height:0.47534, italic:0, skew:0}, "61":{depth:-0.13099, height:0.36866, italic:0, skew:0}, "63":{depth:0, height:0.69141, italic:0, skew:0}, "65":{depth:0, height:0.69141, italic:0, skew:0}, "66":{depth:0, height:0.69141, italic:0, skew:0}, "67":{depth:0, height:0.69141, italic:0, skew:0}, "68":{depth:0, height:0.69141, italic:0, skew:0}, "69":{depth:0, height:0.69141, italic:0, skew:0}, "70":{depth:0.12604, height:0.69141, italic:0, skew:0}, "71":{depth:0, height:0.69141, italic:0, skew:0}, "72":{depth:0.06302, height:0.69141, italic:0, skew:0}, "73":{depth:0, height:0.69141, italic:0, skew:0}, "74":{depth:0.12604, height:0.69141, italic:0, skew:0}, "75":{depth:0, height:0.69141, italic:0, skew:0}, "76":{depth:0, height:0.69141, italic:0, skew:0}, "77":{depth:0, height:0.69141, italic:0, skew:0}, "78":{depth:0, height:0.69141, italic:0, skew:0}, "79":{depth:0, height:0.69141, italic:0, skew:0}, "80":{depth:0.18906, height:0.69141, italic:0, skew:0}, "81":{depth:0.03781, height:0.69141, italic:0, skew:0}, "82":{depth:0, height:0.69141, italic:0, skew:0}, "83":{depth:0, height:0.69141, italic:0, skew:0}, "84":{depth:0, height:0.69141, italic:0, skew:0}, "85":{depth:0, height:0.69141, italic:0, skew:0}, "86":{depth:0, height:0.69141, italic:0, skew:0}, "87":{depth:0, height:0.69141, italic:0, skew:0}, "88":{depth:0, height:0.69141, italic:0, skew:0}, "89":{depth:0.18906, height:0.69141, italic:0, skew:0}, "90":{depth:0.12604, height:0.69141, italic:0, skew:0}, "91":{depth:0.24982, height:0.74947, italic:0, skew:0}, "93":{depth:0.24982, height:0.74947, italic:0, skew:0}, "94":{depth:0, height:0.69141, italic:0, skew:0}, "97":{depth:0, height:0.47534, italic:0, skew:0}, "98":{depth:0, height:0.69141, italic:0, skew:0}, "99":{depth:0, height:0.47534, italic:0, skew:0}, "100":{depth:0, height:0.62119, italic:0, skew:0}, "101":{depth:0, height:0.47534, italic:0, skew:0}, "102":{depth:0.18906, height:0.69141, italic:0, skew:0}, "103":{depth:0.18906, height:0.47534, italic:0, skew:0}, "104":{depth:0.18906, height:0.69141, italic:0, skew:0}, "105":{depth:0, height:0.69141, italic:0, skew:0}, "106":{depth:0, height:0.69141, italic:0, skew:0}, "107":{depth:0, height:0.69141, italic:0, skew:0}, "108":{depth:0, height:0.69141, italic:0, skew:0}, "109":{depth:0, height:0.47534, italic:0, skew:0}, "110":{depth:0, height:0.47534, italic:0, skew:0}, "111":{depth:0, height:0.47534, italic:0, skew:0}, "112":{depth:0.18906, height:0.52396, italic:0, skew:0}, "113":{depth:0.18906, height:0.47534, italic:0, skew:0}, "114":{depth:0, height:0.47534, italic:0, skew:0}, "115":{depth:0, height:0.47534, italic:0, skew:0}, "116":{depth:0, height:0.62119, italic:0, skew:0}, "117":{depth:0, height:0.47534, italic:0, skew:0}, "118":{depth:0, height:0.52396, italic:0, skew:0}, "119":{depth:0, height:0.52396, italic:0, skew:0}, "120":{depth:0.18906, height:0.47534, italic:0, skew:0}, "121":{depth:0.18906, height:0.47534, italic:0, skew:0}, "122":{depth:0.18906, height:0.47534, italic:0, skew:0}, "8216":{depth:0, height:0.69141, italic:0, skew:0}, "8217":{depth:0, height:0.69141, italic:0, skew:0}, "58112":{depth:0, height:0.62119, italic:0, skew:0}, "58113":{depth:0, height:0.62119, italic:0, skew:0}, "58114":{depth:0.18906, height:0.69141, italic:0, skew:0}, "58115":{depth:0.18906, height:0.69141, italic:0, skew:0}, "58116":{depth:0.18906, height:0.47534, italic:0, skew:0}, "58117":{depth:0, height:0.69141, italic:0, skew:0}, "58118":{depth:0, height:0.62119, italic:0, skew:0}, "58119":{depth:0, height:0.47534, italic:0, skew:0}}, "Main-Bold":{"33":{depth:0, height:0.69444, italic:0, skew:0}, "34":{depth:0, height:0.69444, italic:0, skew:0}, "35":{depth:0.19444, height:0.69444, italic:0, skew:0}, "36":{depth:0.05556, height:0.75, italic:0, skew:0}, "37":{depth:0.05556, height:0.75, italic:0, skew:0}, "38":{depth:0, height:0.69444, italic:0, skew:0}, "39":{depth:0, height:0.69444, italic:0, skew:0}, "40":{depth:0.25, height:0.75, italic:0, skew:0}, "41":{depth:0.25, height:0.75, italic:0, skew:0}, "42":{depth:0, height:0.75, italic:0, skew:0}, "43":{depth:0.13333, height:0.63333, italic:0, skew:0}, "44":{depth:0.19444, height:0.15556, italic:0, skew:0}, "45":{depth:0, height:0.44444, italic:0, skew:0}, "46":{depth:0, height:0.15556, italic:0, skew:0}, "47":{depth:0.25, height:0.75, italic:0, skew:0}, "48":{depth:0, height:0.64444, italic:0, skew:0}, "49":{depth:0, height:0.64444, italic:0, skew:0}, "50":{depth:0, height:0.64444, italic:0, skew:0}, "51":{depth:0, height:0.64444, italic:0, skew:0}, "52":{depth:0, height:0.64444, italic:0, skew:0}, "53":{depth:0, height:0.64444, italic:0, skew:0}, "54":{depth:0, height:0.64444, italic:0, skew:0}, "55":{depth:0, height:0.64444, italic:0, skew:0}, "56":{depth:0, height:0.64444, italic:0, skew:0}, "57":{depth:0, height:0.64444, italic:0, skew:0}, "58":{depth:0, height:0.44444, italic:0, skew:0}, "59":{depth:0.19444, height:0.44444, italic:0, skew:0}, "60":{depth:0.08556, height:0.58556, italic:0, skew:0}, "61":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "62":{depth:0.08556, height:0.58556, italic:0, skew:0}, "63":{depth:0, height:0.69444, italic:0, skew:0}, "64":{depth:0, height:0.69444, italic:0, skew:0}, "65":{depth:0, height:0.68611, italic:0, skew:0}, "66":{depth:0, height:0.68611, italic:0, skew:0}, "67":{depth:0, height:0.68611, italic:0, skew:0}, "68":{depth:0, height:0.68611, italic:0, skew:0}, "69":{depth:0, height:0.68611, italic:0, skew:0}, "70":{depth:0, height:0.68611, italic:0, skew:0}, "71":{depth:0, height:0.68611, italic:0, skew:0}, "72":{depth:0, height:0.68611, italic:0, skew:0}, "73":{depth:0, height:0.68611, italic:0, skew:0}, "74":{depth:0, height:0.68611, italic:0, skew:0}, "75":{depth:0, height:0.68611, italic:0, skew:0}, "76":{depth:0, height:0.68611, italic:0, skew:0}, "77":{depth:0, height:0.68611, italic:0, skew:0}, "78":{depth:0, height:0.68611, italic:0, skew:0}, "79":{depth:0, height:0.68611, italic:0, skew:0}, "80":{depth:0, height:0.68611, italic:0, skew:0}, "81":{depth:0.19444, height:0.68611, italic:0, skew:0}, "82":{depth:0, height:0.68611, italic:0, skew:0}, "83":{depth:0, height:0.68611, italic:0, skew:0}, "84":{depth:0, height:0.68611, italic:0, skew:0}, "85":{depth:0, height:0.68611, italic:0, skew:0}, "86":{depth:0, height:0.68611, italic:0.01597, skew:0}, "87":{depth:0, height:0.68611, italic:0.01597, skew:0}, "88":{depth:0, height:0.68611, italic:0, skew:0}, "89":{depth:0, height:0.68611, italic:0.02875, skew:0}, "90":{depth:0, height:0.68611, italic:0, skew:0}, "91":{depth:0.25, height:0.75, italic:0, skew:0}, "92":{depth:0.25, height:0.75, italic:0, skew:0}, "93":{depth:0.25, height:0.75, italic:0, skew:0}, "94":{depth:0, height:0.69444, italic:0, skew:0}, "95":{depth:0.31, height:0.13444, italic:0.03194, skew:0}, "96":{depth:0, height:0.69444, italic:0, skew:0}, "97":{depth:0, height:0.44444, italic:0, skew:0}, "98":{depth:0, height:0.69444, italic:0, skew:0}, "99":{depth:0, height:0.44444, italic:0, skew:0}, "100":{depth:0, height:0.69444, italic:0, skew:0}, "101":{depth:0, height:0.44444, italic:0, skew:0}, "102":{depth:0, height:0.69444, italic:0.10903, skew:0}, "103":{depth:0.19444, height:0.44444, italic:0.01597, skew:0}, "104":{depth:0, height:0.69444, italic:0, skew:0}, "105":{depth:0, height:0.69444, italic:0, skew:0}, "106":{depth:0.19444, height:0.69444, italic:0, skew:0}, "107":{depth:0, height:0.69444, italic:0, skew:0}, "108":{depth:0, height:0.69444, italic:0, skew:0}, "109":{depth:0, height:0.44444, italic:0, skew:0}, "110":{depth:0, height:0.44444, italic:0, skew:0}, "111":{depth:0, height:0.44444, italic:0, skew:0}, "112":{depth:0.19444, height:0.44444, italic:0, skew:0}, "113":{depth:0.19444, height:0.44444, italic:0, skew:0}, "114":{depth:0, height:0.44444, italic:0, skew:0}, "115":{depth:0, height:0.44444, italic:0, skew:0}, "116":{depth:0, height:0.63492, italic:0, skew:0}, "117":{depth:0, height:0.44444, italic:0, skew:0}, "118":{depth:0, height:0.44444, italic:0.01597, skew:0}, "119":{depth:0, height:0.44444, italic:0.01597, skew:0}, "120":{depth:0, height:0.44444, italic:0, skew:0}, "121":{depth:0.19444, height:0.44444, italic:0.01597, skew:0}, "122":{depth:0, height:0.44444, italic:0, skew:0}, "123":{depth:0.25, height:0.75, italic:0, skew:0}, "124":{depth:0.25, height:0.75, italic:0, skew:0}, "125":{depth:0.25, height:0.75, italic:0, skew:0}, "126":{depth:0.35, height:0.34444, italic:0, skew:0}, "168":{depth:0, height:0.69444, italic:0, skew:0}, "172":{depth:0, height:0.44444, italic:0, skew:0}, "175":{depth:0, height:0.59611, italic:0, skew:0}, "176":{depth:0, height:0.69444, italic:0, skew:0}, "177":{depth:0.13333, height:0.63333, italic:0, skew:0}, "180":{depth:0, height:0.69444, italic:0, skew:0}, "215":{depth:0.13333, height:0.63333, italic:0, skew:0}, "247":{depth:0.13333, height:0.63333, italic:0, skew:0}, "305":{depth:0, height:0.44444, italic:0, skew:0}, "567":{depth:0.19444, height:0.44444, italic:0, skew:0}, "710":{depth:0, height:0.69444, italic:0, skew:0}, "711":{depth:0, height:0.63194, italic:0, skew:0}, "713":{depth:0, height:0.59611, italic:0, skew:0}, "714":{depth:0, height:0.69444, italic:0, skew:0}, "715":{depth:0, height:0.69444, italic:0, skew:0}, "728":{depth:0, height:0.69444, italic:0, skew:0}, "729":{depth:0, height:0.69444, italic:0, skew:0}, "730":{depth:0, height:0.69444, italic:0, skew:0}, "732":{depth:0, height:0.69444, italic:0, skew:0}, "768":{depth:0, height:0.69444, italic:0, skew:0}, "769":{depth:0, height:0.69444, italic:0, skew:0}, "770":{depth:0, height:0.69444, italic:0, skew:0}, "771":{depth:0, height:0.69444, italic:0, skew:0}, "772":{depth:0, height:0.59611, italic:0, skew:0}, "774":{depth:0, height:0.69444, italic:0, skew:0}, "775":{depth:0, height:0.69444, italic:0, skew:0}, "776":{depth:0, height:0.69444, italic:0, skew:0}, "778":{depth:0, height:0.69444, italic:0, skew:0}, "779":{depth:0, height:0.69444, italic:0, skew:0}, "780":{depth:0, height:0.63194, italic:0, skew:0}, "824":{depth:0.19444, height:0.69444, italic:0, skew:0}, "915":{depth:0, height:0.68611, italic:0, skew:0}, "916":{depth:0, height:0.68611, italic:0, skew:0}, "920":{depth:0, height:0.68611, italic:0, skew:0}, "923":{depth:0, height:0.68611, italic:0, skew:0}, "926":{depth:0, height:0.68611, italic:0, skew:0}, "928":{depth:0, height:0.68611, italic:0, skew:0}, "931":{depth:0, height:0.68611, italic:0, skew:0}, "933":{depth:0, height:0.68611, italic:0, skew:0}, "934":{depth:0, height:0.68611, italic:0, skew:0}, "936":{depth:0, height:0.68611, italic:0, skew:0}, "937":{depth:0, height:0.68611, italic:0, skew:0}, "8211":{depth:0, height:0.44444, italic:0.03194, skew:0}, "8212":{depth:0, height:0.44444, italic:0.03194, skew:0}, "8216":{depth:0, height:0.69444, italic:0, skew:0}, "8217":{depth:0, height:0.69444, italic:0, skew:0}, "8220":{depth:0, height:0.69444, italic:0, skew:0}, "8221":{depth:0, height:0.69444, italic:0, skew:0}, "8224":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8225":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8242":{depth:0, height:0.55556, italic:0, skew:0}, "8407":{depth:0, height:0.72444, italic:0.15486, skew:0}, "8463":{depth:0, height:0.69444, italic:0, skew:0}, "8465":{depth:0, height:0.69444, italic:0, skew:0}, "8467":{depth:0, height:0.69444, italic:0, skew:0}, "8472":{depth:0.19444, height:0.44444, italic:0, skew:0}, "8476":{depth:0, height:0.69444, italic:0, skew:0}, "8501":{depth:0, height:0.69444, italic:0, skew:0}, "8592":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8593":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8594":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8595":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8596":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8597":{depth:0.25, height:0.75, italic:0, skew:0}, "8598":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8599":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8600":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8601":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8636":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8637":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8640":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8641":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8656":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8657":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8658":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8659":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8660":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8661":{depth:0.25, height:0.75, italic:0, skew:0}, "8704":{depth:0, height:0.69444, italic:0, skew:0}, "8706":{depth:0, height:0.69444, italic:0.06389, skew:0}, "8707":{depth:0, height:0.69444, italic:0, skew:0}, "8709":{depth:0.05556, height:0.75, italic:0, skew:0}, "8711":{depth:0, height:0.68611, italic:0, skew:0}, "8712":{depth:0.08556, height:0.58556, italic:0, skew:0}, "8715":{depth:0.08556, height:0.58556, italic:0, skew:0}, "8722":{depth:0.13333, height:0.63333, italic:0, skew:0}, "8723":{depth:0.13333, height:0.63333, italic:0, skew:0}, "8725":{depth:0.25, height:0.75, italic:0, skew:0}, "8726":{depth:0.25, height:0.75, italic:0, skew:0}, "8727":{depth:-0.02778, height:0.47222, italic:0, skew:0}, "8728":{depth:-0.02639, height:0.47361, italic:0, skew:0}, "8729":{depth:-0.02639, height:0.47361, italic:0, skew:0}, "8730":{depth:0.18, height:0.82, italic:0, skew:0}, "8733":{depth:0, height:0.44444, italic:0, skew:0}, "8734":{depth:0, height:0.44444, italic:0, skew:0}, "8736":{depth:0, height:0.69224, italic:0, skew:0}, "8739":{depth:0.25, height:0.75, italic:0, skew:0}, "8741":{depth:0.25, height:0.75, italic:0, skew:0}, "8743":{depth:0, height:0.55556, italic:0, skew:0}, "8744":{depth:0, height:0.55556, italic:0, skew:0}, "8745":{depth:0, height:0.55556, italic:0, skew:0}, "8746":{depth:0, height:0.55556, italic:0, skew:0}, "8747":{depth:0.19444, height:0.69444, italic:0.12778, skew:0}, "8764":{depth:-0.10889, height:0.39111, italic:0, skew:0}, "8768":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8771":{depth:0.00222, height:0.50222, italic:0, skew:0}, "8776":{depth:0.02444, height:0.52444, italic:0, skew:0}, "8781":{depth:0.00222, height:0.50222, italic:0, skew:0}, "8801":{depth:0.00222, height:0.50222, italic:0, skew:0}, "8804":{depth:0.19667, height:0.69667, italic:0, skew:0}, "8805":{depth:0.19667, height:0.69667, italic:0, skew:0}, "8810":{depth:0.08556, height:0.58556, italic:0, skew:0}, "8811":{depth:0.08556, height:0.58556, italic:0, skew:0}, "8826":{depth:0.08556, height:0.58556, italic:0, skew:0}, "8827":{depth:0.08556, height:0.58556, italic:0, skew:0}, "8834":{depth:0.08556, height:0.58556, italic:0, skew:0}, "8835":{depth:0.08556, height:0.58556, italic:0, skew:0}, "8838":{depth:0.19667, height:0.69667, italic:0, skew:0}, "8839":{depth:0.19667, height:0.69667, italic:0, skew:0}, "8846":{depth:0, height:0.55556, italic:0, skew:0}, "8849":{depth:0.19667, height:0.69667, italic:0, skew:0}, "8850":{depth:0.19667, height:0.69667, italic:0, skew:0}, "8851":{depth:0, height:0.55556, italic:0, skew:0}, "8852":{depth:0, height:0.55556, italic:0, skew:0}, "8853":{depth:0.13333, height:0.63333, italic:0, skew:0}, "8854":{depth:0.13333, height:0.63333, italic:0, skew:0}, "8855":{depth:0.13333, height:0.63333, italic:0, skew:0}, "8856":{depth:0.13333, height:0.63333, italic:0, skew:0}, "8857":{depth:0.13333, height:0.63333, italic:0, skew:0}, "8866":{depth:0, height:0.69444, italic:0, skew:0}, "8867":{depth:0, height:0.69444, italic:0, skew:0}, "8868":{depth:0, height:0.69444, italic:0, skew:0}, "8869":{depth:0, height:0.69444, italic:0, skew:0}, "8900":{depth:-0.02639, height:0.47361, italic:0, skew:0}, "8901":{depth:-0.02639, height:0.47361, italic:0, skew:0}, "8902":{depth:-0.02778, height:0.47222, italic:0, skew:0}, "8968":{depth:0.25, height:0.75, italic:0, skew:0}, "8969":{depth:0.25, height:0.75, italic:0, skew:0}, "8970":{depth:0.25, height:0.75, italic:0, skew:0}, "8971":{depth:0.25, height:0.75, italic:0, skew:0}, "8994":{depth:-0.13889, height:0.36111, italic:0, skew:0}, "8995":{depth:-0.13889, height:0.36111, italic:0, skew:0}, "9651":{depth:0.19444, height:0.69444, italic:0, skew:0}, "9657":{depth:-0.02778, height:0.47222, italic:0, skew:0}, "9661":{depth:0.19444, height:0.69444, italic:0, skew:0}, "9667":{depth:-0.02778, height:0.47222, italic:0, skew:0}, "9711":{depth:0.19444, height:0.69444, italic:0, skew:0}, "9824":{depth:0.12963, height:0.69444, italic:0, skew:0}, "9825":{depth:0.12963, height:0.69444, italic:0, skew:0}, "9826":{depth:0.12963, height:0.69444, italic:0, skew:0}, "9827":{depth:0.12963, height:0.69444, italic:0, skew:0}, "9837":{depth:0, height:0.75, italic:0, skew:0}, "9838":{depth:0.19444, height:0.69444, italic:0, skew:0}, "9839":{depth:0.19444, height:0.69444, italic:0, skew:0}, "10216":{depth:0.25, height:0.75, italic:0, skew:0}, "10217":{depth:0.25, height:0.75, italic:0, skew:0}, "10815":{depth:0, height:0.68611, italic:0, skew:0}, "10927":{depth:0.19667, height:0.69667, italic:0, skew:0}, "10928":{depth:0.19667, height:0.69667, italic:0, skew:0}}, "Main-Italic":{"33":{depth:0, height:0.69444, italic:0.12417, skew:0}, "34":{depth:0, height:0.69444, italic:0.06961, skew:0}, "35":{depth:0.19444, height:0.69444, italic:0.06616, skew:0}, "37":{depth:0.05556, height:0.75, italic:0.13639, skew:0}, "38":{depth:0, height:0.69444, italic:0.09694, skew:0}, "39":{depth:0, height:0.69444, italic:0.12417, skew:0}, "40":{depth:0.25, height:0.75, italic:0.16194, skew:0}, "41":{depth:0.25, height:0.75, italic:0.03694, skew:0}, "42":{depth:0, height:0.75, italic:0.14917, skew:0}, "43":{depth:0.05667, height:0.56167, italic:0.03694, skew:0}, "44":{depth:0.19444, height:0.10556, italic:0, skew:0}, "45":{depth:0, height:0.43056, italic:0.02826, skew:0}, "46":{depth:0, height:0.10556, italic:0, skew:0}, "47":{depth:0.25, height:0.75, italic:0.16194, skew:0}, "48":{depth:0, height:0.64444, italic:0.13556, skew:0}, "49":{depth:0, height:0.64444, italic:0.13556, skew:0}, "50":{depth:0, height:0.64444, italic:0.13556, skew:0}, "51":{depth:0, height:0.64444, italic:0.13556, skew:0}, "52":{depth:0.19444, height:0.64444, italic:0.13556, skew:0}, "53":{depth:0, height:0.64444, italic:0.13556, skew:0}, "54":{depth:0, height:0.64444, italic:0.13556, skew:0}, "55":{depth:0.19444, height:0.64444, italic:0.13556, skew:0}, "56":{depth:0, height:0.64444, italic:0.13556, skew:0}, "57":{depth:0, height:0.64444, italic:0.13556, skew:0}, "58":{depth:0, height:0.43056, italic:0.0582, skew:0}, "59":{depth:0.19444, height:0.43056, italic:0.0582, skew:0}, "61":{depth:-0.13313, height:0.36687, italic:0.06616, skew:0}, "63":{depth:0, height:0.69444, italic:0.1225, skew:0}, "64":{depth:0, height:0.69444, italic:0.09597, skew:0}, "65":{depth:0, height:0.68333, italic:0, skew:0}, "66":{depth:0, height:0.68333, italic:0.10257, skew:0}, "67":{depth:0, height:0.68333, italic:0.14528, skew:0}, "68":{depth:0, height:0.68333, italic:0.09403, skew:0}, "69":{depth:0, height:0.68333, italic:0.12028, skew:0}, "70":{depth:0, height:0.68333, italic:0.13305, skew:0}, "71":{depth:0, height:0.68333, italic:0.08722, skew:0}, "72":{depth:0, height:0.68333, italic:0.16389, skew:0}, "73":{depth:0, height:0.68333, italic:0.15806, skew:0}, "74":{depth:0, height:0.68333, italic:0.14028, skew:0}, "75":{depth:0, height:0.68333, italic:0.14528, skew:0}, "76":{depth:0, height:0.68333, italic:0, skew:0}, "77":{depth:0, height:0.68333, italic:0.16389, skew:0}, "78":{depth:0, height:0.68333, italic:0.16389, skew:0}, "79":{depth:0, height:0.68333, italic:0.09403, skew:0}, "80":{depth:0, height:0.68333, italic:0.10257, skew:0}, "81":{depth:0.19444, height:0.68333, italic:0.09403, skew:0}, "82":{depth:0, height:0.68333, italic:0.03868, skew:0}, "83":{depth:0, height:0.68333, italic:0.11972, skew:0}, "84":{depth:0, height:0.68333, italic:0.13305, skew:0}, "85":{depth:0, height:0.68333, italic:0.16389, skew:0}, "86":{depth:0, height:0.68333, italic:0.18361, skew:0}, "87":{depth:0, height:0.68333, italic:0.18361, skew:0}, "88":{depth:0, height:0.68333, italic:0.15806, skew:0}, "89":{depth:0, height:0.68333, italic:0.19383, skew:0}, "90":{depth:0, height:0.68333, italic:0.14528, skew:0}, "91":{depth:0.25, height:0.75, italic:0.1875, skew:0}, "93":{depth:0.25, height:0.75, italic:0.10528, skew:0}, "94":{depth:0, height:0.69444, italic:0.06646, skew:0}, "95":{depth:0.31, height:0.12056, italic:0.09208, skew:0}, "97":{depth:0, height:0.43056, italic:0.07671, skew:0}, "98":{depth:0, height:0.69444, italic:0.06312, skew:0}, "99":{depth:0, height:0.43056, italic:0.05653, skew:0}, "100":{depth:0, height:0.69444, italic:0.10333, skew:0}, "101":{depth:0, height:0.43056, italic:0.07514, skew:0}, "102":{depth:0.19444, height:0.69444, italic:0.21194, skew:0}, "103":{depth:0.19444, height:0.43056, italic:0.08847, skew:0}, "104":{depth:0, height:0.69444, italic:0.07671, skew:0}, "105":{depth:0, height:0.65536, italic:0.1019, skew:0}, "106":{depth:0.19444, height:0.65536, italic:0.14467, skew:0}, "107":{depth:0, height:0.69444, italic:0.10764, skew:0}, "108":{depth:0, height:0.69444, italic:0.10333, skew:0}, "109":{depth:0, height:0.43056, italic:0.07671, skew:0}, "110":{depth:0, height:0.43056, italic:0.07671, skew:0}, "111":{depth:0, height:0.43056, italic:0.06312, skew:0}, "112":{depth:0.19444, height:0.43056, italic:0.06312, skew:0}, "113":{depth:0.19444, height:0.43056, italic:0.08847, skew:0}, "114":{depth:0, height:0.43056, italic:0.10764, skew:0}, "115":{depth:0, height:0.43056, italic:0.08208, skew:0}, "116":{depth:0, height:0.61508, italic:0.09486, skew:0}, "117":{depth:0, height:0.43056, italic:0.07671, skew:0}, "118":{depth:0, height:0.43056, italic:0.10764, skew:0}, "119":{depth:0, height:0.43056, italic:0.10764, skew:0}, "120":{depth:0, height:0.43056, italic:0.12042, skew:0}, "121":{depth:0.19444, height:0.43056, italic:0.08847, skew:0}, "122":{depth:0, height:0.43056, italic:0.12292, skew:0}, "126":{depth:0.35, height:0.31786, italic:0.11585, skew:0}, "163":{depth:0, height:0.69444, italic:0, skew:0}, "305":{depth:0, height:0.43056, italic:0, skew:0.02778}, "567":{depth:0.19444, height:0.43056, italic:0, skew:0.08334}, "768":{depth:0, height:0.69444, italic:0, skew:0}, "769":{depth:0, height:0.69444, italic:0.09694, skew:0}, "770":{depth:0, height:0.69444, italic:0.06646, skew:0}, "771":{depth:0, height:0.66786, italic:0.11585, skew:0}, "772":{depth:0, height:0.56167, italic:0.10333, skew:0}, "774":{depth:0, height:0.69444, italic:0.10806, skew:0}, "775":{depth:0, height:0.66786, italic:0.11752, skew:0}, "776":{depth:0, height:0.66786, italic:0.10474, skew:0}, "778":{depth:0, height:0.69444, italic:0, skew:0}, "779":{depth:0, height:0.69444, italic:0.1225, skew:0}, "780":{depth:0, height:0.62847, italic:0.08295, skew:0}, "915":{depth:0, height:0.68333, italic:0.13305, skew:0}, "916":{depth:0, height:0.68333, italic:0, skew:0}, "920":{depth:0, height:0.68333, italic:0.09403, skew:0}, "923":{depth:0, height:0.68333, italic:0, skew:0}, "926":{depth:0, height:0.68333, italic:0.15294, skew:0}, "928":{depth:0, height:0.68333, italic:0.16389, skew:0}, "931":{depth:0, height:0.68333, italic:0.12028, skew:0}, "933":{depth:0, height:0.68333, italic:0.11111, skew:0}, "934":{depth:0, height:0.68333, italic:0.05986, skew:0}, "936":{depth:0, height:0.68333, italic:0.11111, skew:0}, "937":{depth:0, height:0.68333, italic:0.10257, skew:0}, "8211":{depth:0, height:0.43056, italic:0.09208, skew:0}, "8212":{depth:0, height:0.43056, italic:0.09208, skew:0}, "8216":{depth:0, height:0.69444, italic:0.12417, skew:0}, "8217":{depth:0, height:0.69444, italic:0.12417, skew:0}, "8220":{depth:0, height:0.69444, italic:0.1685, skew:0}, "8221":{depth:0, height:0.69444, italic:0.06961, skew:0}, "8463":{depth:0, height:0.68889, italic:0, skew:0}}, "Main-Regular":{"32":{depth:0, height:0, italic:0, skew:0}, "33":{depth:0, height:0.69444, italic:0, skew:0}, "34":{depth:0, height:0.69444, italic:0, skew:0}, "35":{depth:0.19444, height:0.69444, italic:0, skew:0}, "36":{depth:0.05556, height:0.75, italic:0, skew:0}, "37":{depth:0.05556, height:0.75, italic:0, skew:0}, "38":{depth:0, height:0.69444, italic:0, skew:0}, "39":{depth:0, height:0.69444, italic:0, skew:0}, "40":{depth:0.25, height:0.75, italic:0, skew:0}, "41":{depth:0.25, height:0.75, italic:0, skew:0}, "42":{depth:0, height:0.75, italic:0, skew:0}, "43":{depth:0.08333, height:0.58333, italic:0, skew:0}, "44":{depth:0.19444, height:0.10556, italic:0, skew:0}, "45":{depth:0, height:0.43056, italic:0, skew:0}, "46":{depth:0, height:0.10556, italic:0, skew:0}, "47":{depth:0.25, height:0.75, italic:0, skew:0}, "48":{depth:0, height:0.64444, italic:0, skew:0}, "49":{depth:0, height:0.64444, italic:0, skew:0}, "50":{depth:0, height:0.64444, italic:0, skew:0}, "51":{depth:0, height:0.64444, italic:0, skew:0}, "52":{depth:0, height:0.64444, italic:0, skew:0}, "53":{depth:0, height:0.64444, italic:0, skew:0}, "54":{depth:0, height:0.64444, italic:0, skew:0}, "55":{depth:0, height:0.64444, italic:0, skew:0}, "56":{depth:0, height:0.64444, italic:0, skew:0}, "57":{depth:0, height:0.64444, italic:0, skew:0}, "58":{depth:0, height:0.43056, italic:0, skew:0}, "59":{depth:0.19444, height:0.43056, italic:0, skew:0}, "60":{depth:0.0391, height:0.5391, italic:0, skew:0}, "61":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "62":{depth:0.0391, height:0.5391, italic:0, skew:0}, "63":{depth:0, height:0.69444, italic:0, skew:0}, "64":{depth:0, height:0.69444, italic:0, skew:0}, "65":{depth:0, height:0.68333, italic:0, skew:0}, "66":{depth:0, height:0.68333, italic:0, skew:0}, "67":{depth:0, height:0.68333, italic:0, skew:0}, "68":{depth:0, height:0.68333, italic:0, skew:0}, "69":{depth:0, height:0.68333, italic:0, skew:0}, "70":{depth:0, height:0.68333, italic:0, skew:0}, "71":{depth:0, height:0.68333, italic:0, skew:0}, "72":{depth:0, height:0.68333, italic:0, skew:0}, "73":{depth:0, height:0.68333, italic:0, skew:0}, "74":{depth:0, height:0.68333, italic:0, skew:0}, "75":{depth:0, height:0.68333, italic:0, skew:0}, "76":{depth:0, height:0.68333, italic:0, skew:0}, "77":{depth:0, height:0.68333, italic:0, skew:0}, "78":{depth:0, height:0.68333, italic:0, skew:0}, "79":{depth:0, height:0.68333, italic:0, skew:0}, "80":{depth:0, height:0.68333, italic:0, skew:0}, "81":{depth:0.19444, height:0.68333, italic:0, skew:0}, "82":{depth:0, height:0.68333, italic:0, skew:0}, "83":{depth:0, height:0.68333, italic:0, skew:0}, "84":{depth:0, height:0.68333, italic:0, skew:0}, "85":{depth:0, height:0.68333, italic:0, skew:0}, "86":{depth:0, height:0.68333, italic:0.01389, skew:0}, "87":{depth:0, height:0.68333, italic:0.01389, skew:0}, "88":{depth:0, height:0.68333, italic:0, skew:0}, "89":{depth:0, height:0.68333, italic:0.025, skew:0}, "90":{depth:0, height:0.68333, italic:0, skew:0}, "91":{depth:0.25, height:0.75, italic:0, skew:0}, "92":{depth:0.25, height:0.75, italic:0, skew:0}, "93":{depth:0.25, height:0.75, italic:0, skew:0}, "94":{depth:0, height:0.69444, italic:0, skew:0}, "95":{depth:0.31, height:0.12056, italic:0.02778, skew:0}, "96":{depth:0, height:0.69444, italic:0, skew:0}, "97":{depth:0, height:0.43056, italic:0, skew:0}, "98":{depth:0, height:0.69444, italic:0, skew:0}, "99":{depth:0, height:0.43056, italic:0, skew:0}, "100":{depth:0, height:0.69444, italic:0, skew:0}, "101":{depth:0, height:0.43056, italic:0, skew:0}, "102":{depth:0, height:0.69444, italic:0.07778, skew:0}, "103":{depth:0.19444, height:0.43056, italic:0.01389, skew:0}, "104":{depth:0, height:0.69444, italic:0, skew:0}, "105":{depth:0, height:0.66786, italic:0, skew:0}, "106":{depth:0.19444, height:0.66786, italic:0, skew:0}, "107":{depth:0, height:0.69444, italic:0, skew:0}, "108":{depth:0, height:0.69444, italic:0, skew:0}, "109":{depth:0, height:0.43056, italic:0, skew:0}, "110":{depth:0, height:0.43056, italic:0, skew:0}, "111":{depth:0, height:0.43056, italic:0, skew:0}, "112":{depth:0.19444, height:0.43056, italic:0, skew:0}, "113":{depth:0.19444, height:0.43056, italic:0, skew:0}, "114":{depth:0, height:0.43056, italic:0, skew:0}, "115":{depth:0, height:0.43056, italic:0, skew:0}, "116":{depth:0, height:0.61508, italic:0, skew:0}, "117":{depth:0, height:0.43056, italic:0, skew:0}, "118":{depth:0, height:0.43056, italic:0.01389, skew:0}, "119":{depth:0, height:0.43056, italic:0.01389, skew:0}, "120":{depth:0, height:0.43056, italic:0, skew:0}, "121":{depth:0.19444, height:0.43056, italic:0.01389, skew:0}, "122":{depth:0, height:0.43056, italic:0, skew:0}, "123":{depth:0.25, height:0.75, italic:0, skew:0}, "124":{depth:0.25, height:0.75, italic:0, skew:0}, "125":{depth:0.25, height:0.75, italic:0, skew:0}, "126":{depth:0.35, height:0.31786, italic:0, skew:0}, "160":{depth:0, height:0, italic:0, skew:0}, "168":{depth:0, height:0.66786, italic:0, skew:0}, "172":{depth:0, height:0.43056, italic:0, skew:0}, "175":{depth:0, height:0.56778, italic:0, skew:0}, "176":{depth:0, height:0.69444, italic:0, skew:0}, "177":{depth:0.08333, height:0.58333, italic:0, skew:0}, "180":{depth:0, height:0.69444, italic:0, skew:0}, "215":{depth:0.08333, height:0.58333, italic:0, skew:0}, "247":{depth:0.08333, height:0.58333, italic:0, skew:0}, "305":{depth:0, height:0.43056, italic:0, skew:0}, "567":{depth:0.19444, height:0.43056, italic:0, skew:0}, "710":{depth:0, height:0.69444, italic:0, skew:0}, "711":{depth:0, height:0.62847, italic:0, skew:0}, "713":{depth:0, height:0.56778, italic:0, skew:0}, "714":{depth:0, height:0.69444, italic:0, skew:0}, "715":{depth:0, height:0.69444, italic:0, skew:0}, "728":{depth:0, height:0.69444, italic:0, skew:0}, "729":{depth:0, height:0.66786, italic:0, skew:0}, "730":{depth:0, height:0.69444, italic:0, skew:0}, "732":{depth:0, height:0.66786, italic:0, skew:0}, "768":{depth:0, height:0.69444, italic:0, skew:0}, "769":{depth:0, height:0.69444, italic:0, skew:0}, "770":{depth:0, height:0.69444, italic:0, skew:0}, "771":{depth:0, height:0.66786, italic:0, skew:0}, "772":{depth:0, height:0.56778, italic:0, skew:0}, "774":{depth:0, height:0.69444, italic:0, skew:0}, "775":{depth:0, height:0.66786, italic:0, skew:0}, "776":{depth:0, height:0.66786, italic:0, skew:0}, "778":{depth:0, height:0.69444, italic:0, skew:0}, "779":{depth:0, height:0.69444, italic:0, skew:0}, "780":{depth:0, height:0.62847, italic:0, skew:0}, "824":{depth:0.19444, height:0.69444, italic:0, skew:0}, "915":{depth:0, height:0.68333, italic:0, skew:0}, "916":{depth:0, height:0.68333, italic:0, skew:0}, "920":{depth:0, height:0.68333, italic:0, skew:0}, "923":{depth:0, height:0.68333, italic:0, skew:0}, "926":{depth:0, height:0.68333, italic:0, skew:0}, "928":{depth:0, height:0.68333, italic:0, skew:0}, "931":{depth:0, height:0.68333, italic:0, skew:0}, "933":{depth:0, height:0.68333, italic:0, skew:0}, "934":{depth:0, height:0.68333, italic:0, skew:0}, "936":{depth:0, height:0.68333, italic:0, skew:0}, "937":{depth:0, height:0.68333, italic:0, skew:0}, "8211":{depth:0, height:0.43056, italic:0.02778, skew:0}, "8212":{depth:0, height:0.43056, italic:0.02778, skew:0}, "8216":{depth:0, height:0.69444, italic:0, skew:0}, "8217":{depth:0, height:0.69444, italic:0, skew:0}, "8220":{depth:0, height:0.69444, italic:0, skew:0}, "8221":{depth:0, height:0.69444, italic:0, skew:0}, "8224":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8225":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8230":{depth:0, height:0.12, italic:0, skew:0}, "8242":{depth:0, height:0.55556, italic:0, skew:0}, "8407":{depth:0, height:0.71444, italic:0.15382, skew:0}, "8463":{depth:0, height:0.68889, italic:0, skew:0}, "8465":{depth:0, height:0.69444, italic:0, skew:0}, "8467":{depth:0, height:0.69444, italic:0, skew:0.11111}, "8472":{depth:0.19444, height:0.43056, italic:0, skew:0.11111}, "8476":{depth:0, height:0.69444, italic:0, skew:0}, "8501":{depth:0, height:0.69444, italic:0, skew:0}, "8592":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8593":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8594":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8595":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8596":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8597":{depth:0.25, height:0.75, italic:0, skew:0}, "8598":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8599":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8600":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8601":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8614":{depth:0.011, height:0.511, italic:0, skew:0}, "8617":{depth:0.011, height:0.511, italic:0, skew:0}, "8618":{depth:0.011, height:0.511, italic:0, skew:0}, "8636":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8637":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8640":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8641":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8652":{depth:0.011, height:0.671, italic:0, skew:0}, "8656":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8657":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8658":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8659":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8660":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8661":{depth:0.25, height:0.75, italic:0, skew:0}, "8704":{depth:0, height:0.69444, italic:0, skew:0}, "8706":{depth:0, height:0.69444, italic:0.05556, skew:0.08334}, "8707":{depth:0, height:0.69444, italic:0, skew:0}, "8709":{depth:0.05556, height:0.75, italic:0, skew:0}, "8711":{depth:0, height:0.68333, italic:0, skew:0}, "8712":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8715":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8722":{depth:0.08333, height:0.58333, italic:0, skew:0}, "8723":{depth:0.08333, height:0.58333, italic:0, skew:0}, "8725":{depth:0.25, height:0.75, italic:0, skew:0}, "8726":{depth:0.25, height:0.75, italic:0, skew:0}, "8727":{depth:-0.03472, height:0.46528, italic:0, skew:0}, "8728":{depth:-0.05555, height:0.44445, italic:0, skew:0}, "8729":{depth:-0.05555, height:0.44445, italic:0, skew:0}, "8730":{depth:0.2, height:0.8, italic:0, skew:0}, "8733":{depth:0, height:0.43056, italic:0, skew:0}, "8734":{depth:0, height:0.43056, italic:0, skew:0}, "8736":{depth:0, height:0.69224, italic:0, skew:0}, "8739":{depth:0.25, height:0.75, italic:0, skew:0}, "8741":{depth:0.25, height:0.75, italic:0, skew:0}, "8743":{depth:0, height:0.55556, italic:0, skew:0}, "8744":{depth:0, height:0.55556, italic:0, skew:0}, "8745":{depth:0, height:0.55556, italic:0, skew:0}, "8746":{depth:0, height:0.55556, italic:0, skew:0}, "8747":{depth:0.19444, height:0.69444, italic:0.11111, skew:0}, "8764":{depth:-0.13313, height:0.36687, italic:0, skew:0}, "8768":{depth:0.19444, height:0.69444, italic:0, skew:0}, "8771":{depth:-0.03625, height:0.46375, italic:0, skew:0}, "8773":{depth:-0.022, height:0.589, italic:0, skew:0}, "8776":{depth:-0.01688, height:0.48312, italic:0, skew:0}, "8781":{depth:-0.03625, height:0.46375, italic:0, skew:0}, "8784":{depth:-0.133, height:0.67, italic:0, skew:0}, "8800":{depth:0.215, height:0.716, italic:0, skew:0}, "8801":{depth:-0.03625, height:0.46375, italic:0, skew:0}, "8804":{depth:0.13597, height:0.63597, italic:0, skew:0}, "8805":{depth:0.13597, height:0.63597, italic:0, skew:0}, "8810":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8811":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8826":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8827":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8834":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8835":{depth:0.0391, height:0.5391, italic:0, skew:0}, "8838":{depth:0.13597, height:0.63597, italic:0, skew:0}, "8839":{depth:0.13597, height:0.63597, italic:0, skew:0}, "8846":{depth:0, height:0.55556, italic:0, skew:0}, "8849":{depth:0.13597, height:0.63597, italic:0, skew:0}, "8850":{depth:0.13597, height:0.63597, italic:0, skew:0}, "8851":{depth:0, height:0.55556, italic:0, skew:0}, "8852":{depth:0, height:0.55556, italic:0, skew:0}, "8853":{depth:0.08333, height:0.58333, italic:0, skew:0}, "8854":{depth:0.08333, height:0.58333, italic:0, skew:0}, "8855":{depth:0.08333, height:0.58333, italic:0, skew:0}, "8856":{depth:0.08333, height:0.58333, italic:0, skew:0}, "8857":{depth:0.08333, height:0.58333, italic:0, skew:0}, "8866":{depth:0, height:0.69444, italic:0, skew:0}, "8867":{depth:0, height:0.69444, italic:0, skew:0}, "8868":{depth:0, height:0.69444, italic:0, skew:0}, "8869":{depth:0, height:0.69444, italic:0, skew:0}, "8872":{depth:0.249, height:0.75, italic:0, skew:0}, "8900":{depth:-0.05555, height:0.44445, italic:0, skew:0}, "8901":{depth:-0.05555, height:0.44445, italic:0, skew:0}, "8902":{depth:-0.03472, height:0.46528, italic:0, skew:0}, "8904":{depth:0.005, height:0.505, italic:0, skew:0}, "8942":{depth:0.03, height:0.9, italic:0, skew:0}, "8943":{depth:-0.19, height:0.31, italic:0, skew:0}, "8945":{depth:-0.1, height:0.82, italic:0, skew:0}, "8968":{depth:0.25, height:0.75, italic:0, skew:0}, "8969":{depth:0.25, height:0.75, italic:0, skew:0}, "8970":{depth:0.25, height:0.75, italic:0, skew:0}, "8971":{depth:0.25, height:0.75, italic:0, skew:0}, "8994":{depth:-0.14236, height:0.35764, italic:0, skew:0}, "8995":{depth:-0.14236, height:0.35764, italic:0, skew:0}, "9136":{depth:0.244, height:0.744, italic:0, skew:0}, "9137":{depth:0.244, height:0.744, italic:0, skew:0}, "9651":{depth:0.19444, height:0.69444, italic:0, skew:0}, "9657":{depth:-0.03472, height:0.46528, italic:0, skew:0}, "9661":{depth:0.19444, height:0.69444, italic:0, skew:0}, "9667":{depth:-0.03472, height:0.46528, italic:0, skew:0}, "9711":{depth:0.19444, height:0.69444, italic:0, skew:0}, "9824":{depth:0.12963, height:0.69444, italic:0, skew:0}, "9825":{depth:0.12963, height:0.69444, italic:0, skew:0}, "9826":{depth:0.12963, height:0.69444, italic:0, skew:0}, "9827":{depth:0.12963, height:0.69444, italic:0, skew:0}, "9837":{depth:0, height:0.75, italic:0, skew:0}, "9838":{depth:0.19444, height:0.69444, italic:0, skew:0}, "9839":{depth:0.19444, height:0.69444, italic:0, skew:0}, "10216":{depth:0.25, height:0.75, italic:0, skew:0}, "10217":{depth:0.25, height:0.75, italic:0, skew:0}, "10222":{depth:0.244, height:0.744, italic:0, skew:0}, "10223":{depth:0.244, height:0.744, italic:0, skew:0}, "10229":{depth:0.011, height:0.511, italic:0, skew:0}, "10230":{depth:0.011, height:0.511, italic:0, skew:0}, "10231":{depth:0.011, height:0.511, italic:0, skew:0}, "10232":{depth:0.024, height:0.525, italic:0, skew:0}, "10233":{depth:0.024, height:0.525, italic:0, skew:0}, "10234":{depth:0.024, height:0.525, italic:0, skew:0}, "10236":{depth:0.011, height:0.511, italic:0, skew:0}, "10815":{depth:0, height:0.68333, italic:0, skew:0}, "10927":{depth:0.13597, height:0.63597, italic:0, skew:0}, "10928":{depth:0.13597, height:0.63597, italic:0, skew:0}}, "Math-BoldItalic":{"47":{depth:0.19444, height:0.69444, italic:0, skew:0}, "65":{depth:0, height:0.68611, italic:0, skew:0}, "66":{depth:0, height:0.68611, italic:0.04835, skew:0}, "67":{depth:0, height:0.68611, italic:0.06979, skew:0}, "68":{depth:0, height:0.68611, italic:0.03194, skew:0}, "69":{depth:0, height:0.68611, italic:0.05451, skew:0}, "70":{depth:0, height:0.68611, italic:0.15972, skew:0}, "71":{depth:0, height:0.68611, italic:0, skew:0}, "72":{depth:0, height:0.68611, italic:0.08229, skew:0}, "73":{depth:0, height:0.68611, italic:0.07778, skew:0}, "74":{depth:0, height:0.68611, italic:0.10069, skew:0}, "75":{depth:0, height:0.68611, italic:0.06979, skew:0}, "76":{depth:0, height:0.68611, italic:0, skew:0}, "77":{depth:0, height:0.68611, italic:0.11424, skew:0}, "78":{depth:0, height:0.68611, italic:0.11424, skew:0}, "79":{depth:0, height:0.68611, italic:0.03194, skew:0}, "80":{depth:0, height:0.68611, italic:0.15972, skew:0}, "81":{depth:0.19444, height:0.68611, italic:0, skew:0}, "82":{depth:0, height:0.68611, italic:0.00421, skew:0}, "83":{depth:0, height:0.68611, italic:0.05382, skew:0}, "84":{depth:0, height:0.68611, italic:0.15972, skew:0}, "85":{depth:0, height:0.68611, italic:0.11424, skew:0}, "86":{depth:0, height:0.68611, italic:0.25555, skew:0}, "87":{depth:0, height:0.68611, italic:0.15972, skew:0}, "88":{depth:0, height:0.68611, italic:0.07778, skew:0}, "89":{depth:0, height:0.68611, italic:0.25555, skew:0}, "90":{depth:0, height:0.68611, italic:0.06979, skew:0}, "97":{depth:0, height:0.44444, italic:0, skew:0}, "98":{depth:0, height:0.69444, italic:0, skew:0}, "99":{depth:0, height:0.44444, italic:0, skew:0}, "100":{depth:0, height:0.69444, italic:0, skew:0}, "101":{depth:0, height:0.44444, italic:0, skew:0}, "102":{depth:0.19444, height:0.69444, italic:0.11042, skew:0}, "103":{depth:0.19444, height:0.44444, italic:0.03704, skew:0}, "104":{depth:0, height:0.69444, italic:0, skew:0}, "105":{depth:0, height:0.69326, italic:0, skew:0}, "106":{depth:0.19444, height:0.69326, italic:0.0622, skew:0}, "107":{depth:0, height:0.69444, italic:0.01852, skew:0}, "108":{depth:0, height:0.69444, italic:0.0088, skew:0}, "109":{depth:0, height:0.44444, italic:0, skew:0}, "110":{depth:0, height:0.44444, italic:0, skew:0}, "111":{depth:0, height:0.44444, italic:0, skew:0}, "112":{depth:0.19444, height:0.44444, italic:0, skew:0}, "113":{depth:0.19444, height:0.44444, italic:0.03704, skew:0}, "114":{depth:0, height:0.44444, italic:0.03194, skew:0}, "115":{depth:0, height:0.44444, italic:0, skew:0}, "116":{depth:0, height:0.63492, italic:0, skew:0}, "117":{depth:0, height:0.44444, italic:0, skew:0}, "118":{depth:0, height:0.44444, italic:0.03704, skew:0}, "119":{depth:0, height:0.44444, italic:0.02778, skew:0}, "120":{depth:0, height:0.44444, italic:0, skew:0}, "121":{depth:0.19444, height:0.44444, italic:0.03704, skew:0}, "122":{depth:0, height:0.44444, italic:0.04213, skew:0}, "915":{depth:0, height:0.68611, italic:0.15972, skew:0}, "916":{depth:0, height:0.68611, italic:0, skew:0}, "920":{depth:0, height:0.68611, italic:0.03194, skew:0}, "923":{depth:0, height:0.68611, italic:0, skew:0}, "926":{depth:0, height:0.68611, italic:0.07458, skew:0}, "928":{depth:0, height:0.68611, italic:0.08229, skew:0}, "931":{depth:0, height:0.68611, italic:0.05451, skew:0}, "933":{depth:0, height:0.68611, italic:0.15972, skew:0}, "934":{depth:0, height:0.68611, italic:0, skew:0}, "936":{depth:0, height:0.68611, italic:0.11653, skew:0}, "937":{depth:0, height:0.68611, italic:0.04835, skew:0}, "945":{depth:0, height:0.44444, italic:0, skew:0}, "946":{depth:0.19444, height:0.69444, italic:0.03403, skew:0}, "947":{depth:0.19444, height:0.44444, italic:0.06389, skew:0}, "948":{depth:0, height:0.69444, italic:0.03819, skew:0}, "949":{depth:0, height:0.44444, italic:0, skew:0}, "950":{depth:0.19444, height:0.69444, italic:0.06215, skew:0}, "951":{depth:0.19444, height:0.44444, italic:0.03704, skew:0}, "952":{depth:0, height:0.69444, italic:0.03194, skew:0}, "953":{depth:0, height:0.44444, italic:0, skew:0}, "954":{depth:0, height:0.44444, italic:0, skew:0}, "955":{depth:0, height:0.69444, italic:0, skew:0}, "956":{depth:0.19444, height:0.44444, italic:0, skew:0}, "957":{depth:0, height:0.44444, italic:0.06898, skew:0}, "958":{depth:0.19444, height:0.69444, italic:0.03021, skew:0}, "959":{depth:0, height:0.44444, italic:0, skew:0}, "960":{depth:0, height:0.44444, italic:0.03704, skew:0}, "961":{depth:0.19444, height:0.44444, italic:0, skew:0}, "962":{depth:0.09722, height:0.44444, italic:0.07917, skew:0}, "963":{depth:0, height:0.44444, italic:0.03704, skew:0}, "964":{depth:0, height:0.44444, italic:0.13472, skew:0}, "965":{depth:0, height:0.44444, italic:0.03704, skew:0}, "966":{depth:0.19444, height:0.44444, italic:0, skew:0}, "967":{depth:0.19444, height:0.44444, italic:0, skew:0}, "968":{depth:0.19444, height:0.69444, italic:0.03704, skew:0}, "969":{depth:0, height:0.44444, italic:0.03704, skew:0}, "977":{depth:0, height:0.69444, italic:0, skew:0}, "981":{depth:0.19444, height:0.69444, italic:0, skew:0}, "982":{depth:0, height:0.44444, italic:0.03194, skew:0}, "1009":{depth:0.19444, height:0.44444, italic:0, skew:0}, "1013":{depth:0, height:0.44444, italic:0, skew:0}}, "Math-Italic":{"47":{depth:0.19444, height:0.69444, italic:0, skew:0}, "65":{depth:0, height:0.68333, italic:0, skew:0.13889}, "66":{depth:0, height:0.68333, italic:0.05017, skew:0.08334}, "67":{depth:0, height:0.68333, italic:0.07153, skew:0.08334}, "68":{depth:0, height:0.68333, italic:0.02778, skew:0.05556}, "69":{depth:0, height:0.68333, italic:0.05764, skew:0.08334}, "70":{depth:0, height:0.68333, italic:0.13889, skew:0.08334}, "71":{depth:0, height:0.68333, italic:0, skew:0.08334}, "72":{depth:0, height:0.68333, italic:0.08125, skew:0.05556}, "73":{depth:0, height:0.68333, italic:0.07847, skew:0.11111}, "74":{depth:0, height:0.68333, italic:0.09618, skew:0.16667}, "75":{depth:0, height:0.68333, italic:0.07153, skew:0.05556}, "76":{depth:0, height:0.68333, italic:0, skew:0.02778}, "77":{depth:0, height:0.68333, italic:0.10903, skew:0.08334}, "78":{depth:0, height:0.68333, italic:0.10903, skew:0.08334}, "79":{depth:0, height:0.68333, italic:0.02778, skew:0.08334}, "80":{depth:0, height:0.68333, italic:0.13889, skew:0.08334}, "81":{depth:0.19444, height:0.68333, italic:0, skew:0.08334}, "82":{depth:0, height:0.68333, italic:0.00773, skew:0.08334}, "83":{depth:0, height:0.68333, italic:0.05764, skew:0.08334}, "84":{depth:0, height:0.68333, italic:0.13889, skew:0.08334}, "85":{depth:0, height:0.68333, italic:0.10903, skew:0.02778}, "86":{depth:0, height:0.68333, italic:0.22222, skew:0}, "87":{depth:0, height:0.68333, italic:0.13889, skew:0}, "88":{depth:0, height:0.68333, italic:0.07847, skew:0.08334}, "89":{depth:0, height:0.68333, italic:0.22222, skew:0}, "90":{depth:0, height:0.68333, italic:0.07153, skew:0.08334}, "97":{depth:0, height:0.43056, italic:0, skew:0}, "98":{depth:0, height:0.69444, italic:0, skew:0}, "99":{depth:0, height:0.43056, italic:0, skew:0.05556}, "100":{depth:0, height:0.69444, italic:0, skew:0.16667}, "101":{depth:0, height:0.43056, italic:0, skew:0.05556}, "102":{depth:0.19444, height:0.69444, italic:0.10764, skew:0.16667}, "103":{depth:0.19444, height:0.43056, italic:0.03588, skew:0.02778}, "104":{depth:0, height:0.69444, italic:0, skew:0}, "105":{depth:0, height:0.65952, italic:0, skew:0}, "106":{depth:0.19444, height:0.65952, italic:0.05724, skew:0}, "107":{depth:0, height:0.69444, italic:0.03148, skew:0}, "108":{depth:0, height:0.69444, italic:0.01968, skew:0.08334}, "109":{depth:0, height:0.43056, italic:0, skew:0}, "110":{depth:0, height:0.43056, italic:0, skew:0}, "111":{depth:0, height:0.43056, italic:0, skew:0.05556}, "112":{depth:0.19444, height:0.43056, italic:0, skew:0.08334}, "113":{depth:0.19444, height:0.43056, italic:0.03588, skew:0.08334}, "114":{depth:0, height:0.43056, italic:0.02778, skew:0.05556}, "115":{depth:0, height:0.43056, italic:0, skew:0.05556}, "116":{depth:0, height:0.61508, italic:0, skew:0.08334}, "117":{depth:0, height:0.43056, italic:0, skew:0.02778}, "118":{depth:0, height:0.43056, italic:0.03588, skew:0.02778}, "119":{depth:0, height:0.43056, italic:0.02691, skew:0.08334}, "120":{depth:0, height:0.43056, italic:0, skew:0.02778}, "121":{depth:0.19444, height:0.43056, italic:0.03588, skew:0.05556}, "122":{depth:0, height:0.43056, italic:0.04398, skew:0.05556}, "915":{depth:0, height:0.68333, italic:0.13889, skew:0.08334}, "916":{depth:0, height:0.68333, italic:0, skew:0.16667}, "920":{depth:0, height:0.68333, italic:0.02778, skew:0.08334}, "923":{depth:0, height:0.68333, italic:0, skew:0.16667}, "926":{depth:0, height:0.68333, italic:0.07569, skew:0.08334}, "928":{depth:0, height:0.68333, italic:0.08125, skew:0.05556}, "931":{depth:0, height:0.68333, italic:0.05764, skew:0.08334}, "933":{depth:0, height:0.68333, italic:0.13889, skew:0.05556}, "934":{depth:0, height:0.68333, italic:0, skew:0.08334}, "936":{depth:0, height:0.68333, italic:0.11, skew:0.05556}, "937":{depth:0, height:0.68333, italic:0.05017, skew:0.08334}, "945":{depth:0, height:0.43056, italic:0.0037, skew:0.02778}, "946":{depth:0.19444, height:0.69444, italic:0.05278, skew:0.08334}, "947":{depth:0.19444, height:0.43056, italic:0.05556, skew:0}, "948":{depth:0, height:0.69444, italic:0.03785, skew:0.05556}, "949":{depth:0, height:0.43056, italic:0, skew:0.08334}, "950":{depth:0.19444, height:0.69444, italic:0.07378, skew:0.08334}, "951":{depth:0.19444, height:0.43056, italic:0.03588, skew:0.05556}, "952":{depth:0, height:0.69444, italic:0.02778, skew:0.08334}, "953":{depth:0, height:0.43056, italic:0, skew:0.05556}, "954":{depth:0, height:0.43056, italic:0, skew:0}, "955":{depth:0, height:0.69444, italic:0, skew:0}, "956":{depth:0.19444, height:0.43056, italic:0, skew:0.02778}, "957":{depth:0, height:0.43056, italic:0.06366, skew:0.02778}, "958":{depth:0.19444, height:0.69444, italic:0.04601, skew:0.11111}, "959":{depth:0, height:0.43056, italic:0, skew:0.05556}, "960":{depth:0, height:0.43056, italic:0.03588, skew:0}, "961":{depth:0.19444, height:0.43056, italic:0, skew:0.08334}, "962":{depth:0.09722, height:0.43056, italic:0.07986, skew:0.08334}, "963":{depth:0, height:0.43056, italic:0.03588, skew:0}, "964":{depth:0, height:0.43056, italic:0.1132, skew:0.02778}, "965":{depth:0, height:0.43056, italic:0.03588, skew:0.02778}, "966":{depth:0.19444, height:0.43056, italic:0, skew:0.08334}, "967":{depth:0.19444, height:0.43056, italic:0, skew:0.05556}, "968":{depth:0.19444, height:0.69444, italic:0.03588, skew:0.11111}, "969":{depth:0, height:0.43056, italic:0.03588, skew:0}, "977":{depth:0, height:0.69444, italic:0, skew:0.08334}, "981":{depth:0.19444, height:0.69444, italic:0, skew:0.08334}, "982":{depth:0, height:0.43056, italic:0.02778, skew:0}, "1009":{depth:0.19444, height:0.43056, italic:0, skew:0.08334}, "1013":{depth:0, height:0.43056, italic:0, skew:0.05556}}, "Math-Regular":{"65":{depth:0, height:0.68333, italic:0, skew:0.13889}, "66":{depth:0, height:0.68333, italic:0.05017, skew:0.08334}, "67":{depth:0, height:0.68333, italic:0.07153, skew:0.08334}, "68":{depth:0, height:0.68333, italic:0.02778, skew:0.05556}, "69":{depth:0, height:0.68333, italic:0.05764, skew:0.08334}, "70":{depth:0, height:0.68333, italic:0.13889, skew:0.08334}, "71":{depth:0, height:0.68333, italic:0, skew:0.08334}, "72":{depth:0, height:0.68333, italic:0.08125, skew:0.05556}, "73":{depth:0, height:0.68333, italic:0.07847, skew:0.11111}, "74":{depth:0, height:0.68333, italic:0.09618, skew:0.16667}, "75":{depth:0, height:0.68333, italic:0.07153, skew:0.05556}, "76":{depth:0, height:0.68333, italic:0, skew:0.02778}, "77":{depth:0, height:0.68333, italic:0.10903, skew:0.08334}, "78":{depth:0, height:0.68333, italic:0.10903, skew:0.08334}, "79":{depth:0, height:0.68333, italic:0.02778, skew:0.08334}, "80":{depth:0, height:0.68333, italic:0.13889, skew:0.08334}, "81":{depth:0.19444, height:0.68333, italic:0, skew:0.08334}, "82":{depth:0, height:0.68333, italic:0.00773, skew:0.08334}, "83":{depth:0, height:0.68333, italic:0.05764, skew:0.08334}, "84":{depth:0, height:0.68333, italic:0.13889, skew:0.08334}, "85":{depth:0, height:0.68333, italic:0.10903, skew:0.02778}, "86":{depth:0, height:0.68333, italic:0.22222, skew:0}, "87":{depth:0, height:0.68333, italic:0.13889, skew:0}, "88":{depth:0, height:0.68333, italic:0.07847, skew:0.08334}, "89":{depth:0, height:0.68333, italic:0.22222, skew:0}, "90":{depth:0, height:0.68333, italic:0.07153, skew:0.08334}, "97":{depth:0, height:0.43056, italic:0, skew:0}, "98":{depth:0, height:0.69444, italic:0, skew:0}, "99":{depth:0, height:0.43056, italic:0, skew:0.05556}, "100":{depth:0, height:0.69444, italic:0, skew:0.16667}, "101":{depth:0, height:0.43056, italic:0, skew:0.05556}, "102":{depth:0.19444, height:0.69444, italic:0.10764, skew:0.16667}, "103":{depth:0.19444, height:0.43056, italic:0.03588, skew:0.02778}, "104":{depth:0, height:0.69444, italic:0, skew:0}, "105":{depth:0, height:0.65952, italic:0, skew:0}, "106":{depth:0.19444, height:0.65952, italic:0.05724, skew:0}, "107":{depth:0, height:0.69444, italic:0.03148, skew:0}, "108":{depth:0, height:0.69444, italic:0.01968, skew:0.08334}, "109":{depth:0, height:0.43056, italic:0, skew:0}, "110":{depth:0, height:0.43056, italic:0, skew:0}, "111":{depth:0, height:0.43056, italic:0, skew:0.05556}, "112":{depth:0.19444, height:0.43056, italic:0, skew:0.08334}, "113":{depth:0.19444, height:0.43056, italic:0.03588, skew:0.08334}, "114":{depth:0, height:0.43056, italic:0.02778, skew:0.05556}, "115":{depth:0, height:0.43056, italic:0, skew:0.05556}, "116":{depth:0, height:0.61508, italic:0, skew:0.08334}, "117":{depth:0, height:0.43056, italic:0, skew:0.02778}, "118":{depth:0, height:0.43056, italic:0.03588, skew:0.02778}, "119":{depth:0, height:0.43056, italic:0.02691, skew:0.08334}, "120":{depth:0, height:0.43056, italic:0, skew:0.02778}, "121":{depth:0.19444, height:0.43056, italic:0.03588, skew:0.05556}, "122":{depth:0, height:0.43056, italic:0.04398, skew:0.05556}, "915":{depth:0, height:0.68333, italic:0.13889, skew:0.08334}, "916":{depth:0, height:0.68333, italic:0, skew:0.16667}, "920":{depth:0, height:0.68333, italic:0.02778, skew:0.08334}, "923":{depth:0, height:0.68333, italic:0, skew:0.16667}, "926":{depth:0, height:0.68333, italic:0.07569, skew:0.08334}, "928":{depth:0, height:0.68333, italic:0.08125, skew:0.05556}, "931":{depth:0, height:0.68333, italic:0.05764, skew:0.08334}, "933":{depth:0, height:0.68333, italic:0.13889, skew:0.05556}, "934":{depth:0, height:0.68333, italic:0, skew:0.08334}, "936":{depth:0, height:0.68333, italic:0.11, skew:0.05556}, "937":{depth:0, height:0.68333, italic:0.05017, skew:0.08334}, "945":{depth:0, height:0.43056, italic:0.0037, skew:0.02778}, "946":{depth:0.19444, height:0.69444, italic:0.05278, skew:0.08334}, "947":{depth:0.19444, height:0.43056, italic:0.05556, skew:0}, "948":{depth:0, height:0.69444, italic:0.03785, skew:0.05556}, "949":{depth:0, height:0.43056, italic:0, skew:0.08334}, "950":{depth:0.19444, height:0.69444, italic:0.07378, skew:0.08334}, "951":{depth:0.19444, height:0.43056, italic:0.03588, skew:0.05556}, "952":{depth:0, height:0.69444, italic:0.02778, skew:0.08334}, "953":{depth:0, height:0.43056, italic:0, skew:0.05556}, "954":{depth:0, height:0.43056, italic:0, skew:0}, "955":{depth:0, height:0.69444, italic:0, skew:0}, "956":{depth:0.19444, height:0.43056, italic:0, skew:0.02778}, "957":{depth:0, height:0.43056, italic:0.06366, skew:0.02778}, "958":{depth:0.19444, height:0.69444, italic:0.04601, skew:0.11111}, "959":{depth:0, height:0.43056, italic:0, skew:0.05556}, "960":{depth:0, height:0.43056, italic:0.03588, skew:0}, "961":{depth:0.19444, height:0.43056, italic:0, skew:0.08334}, "962":{depth:0.09722, height:0.43056, italic:0.07986, skew:0.08334}, "963":{depth:0, height:0.43056, italic:0.03588, skew:0}, "964":{depth:0, height:0.43056, italic:0.1132, skew:0.02778}, "965":{depth:0, height:0.43056, italic:0.03588, skew:0.02778}, "966":{depth:0.19444, height:0.43056, italic:0, skew:0.08334}, "967":{depth:0.19444, height:0.43056, italic:0, skew:0.05556}, "968":{depth:0.19444, height:0.69444, italic:0.03588, skew:0.11111}, "969":{depth:0, height:0.43056, italic:0.03588, skew:0}, "977":{depth:0, height:0.69444, italic:0, skew:0.08334}, "981":{depth:0.19444, height:0.69444, italic:0, skew:0.08334}, "982":{depth:0, height:0.43056, italic:0.02778, skew:0}, "1009":{depth:0.19444, height:0.43056, italic:0, skew:0.08334}, "1013":{depth:0, height:0.43056, italic:0, skew:0.05556}}, "SansSerif-Regular":{"33":{depth:0, height:0.69444, italic:0, skew:0}, "34":{depth:0, height:0.69444, italic:0, skew:0}, "35":{depth:0.19444, height:0.69444, italic:0, skew:0}, "36":{depth:0.05556, height:0.75, italic:0, skew:0}, "37":{depth:0.05556, height:0.75, italic:0, skew:0}, "38":{depth:0, height:0.69444, italic:0, skew:0}, "39":{depth:0, height:0.69444, italic:0, skew:0}, "40":{depth:0.25, height:0.75, italic:0, skew:0}, "41":{depth:0.25, height:0.75, italic:0, skew:0}, "42":{depth:0, height:0.75, italic:0, skew:0}, "43":{depth:0.08333, height:0.58333, italic:0, skew:0}, "44":{depth:0.125, height:0.08333, italic:0, skew:0}, "45":{depth:0, height:0.44444, italic:0, skew:0}, "46":{depth:0, height:0.08333, italic:0, skew:0}, "47":{depth:0.25, height:0.75, italic:0, skew:0}, "48":{depth:0, height:0.65556, italic:0, skew:0}, "49":{depth:0, height:0.65556, italic:0, skew:0}, "50":{depth:0, height:0.65556, italic:0, skew:0}, "51":{depth:0, height:0.65556, italic:0, skew:0}, "52":{depth:0, height:0.65556, italic:0, skew:0}, "53":{depth:0, height:0.65556, italic:0, skew:0}, "54":{depth:0, height:0.65556, italic:0, skew:0}, "55":{depth:0, height:0.65556, italic:0, skew:0}, "56":{depth:0, height:0.65556, italic:0, skew:0}, "57":{depth:0, height:0.65556, italic:0, skew:0}, "58":{depth:0, height:0.44444, italic:0, skew:0}, "59":{depth:0.125, height:0.44444, italic:0, skew:0}, "61":{depth:-0.13, height:0.37, italic:0, skew:0}, "63":{depth:0, height:0.69444, italic:0, skew:0}, "64":{depth:0, height:0.69444, italic:0, skew:0}, "65":{depth:0, height:0.69444, italic:0, skew:0}, "66":{depth:0, height:0.69444, italic:0, skew:0}, "67":{depth:0, height:0.69444, italic:0, skew:0}, "68":{depth:0, height:0.69444, italic:0, skew:0}, "69":{depth:0, height:0.69444, italic:0, skew:0}, "70":{depth:0, height:0.69444, italic:0, skew:0}, "71":{depth:0, height:0.69444, italic:0, skew:0}, "72":{depth:0, height:0.69444, italic:0, skew:0}, "73":{depth:0, height:0.69444, italic:0, skew:0}, "74":{depth:0, height:0.69444, italic:0, skew:0}, "75":{depth:0, height:0.69444, italic:0, skew:0}, "76":{depth:0, height:0.69444, italic:0, skew:0}, "77":{depth:0, height:0.69444, italic:0, skew:0}, "78":{depth:0, height:0.69444, italic:0, skew:0}, "79":{depth:0, height:0.69444, italic:0, skew:0}, "80":{depth:0, height:0.69444, italic:0, skew:0}, "81":{depth:0.125, height:0.69444, italic:0, skew:0}, "82":{depth:0, height:0.69444, italic:0, skew:0}, "83":{depth:0, height:0.69444, italic:0, skew:0}, "84":{depth:0, height:0.69444, italic:0, skew:0}, "85":{depth:0, height:0.69444, italic:0, skew:0}, "86":{depth:0, height:0.69444, italic:0.01389, skew:0}, "87":{depth:0, height:0.69444, italic:0.01389, skew:0}, "88":{depth:0, height:0.69444, italic:0, skew:0}, "89":{depth:0, height:0.69444, italic:0.025, skew:0}, "90":{depth:0, height:0.69444, italic:0, skew:0}, "91":{depth:0.25, height:0.75, italic:0, skew:0}, "93":{depth:0.25, height:0.75, italic:0, skew:0}, "94":{depth:0, height:0.69444, italic:0, skew:0}, "95":{depth:0.35, height:0.09444, italic:0.02778, skew:0}, "97":{depth:0, height:0.44444, italic:0, skew:0}, "98":{depth:0, height:0.69444, italic:0, skew:0}, "99":{depth:0, height:0.44444, italic:0, skew:0}, "100":{depth:0, height:0.69444, italic:0, skew:0}, "101":{depth:0, height:0.44444, italic:0, skew:0}, "102":{depth:0, height:0.69444, italic:0.06944, skew:0}, "103":{depth:0.19444, height:0.44444, italic:0.01389, skew:0}, "104":{depth:0, height:0.69444, italic:0, skew:0}, "105":{depth:0, height:0.67937, italic:0, skew:0}, "106":{depth:0.19444, height:0.67937, italic:0, skew:0}, "107":{depth:0, height:0.69444, italic:0, skew:0}, "108":{depth:0, height:0.69444, italic:0, skew:0}, "109":{depth:0, height:0.44444, italic:0, skew:0}, "110":{depth:0, height:0.44444, italic:0, skew:0}, "111":{depth:0, height:0.44444, italic:0, skew:0}, "112":{depth:0.19444, height:0.44444, italic:0, skew:0}, "113":{depth:0.19444, height:0.44444, italic:0, skew:0}, "114":{depth:0, height:0.44444, italic:0.01389, skew:0}, "115":{depth:0, height:0.44444, italic:0, skew:0}, "116":{depth:0, height:0.57143, italic:0, skew:0}, "117":{depth:0, height:0.44444, italic:0, skew:0}, "118":{depth:0, height:0.44444, italic:0.01389, skew:0}, "119":{depth:0, height:0.44444, italic:0.01389, skew:0}, "120":{depth:0, height:0.44444, italic:0, skew:0}, "121":{depth:0.19444, height:0.44444, italic:0.01389, skew:0}, "122":{depth:0, height:0.44444, italic:0, skew:0}, "126":{depth:0.35, height:0.32659, italic:0, skew:0}, "305":{depth:0, height:0.44444, italic:0, skew:0}, "567":{depth:0.19444, height:0.44444, italic:0, skew:0}, "768":{depth:0, height:0.69444, italic:0, skew:0}, "769":{depth:0, height:0.69444, italic:0, skew:0}, "770":{depth:0, height:0.69444, italic:0, skew:0}, "771":{depth:0, height:0.67659, italic:0, skew:0}, "772":{depth:0, height:0.60889, italic:0, skew:0}, "774":{depth:0, height:0.69444, italic:0, skew:0}, "775":{depth:0, height:0.67937, italic:0, skew:0}, "776":{depth:0, height:0.67937, italic:0, skew:0}, "778":{depth:0, height:0.69444, italic:0, skew:0}, "779":{depth:0, height:0.69444, italic:0, skew:0}, "780":{depth:0, height:0.63194, italic:0, skew:0}, "915":{depth:0, height:0.69444, italic:0, skew:0}, "916":{depth:0, height:0.69444, italic:0, skew:0}, "920":{depth:0, height:0.69444, italic:0, skew:0}, "923":{depth:0, height:0.69444, italic:0, skew:0}, "926":{depth:0, height:0.69444, italic:0, skew:0}, "928":{depth:0, height:0.69444, italic:0, skew:0}, "931":{depth:0, height:0.69444, italic:0, skew:0}, "933":{depth:0, height:0.69444, italic:0, skew:0}, "934":{depth:0, height:0.69444, italic:0, skew:0}, "936":{depth:0, height:0.69444, italic:0, skew:0}, "937":{depth:0, height:0.69444, italic:0, skew:0}, "8211":{depth:0, height:0.44444, italic:0.02778, skew:0}, "8212":{depth:0, height:0.44444, italic:0.02778, skew:0}, "8216":{depth:0, height:0.69444, italic:0, skew:0}, "8217":{depth:0, height:0.69444, italic:0, skew:0}, "8220":{depth:0, height:0.69444, italic:0, skew:0}, "8221":{depth:0, height:0.69444, italic:0, skew:0}}, "Script-Regular":{"65":{depth:0, height:0.7, italic:0.22925, skew:0}, "66":{depth:0, height:0.7, italic:0.04087, skew:0}, "67":{depth:0, height:0.7, italic:0.1689, skew:0}, "68":{depth:0, height:0.7, italic:0.09371, skew:0}, "69":{depth:0, height:0.7, italic:0.18583, skew:0}, "70":{depth:0, height:0.7, italic:0.13634, skew:0}, "71":{depth:0, height:0.7, italic:0.17322, skew:0}, "72":{depth:0, height:0.7, italic:0.29694, skew:0}, "73":{depth:0, height:0.7, italic:0.19189, skew:0}, "74":{depth:0.27778, height:0.7, italic:0.19189, skew:0}, "75":{depth:0, height:0.7, italic:0.31259, skew:0}, "76":{depth:0, height:0.7, italic:0.19189, skew:0}, "77":{depth:0, height:0.7, italic:0.15981, skew:0}, "78":{depth:0, height:0.7, italic:0.3525, skew:0}, "79":{depth:0, height:0.7, italic:0.08078, skew:0}, "80":{depth:0, height:0.7, italic:0.08078, skew:0}, "81":{depth:0, height:0.7, italic:0.03305, skew:0}, "82":{depth:0, height:0.7, italic:0.06259, skew:0}, "83":{depth:0, height:0.7, italic:0.19189, skew:0}, "84":{depth:0, height:0.7, italic:0.29087, skew:0}, "85":{depth:0, height:0.7, italic:0.25815, skew:0}, "86":{depth:0, height:0.7, italic:0.27523, skew:0}, "87":{depth:0, height:0.7, italic:0.27523, skew:0}, "88":{depth:0, height:0.7, italic:0.26006, skew:0}, "89":{depth:0, height:0.7, italic:0.2939, skew:0}, "90":{depth:0, height:0.7, italic:0.24037, skew:0}}, "Size1-Regular":{"40":{depth:0.35001, height:0.85, italic:0, skew:0}, "41":{depth:0.35001, height:0.85, italic:0, skew:0}, "47":{depth:0.35001, height:0.85, italic:0, skew:0}, "91":{depth:0.35001, height:0.85, italic:0, skew:0}, "92":{depth:0.35001, height:0.85, italic:0, skew:0}, "93":{depth:0.35001, height:0.85, italic:0, skew:0}, "123":{depth:0.35001, height:0.85, italic:0, skew:0}, "125":{depth:0.35001, height:0.85, italic:0, skew:0}, "710":{depth:0, height:0.72222, italic:0, skew:0}, "732":{depth:0, height:0.72222, italic:0, skew:0}, "770":{depth:0, height:0.72222, italic:0, skew:0}, "771":{depth:0, height:0.72222, italic:0, skew:0}, "8214":{depth:-0.00099, height:0.601, italic:0, skew:0}, "8593":{depth:0.00001, height:0.6, italic:0, skew:0}, "8595":{depth:0.00001, height:0.6, italic:0, skew:0}, "8657":{depth:0.00001, height:0.6, italic:0, skew:0}, "8659":{depth:0.00001, height:0.6, italic:0, skew:0}, "8719":{depth:0.25001, height:0.75, italic:0, skew:0}, "8720":{depth:0.25001, height:0.75, italic:0, skew:0}, "8721":{depth:0.25001, height:0.75, italic:0, skew:0}, "8730":{depth:0.35001, height:0.85, italic:0, skew:0}, "8739":{depth:-0.00599, height:0.606, italic:0, skew:0}, "8741":{depth:-0.00599, height:0.606, italic:0, skew:0}, "8747":{depth:0.30612, height:0.805, italic:0.19445, skew:0}, "8748":{depth:0.306, height:0.805, italic:0.19445, skew:0}, "8749":{depth:0.306, height:0.805, italic:0.19445, skew:0}, "8750":{depth:0.30612, height:0.805, italic:0.19445, skew:0}, "8896":{depth:0.25001, height:0.75, italic:0, skew:0}, "8897":{depth:0.25001, height:0.75, italic:0, skew:0}, "8898":{depth:0.25001, height:0.75, italic:0, skew:0}, "8899":{depth:0.25001, height:0.75, italic:0, skew:0}, "8968":{depth:0.35001, height:0.85, italic:0, skew:0}, "8969":{depth:0.35001, height:0.85, italic:0, skew:0}, "8970":{depth:0.35001, height:0.85, italic:0, skew:0}, "8971":{depth:0.35001, height:0.85, italic:0, skew:0}, "9168":{depth:-0.00099, height:0.601, italic:0, skew:0}, "10216":{depth:0.35001, height:0.85, italic:0, skew:0}, "10217":{depth:0.35001, height:0.85, italic:0, skew:0}, "10752":{depth:0.25001, height:0.75, italic:0, skew:0}, "10753":{depth:0.25001, height:0.75, italic:0, skew:0}, "10754":{depth:0.25001, height:0.75, italic:0, skew:0}, "10756":{depth:0.25001, height:0.75, italic:0, skew:0}, "10758":{depth:0.25001, height:0.75, italic:0, skew:0}}, "Size2-Regular":{"40":{depth:0.65002, height:1.15, italic:0, skew:0}, "41":{depth:0.65002, height:1.15, italic:0, skew:0}, "47":{depth:0.65002, height:1.15, italic:0, skew:0}, "91":{depth:0.65002, height:1.15, italic:0, skew:0}, "92":{depth:0.65002, height:1.15, italic:0, skew:0}, "93":{depth:0.65002, height:1.15, italic:0, skew:0}, "123":{depth:0.65002, height:1.15, italic:0, skew:0}, "125":{depth:0.65002, height:1.15, italic:0, skew:0}, "710":{depth:0, height:0.75, italic:0, skew:0}, "732":{depth:0, height:0.75, italic:0, skew:0}, "770":{depth:0, height:0.75, italic:0, skew:0}, "771":{depth:0, height:0.75, italic:0, skew:0}, "8719":{depth:0.55001, height:1.05, italic:0, skew:0}, "8720":{depth:0.55001, height:1.05, italic:0, skew:0}, "8721":{depth:0.55001, height:1.05, italic:0, skew:0}, "8730":{depth:0.65002, height:1.15, italic:0, skew:0}, "8747":{depth:0.86225, height:1.36, italic:0.44445, skew:0}, "8748":{depth:0.862, height:1.36, italic:0.44445, skew:0}, "8749":{depth:0.862, height:1.36, italic:0.44445, skew:0}, "8750":{depth:0.86225, height:1.36, italic:0.44445, skew:0}, "8896":{depth:0.55001, height:1.05, italic:0, skew:0}, "8897":{depth:0.55001, height:1.05, italic:0, skew:0}, "8898":{depth:0.55001, height:1.05, italic:0, skew:0}, "8899":{depth:0.55001, height:1.05, italic:0, skew:0}, "8968":{depth:0.65002, height:1.15, italic:0, skew:0}, "8969":{depth:0.65002, height:1.15, italic:0, skew:0}, "8970":{depth:0.65002, height:1.15, italic:0, skew:0}, "8971":{depth:0.65002, height:1.15, italic:0, skew:0}, "10216":{depth:0.65002, height:1.15, italic:0, skew:0}, "10217":{depth:0.65002, height:1.15, italic:0, skew:0}, "10752":{depth:0.55001, height:1.05, italic:0, skew:0}, "10753":{depth:0.55001, height:1.05, italic:0, skew:0}, "10754":{depth:0.55001, height:1.05, italic:0, skew:0}, "10756":{depth:0.55001, height:1.05, italic:0, skew:0}, "10758":{depth:0.55001, height:1.05, italic:0, skew:0}}, "Size3-Regular":{"40":{depth:0.95003, height:1.45, italic:0, skew:0}, "41":{depth:0.95003, height:1.45, italic:0, skew:0}, "47":{depth:0.95003, height:1.45, italic:0, skew:0}, "91":{depth:0.95003, height:1.45, italic:0, skew:0}, "92":{depth:0.95003, height:1.45, italic:0, skew:0}, "93":{depth:0.95003, height:1.45, italic:0, skew:0}, "123":{depth:0.95003, height:1.45, italic:0, skew:0}, "125":{depth:0.95003, height:1.45, italic:0, skew:0}, "710":{depth:0, height:0.75, italic:0, skew:0}, "732":{depth:0, height:0.75, italic:0, skew:0}, "770":{depth:0, height:0.75, italic:0, skew:0}, "771":{depth:0, height:0.75, italic:0, skew:0}, "8730":{depth:0.95003, height:1.45, italic:0, skew:0}, "8968":{depth:0.95003, height:1.45, italic:0, skew:0}, "8969":{depth:0.95003, height:1.45, italic:0, skew:0}, "8970":{depth:0.95003, height:1.45, italic:0, skew:0}, "8971":{depth:0.95003, height:1.45, italic:0, skew:0}, "10216":{depth:0.95003, height:1.45, italic:0, skew:0}, "10217":{depth:0.95003, height:1.45, italic:0, skew:0}}, "Size4-Regular":{"40":{depth:1.25003, height:1.75, italic:0, skew:0}, "41":{depth:1.25003, height:1.75, italic:0, skew:0}, "47":{depth:1.25003, height:1.75, italic:0, skew:0}, "91":{depth:1.25003, height:1.75, italic:0, skew:0}, "92":{depth:1.25003, height:1.75, italic:0, skew:0}, "93":{depth:1.25003, height:1.75, italic:0, skew:0}, "123":{depth:1.25003, height:1.75, italic:0, skew:0}, "125":{depth:1.25003, height:1.75, italic:0, skew:0}, "710":{depth:0, height:0.825, italic:0, skew:0}, "732":{depth:0, height:0.825, italic:0, skew:0}, "770":{depth:0, height:0.825, italic:0, skew:0}, "771":{depth:0, height:0.825, italic:0, skew:0}, "8730":{depth:1.25003, height:1.75, italic:0, skew:0}, "8968":{depth:1.25003, height:1.75, italic:0, skew:0}, "8969":{depth:1.25003, height:1.75, italic:0, skew:0}, "8970":{depth:1.25003, height:1.75, italic:0, skew:0}, "8971":{depth:1.25003, height:1.75, italic:0, skew:0}, "9115":{depth:0.64502, height:1.155, italic:0, skew:0}, "9116":{depth:0.00001, height:0.6, italic:0, skew:0}, "9117":{depth:0.64502, height:1.155, italic:0, skew:0}, "9118":{depth:0.64502, height:1.155, italic:0, skew:0}, "9119":{depth:0.00001, height:0.6, italic:0, skew:0}, "9120":{depth:0.64502, height:1.155, italic:0, skew:0}, "9121":{depth:0.64502, height:1.155, italic:0, skew:0}, "9122":{depth:-0.00099, height:0.601, italic:0, skew:0}, "9123":{depth:0.64502, height:1.155, italic:0, skew:0}, "9124":{depth:0.64502, height:1.155, italic:0, skew:0}, "9125":{depth:-0.00099, height:0.601, italic:0, skew:0}, "9126":{depth:0.64502, height:1.155, italic:0, skew:0}, "9127":{depth:0.00001, height:0.9, italic:0, skew:0}, "9128":{depth:0.65002, height:1.15, italic:0, skew:0}, "9129":{depth:0.90001, height:0, italic:0, skew:0}, "9130":{depth:0, height:0.3, italic:0, skew:0}, "9131":{depth:0.00001, height:0.9, italic:0, skew:0}, "9132":{depth:0.65002, height:1.15, italic:0, skew:0}, "9133":{depth:0.90001, height:0, italic:0, skew:0}, "9143":{depth:0.88502, height:0.915, italic:0, skew:0}, "10216":{depth:1.25003, height:1.75, italic:0, skew:0}, "10217":{depth:1.25003, height:1.75, italic:0, skew:0}, "57344":{depth:-0.00499, height:0.605, italic:0, skew:0}, "57345":{depth:-0.00499, height:0.605, italic:0, skew:0}, "57680":{depth:0, height:0.12, italic:0, skew:0}, "57681":{depth:0, height:0.12, italic:0, skew:0}, "57682":{depth:0, height:0.12, italic:0, skew:0}, "57683":{depth:0, height:0.12, italic:0, skew:0}}, "Typewriter-Regular":{"33":{depth:0, height:0.61111, italic:0, skew:0}, "34":{depth:0, height:0.61111, italic:0, skew:0}, "35":{depth:0, height:0.61111, italic:0, skew:0}, "36":{depth:0.08333, height:0.69444, italic:0, skew:0}, "37":{depth:0.08333, height:0.69444, italic:0, skew:0}, "38":{depth:0, height:0.61111, italic:0, skew:0}, "39":{depth:0, height:0.61111, italic:0, skew:0}, "40":{depth:0.08333, height:0.69444, italic:0, skew:0}, "41":{depth:0.08333, height:0.69444, italic:0, skew:0}, "42":{depth:0, height:0.52083, italic:0, skew:0}, "43":{depth:-0.08056, height:0.53055, italic:0, skew:0}, "44":{depth:0.13889, height:0.125, italic:0, skew:0}, "45":{depth:-0.08056, height:0.53055, italic:0, skew:0}, "46":{depth:0, height:0.125, italic:0, skew:0}, "47":{depth:0.08333, height:0.69444, italic:0, skew:0}, "48":{depth:0, height:0.61111, italic:0, skew:0}, "49":{depth:0, height:0.61111, italic:0, skew:0}, "50":{depth:0, height:0.61111, italic:0, skew:0}, "51":{depth:0, height:0.61111, italic:0, skew:0}, "52":{depth:0, height:0.61111, italic:0, skew:0}, "53":{depth:0, height:0.61111, italic:0, skew:0}, "54":{depth:0, height:0.61111, italic:0, skew:0}, "55":{depth:0, height:0.61111, italic:0, skew:0}, "56":{depth:0, height:0.61111, italic:0, skew:0}, "57":{depth:0, height:0.61111, italic:0, skew:0}, "58":{depth:0, height:0.43056, italic:0, skew:0}, "59":{depth:0.13889, height:0.43056, italic:0, skew:0}, "60":{depth:-0.05556, height:0.55556, italic:0, skew:0}, "61":{depth:-0.19549, height:0.41562, italic:0, skew:0}, "62":{depth:-0.05556, height:0.55556, italic:0, skew:0}, "63":{depth:0, height:0.61111, italic:0, skew:0}, "64":{depth:0, height:0.61111, italic:0, skew:0}, "65":{depth:0, height:0.61111, italic:0, skew:0}, "66":{depth:0, height:0.61111, italic:0, skew:0}, "67":{depth:0, height:0.61111, italic:0, skew:0}, "68":{depth:0, height:0.61111, italic:0, skew:0}, "69":{depth:0, height:0.61111, italic:0, skew:0}, "70":{depth:0, height:0.61111, italic:0, skew:0}, "71":{depth:0, height:0.61111, italic:0, skew:0}, "72":{depth:0, height:0.61111, italic:0, skew:0}, "73":{depth:0, height:0.61111, italic:0, skew:0}, "74":{depth:0, height:0.61111, italic:0, skew:0}, "75":{depth:0, height:0.61111, italic:0, skew:0}, "76":{depth:0, height:0.61111, italic:0, skew:0}, "77":{depth:0, height:0.61111, italic:0, skew:0}, "78":{depth:0, height:0.61111, italic:0, skew:0}, "79":{depth:0, height:0.61111, italic:0, skew:0}, "80":{depth:0, height:0.61111, italic:0, skew:0}, "81":{depth:0.13889, height:0.61111, italic:0, skew:0}, "82":{depth:0, height:0.61111, italic:0, skew:0}, "83":{depth:0, height:0.61111, italic:0, skew:0}, "84":{depth:0, height:0.61111, italic:0, skew:0}, "85":{depth:0, height:0.61111, italic:0, skew:0}, "86":{depth:0, height:0.61111, italic:0, skew:0}, "87":{depth:0, height:0.61111, italic:0, skew:0}, "88":{depth:0, height:0.61111, italic:0, skew:0}, "89":{depth:0, height:0.61111, italic:0, skew:0}, "90":{depth:0, height:0.61111, italic:0, skew:0}, "91":{depth:0.08333, height:0.69444, italic:0, skew:0}, "92":{depth:0.08333, height:0.69444, italic:0, skew:0}, "93":{depth:0.08333, height:0.69444, italic:0, skew:0}, "94":{depth:0, height:0.61111, italic:0, skew:0}, "95":{depth:0.09514, height:0, italic:0, skew:0}, "96":{depth:0, height:0.61111, italic:0, skew:0}, "97":{depth:0, height:0.43056, italic:0, skew:0}, "98":{depth:0, height:0.61111, italic:0, skew:0}, "99":{depth:0, height:0.43056, italic:0, skew:0}, "100":{depth:0, height:0.61111, italic:0, skew:0}, "101":{depth:0, height:0.43056, italic:0, skew:0}, "102":{depth:0, height:0.61111, italic:0, skew:0}, "103":{depth:0.22222, height:0.43056, italic:0, skew:0}, "104":{depth:0, height:0.61111, italic:0, skew:0}, "105":{depth:0, height:0.61111, italic:0, skew:0}, "106":{depth:0.22222, height:0.61111, italic:0, skew:0}, "107":{depth:0, height:0.61111, italic:0, skew:0}, "108":{depth:0, height:0.61111, italic:0, skew:0}, "109":{depth:0, height:0.43056, italic:0, skew:0}, "110":{depth:0, height:0.43056, italic:0, skew:0}, "111":{depth:0, height:0.43056, italic:0, skew:0}, "112":{depth:0.22222, height:0.43056, italic:0, skew:0}, "113":{depth:0.22222, height:0.43056, italic:0, skew:0}, "114":{depth:0, height:0.43056, italic:0, skew:0}, "115":{depth:0, height:0.43056, italic:0, skew:0}, "116":{depth:0, height:0.55358, italic:0, skew:0}, "117":{depth:0, height:0.43056, italic:0, skew:0}, "118":{depth:0, height:0.43056, italic:0, skew:0}, "119":{depth:0, height:0.43056, italic:0, skew:0}, "120":{depth:0, height:0.43056, italic:0, skew:0}, "121":{depth:0.22222, height:0.43056, italic:0, skew:0}, "122":{depth:0, height:0.43056, italic:0, skew:0}, "123":{depth:0.08333, height:0.69444, italic:0, skew:0}, "124":{depth:0.08333, height:0.69444, italic:0, skew:0}, "125":{depth:0.08333, height:0.69444, italic:0, skew:0}, "126":{depth:0, height:0.61111, italic:0, skew:0}, "127":{depth:0, height:0.61111, italic:0, skew:0}, "305":{depth:0, height:0.43056, italic:0, skew:0}, "567":{depth:0.22222, height:0.43056, italic:0, skew:0}, "768":{depth:0, height:0.61111, italic:0, skew:0}, "769":{depth:0, height:0.61111, italic:0, skew:0}, "770":{depth:0, height:0.61111, italic:0, skew:0}, "771":{depth:0, height:0.61111, italic:0, skew:0}, "772":{depth:0, height:0.56555, italic:0, skew:0}, "774":{depth:0, height:0.61111, italic:0, skew:0}, "776":{depth:0, height:0.61111, italic:0, skew:0}, "778":{depth:0, height:0.61111, italic:0, skew:0}, "780":{depth:0, height:0.56597, italic:0, skew:0}, "915":{depth:0, height:0.61111, italic:0, skew:0}, "916":{depth:0, height:0.61111, italic:0, skew:0}, "920":{depth:0, height:0.61111, italic:0, skew:0}, "923":{depth:0, height:0.61111, italic:0, skew:0}, "926":{depth:0, height:0.61111, italic:0, skew:0}, "928":{depth:0, height:0.61111, italic:0, skew:0}, "931":{depth:0, height:0.61111, italic:0, skew:0}, "933":{depth:0, height:0.61111, italic:0, skew:0}, "934":{depth:0, height:0.61111, italic:0, skew:0}, "936":{depth:0, height:0.61111, italic:0, skew:0}, "937":{depth:0, height:0.61111, italic:0, skew:0}, "2018":{depth:0, height:0.61111, italic:0, skew:0}, "2019":{depth:0, height:0.61111, italic:0, skew:0}, "8242":{depth:0, height:0.61111, italic:0, skew:0}}};
 
-},{}],99:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
+"use strict";
+
 var utils = require("./utils");
 var ParseError = require("./ParseError");
 
@@ -11278,7 +9146,7 @@ var functions = {
     "\\sqrt": {
         numArgs: 1,
         numOptionalArgs: 1,
-        handler: function(func, index, body, positions) {
+        handler: function handler(func, index, body, positions) {
             return {
                 type: "sqrt",
                 body: body,
@@ -11292,7 +9160,7 @@ var functions = {
         numArgs: 1,
         argTypes: ["text"],
         greediness: 2,
-        handler: function(func, body) {
+        handler: function handler(func, body) {
             // Since the corresponding buildHTML/buildMathML function expects a
             // list of elements, we normalize for different kinds of arguments
             // TODO(emily): maybe this should be done somewhere else
@@ -11316,7 +9184,7 @@ var functions = {
         allowedInText: true,
         greediness: 3,
         argTypes: ["color", "original"],
-        handler: function(func, color, body) {
+        handler: function handler(func, color, body) {
             // Normalize the different kinds of bodies (see \text above)
             var inner;
             if (body.type === "ordgroup") {
@@ -11336,7 +9204,7 @@ var functions = {
     // An overline
     "\\overline": {
         numArgs: 1,
-        handler: function(func, body) {
+        handler: function handler(func, body) {
             return {
                 type: "overline",
                 body: body
@@ -11349,7 +9217,7 @@ var functions = {
         numArgs: 2,
         numOptionalArgs: 1,
         argTypes: ["size", "size", "size"],
-        handler: function(func, shift, width, height) {
+        handler: function handler(func, shift, width, height) {
             return {
                 type: "rule",
                 shift: shift && shift.value,
@@ -11362,7 +9230,7 @@ var functions = {
     // A KaTeX logo
     "\\KaTeX": {
         numArgs: 0,
-        handler: function(func) {
+        handler: function handler(func) {
             return {
                 type: "katex"
             };
@@ -11371,7 +9239,7 @@ var functions = {
 
     "\\phantom": {
         numArgs: 1,
-        handler: function(func, body) {
+        handler: function handler(func, body) {
             var inner;
             if (body.type === "ordgroup") {
                 inner = body.value;
@@ -11389,38 +9257,25 @@ var functions = {
 
 // Extra data needed for the delimiter handler down below
 var delimiterSizes = {
-    "\\bigl" : {type: "open",    size: 1},
-    "\\Bigl" : {type: "open",    size: 2},
-    "\\biggl": {type: "open",    size: 3},
-    "\\Biggl": {type: "open",    size: 4},
-    "\\bigr" : {type: "close",   size: 1},
-    "\\Bigr" : {type: "close",   size: 2},
-    "\\biggr": {type: "close",   size: 3},
-    "\\Biggr": {type: "close",   size: 4},
-    "\\bigm" : {type: "rel",     size: 1},
-    "\\Bigm" : {type: "rel",     size: 2},
-    "\\biggm": {type: "rel",     size: 3},
-    "\\Biggm": {type: "rel",     size: 4},
-    "\\big"  : {type: "textord", size: 1},
-    "\\Big"  : {type: "textord", size: 2},
-    "\\bigg" : {type: "textord", size: 3},
-    "\\Bigg" : {type: "textord", size: 4}
+    "\\bigl": { type: "open", size: 1 },
+    "\\Bigl": { type: "open", size: 2 },
+    "\\biggl": { type: "open", size: 3 },
+    "\\Biggl": { type: "open", size: 4 },
+    "\\bigr": { type: "close", size: 1 },
+    "\\Bigr": { type: "close", size: 2 },
+    "\\biggr": { type: "close", size: 3 },
+    "\\Biggr": { type: "close", size: 4 },
+    "\\bigm": { type: "rel", size: 1 },
+    "\\Bigm": { type: "rel", size: 2 },
+    "\\biggm": { type: "rel", size: 3 },
+    "\\Biggm": { type: "rel", size: 4 },
+    "\\big": { type: "textord", size: 1 },
+    "\\Big": { type: "textord", size: 2 },
+    "\\bigg": { type: "textord", size: 3 },
+    "\\Bigg": { type: "textord", size: 4 }
 };
 
-var delimiters = [
-    "(", ")", "[", "\\lbrack", "]", "\\rbrack",
-    "\\{", "\\lbrace", "\\}", "\\rbrace",
-    "\\lfloor", "\\rfloor", "\\lceil", "\\rceil",
-    "<", ">", "\\langle", "\\rangle",
-    "\\lvert", "\\rvert", "\\lVert", "\\rVert",
-    "\\lgroup", "\\rgroup", "\\lmoustache", "\\rmoustache",
-    "/", "\\backslash",
-    "|", "\\vert", "\\|", "\\Vert",
-    "\\uparrow", "\\Uparrow",
-    "\\downarrow", "\\Downarrow",
-    "\\updownarrow", "\\Updownarrow",
-    "."
-];
+var delimiters = ["(", ")", "[", "\\lbrack", "]", "\\rbrack", "\\{", "\\lbrace", "\\}", "\\rbrace", "\\lfloor", "\\rfloor", "\\lceil", "\\rceil", "<", ">", "\\langle", "\\rangle", "\\lvert", "\\rvert", "\\lVert", "\\rVert", "\\lgroup", "\\rgroup", "\\lmoustache", "\\rmoustache", "/", "\\backslash", "|", "\\vert", "\\|", "\\Vert", "\\uparrow", "\\Uparrow", "\\downarrow", "\\Downarrow", "\\updownarrow", "\\Updownarrow", "."];
 
 var fontAliases = {
     "\\Bbb": "\\mathbb",
@@ -11437,373 +9292,318 @@ var fontAliases = {
  *          table above
  */
 var duplicatedFunctions = [
-    // Single-argument color functions
-    {
-        funcs: [
-            "\\blue", "\\orange", "\\pink", "\\red",
-            "\\green", "\\gray", "\\purple",
-            "\\blueA", "\\blueB", "\\blueC", "\\blueD", "\\blueE",
-            "\\tealA", "\\tealB", "\\tealC", "\\tealD", "\\tealE",
-            "\\greenA", "\\greenB", "\\greenC", "\\greenD", "\\greenE",
-            "\\goldA", "\\goldB", "\\goldC", "\\goldD", "\\goldE",
-            "\\redA", "\\redB", "\\redC", "\\redD", "\\redE",
-            "\\maroonA", "\\maroonB", "\\maroonC", "\\maroonD", "\\maroonE",
-            "\\purpleA", "\\purpleB", "\\purpleC", "\\purpleD", "\\purpleE",
-            "\\mintA", "\\mintB", "\\mintC",
-            "\\grayA", "\\grayB", "\\grayC", "\\grayD", "\\grayE",
-            "\\grayF", "\\grayG", "\\grayH", "\\grayI",
-            "\\kaBlue", "\\kaGreen"
-        ],
-        data: {
-            numArgs: 1,
-            allowedInText: true,
-            greediness: 3,
-            handler: function(func, body) {
-                var atoms;
-                if (body.type === "ordgroup") {
-                    atoms = body.value;
-                } else {
-                    atoms = [body];
-                }
+// Single-argument color functions
+{
+    funcs: ["\\blue", "\\orange", "\\pink", "\\red", "\\green", "\\gray", "\\purple", "\\blueA", "\\blueB", "\\blueC", "\\blueD", "\\blueE", "\\tealA", "\\tealB", "\\tealC", "\\tealD", "\\tealE", "\\greenA", "\\greenB", "\\greenC", "\\greenD", "\\greenE", "\\goldA", "\\goldB", "\\goldC", "\\goldD", "\\goldE", "\\redA", "\\redB", "\\redC", "\\redD", "\\redE", "\\maroonA", "\\maroonB", "\\maroonC", "\\maroonD", "\\maroonE", "\\purpleA", "\\purpleB", "\\purpleC", "\\purpleD", "\\purpleE", "\\mintA", "\\mintB", "\\mintC", "\\grayA", "\\grayB", "\\grayC", "\\grayD", "\\grayE", "\\grayF", "\\grayG", "\\grayH", "\\grayI", "\\kaBlue", "\\kaGreen"],
+    data: {
+        numArgs: 1,
+        allowedInText: true,
+        greediness: 3,
+        handler: function handler(func, body) {
+            var atoms;
+            if (body.type === "ordgroup") {
+                atoms = body.value;
+            } else {
+                atoms = [body];
+            }
 
+            return {
+                type: "color",
+                color: "katex-" + func.slice(1),
+                value: atoms
+            };
+        }
+    }
+},
+
+// There are 2 flags for operators; whether they produce limits in
+// displaystyle, and whether they are symbols and should grow in
+// displaystyle. These four groups cover the four possible choices.
+
+// No limits, not symbols
+{
+    funcs: ["\\arcsin", "\\arccos", "\\arctan", "\\arg", "\\cos", "\\cosh", "\\cot", "\\coth", "\\csc", "\\deg", "\\dim", "\\exp", "\\hom", "\\ker", "\\lg", "\\ln", "\\log", "\\sec", "\\sin", "\\sinh", "\\tan", "\\tanh"],
+    data: {
+        numArgs: 0,
+        handler: function handler(func) {
+            return {
+                type: "op",
+                limits: false,
+                symbol: false,
+                body: func
+            };
+        }
+    }
+},
+
+// Limits, not symbols
+{
+    funcs: ["\\det", "\\gcd", "\\inf", "\\lim", "\\liminf", "\\limsup", "\\max", "\\min", "\\Pr", "\\sup"],
+    data: {
+        numArgs: 0,
+        handler: function handler(func) {
+            return {
+                type: "op",
+                limits: true,
+                symbol: false,
+                body: func
+            };
+        }
+    }
+},
+
+// No limits, symbols
+{
+    funcs: ["\\int", "\\iint", "\\iiint", "\\oint"],
+    data: {
+        numArgs: 0,
+        handler: function handler(func) {
+            return {
+                type: "op",
+                limits: false,
+                symbol: true,
+                body: func
+            };
+        }
+    }
+},
+
+// Limits, symbols
+{
+    funcs: ["\\coprod", "\\bigvee", "\\bigwedge", "\\biguplus", "\\bigcap", "\\bigcup", "\\intop", "\\prod", "\\sum", "\\bigotimes", "\\bigoplus", "\\bigodot", "\\bigsqcup", "\\smallint"],
+    data: {
+        numArgs: 0,
+        handler: function handler(func) {
+            return {
+                type: "op",
+                limits: true,
+                symbol: true,
+                body: func
+            };
+        }
+    }
+},
+
+// Fractions
+{
+    funcs: ["\\dfrac", "\\frac", "\\tfrac", "\\dbinom", "\\binom", "\\tbinom"],
+    data: {
+        numArgs: 2,
+        greediness: 2,
+        handler: function handler(func, numer, denom) {
+            var hasBarLine;
+            var leftDelim = null;
+            var rightDelim = null;
+            var size = "auto";
+
+            switch (func) {
+                case "\\dfrac":
+                case "\\frac":
+                case "\\tfrac":
+                    hasBarLine = true;
+                    break;
+                case "\\dbinom":
+                case "\\binom":
+                case "\\tbinom":
+                    hasBarLine = false;
+                    leftDelim = "(";
+                    rightDelim = ")";
+                    break;
+                default:
+                    throw new Error("Unrecognized genfrac command");
+            }
+
+            switch (func) {
+                case "\\dfrac":
+                case "\\dbinom":
+                    size = "display";
+                    break;
+                case "\\tfrac":
+                case "\\tbinom":
+                    size = "text";
+                    break;
+            }
+
+            return {
+                type: "genfrac",
+                numer: numer,
+                denom: denom,
+                hasBarLine: hasBarLine,
+                leftDelim: leftDelim,
+                rightDelim: rightDelim,
+                size: size
+            };
+        }
+    }
+},
+
+// Left and right overlap functions
+{
+    funcs: ["\\llap", "\\rlap"],
+    data: {
+        numArgs: 1,
+        allowedInText: true,
+        handler: function handler(func, body) {
+            return {
+                type: func.slice(1),
+                body: body
+            };
+        }
+    }
+},
+
+// Delimiter functions
+{
+    funcs: ["\\bigl", "\\Bigl", "\\biggl", "\\Biggl", "\\bigr", "\\Bigr", "\\biggr", "\\Biggr", "\\bigm", "\\Bigm", "\\biggm", "\\Biggm", "\\big", "\\Big", "\\bigg", "\\Bigg", "\\left", "\\right"],
+    data: {
+        numArgs: 1,
+        handler: function handler(func, delim, positions) {
+            if (!utils.contains(delimiters, delim.value)) {
+                throw new ParseError("Invalid delimiter: '" + delim.value + "' after '" + func + "'", this.lexer, positions[1]);
+            }
+
+            // \left and \right are caught somewhere in Parser.js, which is
+            // why this data doesn't match what is in buildHTML.
+            if (func === "\\left" || func === "\\right") {
                 return {
-                    type: "color",
-                    color: "katex-" + func.slice(1),
-                    value: atoms
+                    type: "leftright",
+                    value: delim.value
                 };
-            }
-        }
-    },
-
-    // There are 2 flags for operators; whether they produce limits in
-    // displaystyle, and whether they are symbols and should grow in
-    // displaystyle. These four groups cover the four possible choices.
-
-    // No limits, not symbols
-    {
-        funcs: [
-            "\\arcsin", "\\arccos", "\\arctan", "\\arg", "\\cos", "\\cosh",
-            "\\cot", "\\coth", "\\csc", "\\deg", "\\dim", "\\exp", "\\hom",
-            "\\ker", "\\lg", "\\ln", "\\log", "\\sec", "\\sin", "\\sinh",
-            "\\tan","\\tanh"
-        ],
-        data: {
-            numArgs: 0,
-            handler: function(func) {
+            } else {
                 return {
-                    type: "op",
-                    limits: false,
-                    symbol: false,
-                    body: func
-                };
-            }
-        }
-    },
-
-    // Limits, not symbols
-    {
-        funcs: [
-            "\\det", "\\gcd", "\\inf", "\\lim", "\\liminf", "\\limsup", "\\max",
-            "\\min", "\\Pr", "\\sup"
-        ],
-        data: {
-            numArgs: 0,
-            handler: function(func) {
-                return {
-                    type: "op",
-                    limits: true,
-                    symbol: false,
-                    body: func
-                };
-            }
-        }
-    },
-
-    // No limits, symbols
-    {
-        funcs: [
-            "\\int", "\\iint", "\\iiint", "\\oint"
-        ],
-        data: {
-            numArgs: 0,
-            handler: function(func) {
-                return {
-                    type: "op",
-                    limits: false,
-                    symbol: true,
-                    body: func
-                };
-            }
-        }
-    },
-
-    // Limits, symbols
-    {
-        funcs: [
-            "\\coprod", "\\bigvee", "\\bigwedge", "\\biguplus", "\\bigcap",
-            "\\bigcup", "\\intop", "\\prod", "\\sum", "\\bigotimes",
-            "\\bigoplus", "\\bigodot", "\\bigsqcup", "\\smallint"
-        ],
-        data: {
-            numArgs: 0,
-            handler: function(func) {
-                return {
-                    type: "op",
-                    limits: true,
-                    symbol: true,
-                    body: func
-                };
-            }
-        }
-    },
-
-    // Fractions
-    {
-        funcs: [
-            "\\dfrac", "\\frac", "\\tfrac",
-            "\\dbinom", "\\binom", "\\tbinom"
-        ],
-        data: {
-            numArgs: 2,
-            greediness: 2,
-            handler: function(func, numer, denom) {
-                var hasBarLine;
-                var leftDelim = null;
-                var rightDelim = null;
-                var size = "auto";
-
-                switch (func) {
-                    case "\\dfrac":
-                    case "\\frac":
-                    case "\\tfrac":
-                        hasBarLine = true;
-                        break;
-                    case "\\dbinom":
-                    case "\\binom":
-                    case "\\tbinom":
-                        hasBarLine = false;
-                        leftDelim = "(";
-                        rightDelim = ")";
-                        break;
-                    default:
-                        throw new Error("Unrecognized genfrac command");
-                }
-
-                switch (func) {
-                    case "\\dfrac":
-                    case "\\dbinom":
-                        size = "display";
-                        break;
-                    case "\\tfrac":
-                    case "\\tbinom":
-                        size = "text";
-                        break;
-                }
-
-                return {
-                    type: "genfrac",
-                    numer: numer,
-                    denom: denom,
-                    hasBarLine: hasBarLine,
-                    leftDelim: leftDelim,
-                    rightDelim: rightDelim,
-                    size: size
-                };
-            }
-        }
-    },
-
-    // Left and right overlap functions
-    {
-        funcs: ["\\llap", "\\rlap"],
-        data: {
-            numArgs: 1,
-            allowedInText: true,
-            handler: function(func, body) {
-                return {
-                    type: func.slice(1),
-                    body: body
-                };
-            }
-        }
-    },
-
-    // Delimiter functions
-    {
-        funcs: [
-            "\\bigl", "\\Bigl", "\\biggl", "\\Biggl",
-            "\\bigr", "\\Bigr", "\\biggr", "\\Biggr",
-            "\\bigm", "\\Bigm", "\\biggm", "\\Biggm",
-            "\\big",  "\\Big",  "\\bigg",  "\\Bigg",
-            "\\left", "\\right"
-        ],
-        data: {
-            numArgs: 1,
-            handler: function(func, delim, positions) {
-                if (!utils.contains(delimiters, delim.value)) {
-                    throw new ParseError(
-                        "Invalid delimiter: '" + delim.value + "' after '" +
-                            func + "'",
-                        this.lexer, positions[1]);
-                }
-
-                // \left and \right are caught somewhere in Parser.js, which is
-                // why this data doesn't match what is in buildHTML.
-                if (func === "\\left" || func === "\\right") {
-                    return {
-                        type: "leftright",
-                        value: delim.value
-                    };
-                } else {
-                    return {
-                        type: "delimsizing",
-                        size: delimiterSizes[func].size,
-                        delimType: delimiterSizes[func].type,
-                        value: delim.value
-                    };
-                }
-            }
-        }
-    },
-
-    // Sizing functions (handled in Parser.js explicitly, hence no handler)
-    {
-        funcs: [
-            "\\tiny", "\\scriptsize", "\\footnotesize", "\\small",
-            "\\normalsize", "\\large", "\\Large", "\\LARGE", "\\huge", "\\Huge"
-        ],
-        data: {
-            numArgs: 0
-        }
-    },
-
-    // Style changing functions (handled in Parser.js explicitly, hence no
-    // handler)
-    {
-        funcs: [
-            "\\displaystyle", "\\textstyle", "\\scriptstyle",
-            "\\scriptscriptstyle"
-        ],
-        data: {
-            numArgs: 0
-        }
-    },
-
-    {
-        funcs: [
-            // styles
-            "\\mathrm", "\\mathit", "\\mathbf",
-
-            // families
-            "\\mathbb", "\\mathcal", "\\mathfrak", "\\mathscr", "\\mathsf",
-            "\\mathtt",
-
-            // aliases
-            "\\Bbb", "\\bold", "\\frak"
-        ],
-        data: {
-            numArgs: 1,
-            handler: function (func, body) {
-                if (func in fontAliases) {
-                    func = fontAliases[func];
-                }
-                return {
-                    type: "font",
-                    font: func.slice(1),
-                    body: body
-                };
-            }
-        }
-    },
-
-    // Accents
-    {
-        funcs: [
-            "\\acute", "\\grave", "\\ddot", "\\tilde", "\\bar", "\\breve",
-            "\\check", "\\hat", "\\vec", "\\dot"
-            // We don't support expanding accents yet
-            // "\\widetilde", "\\widehat"
-        ],
-        data: {
-            numArgs: 1,
-            handler: function(func, base) {
-                return {
-                    type: "accent",
-                    accent: func,
-                    base: base
-                };
-            }
-        }
-    },
-
-    // Infix generalized fractions
-    {
-        funcs: ["\\over", "\\choose"],
-        data: {
-            numArgs: 0,
-            handler: function (func) {
-                var replaceWith;
-                switch (func) {
-                    case "\\over":
-                        replaceWith = "\\frac";
-                        break;
-                    case "\\choose":
-                        replaceWith = "\\binom";
-                        break;
-                    default:
-                        throw new Error("Unrecognized infix genfrac command");
-                }
-                return {
-                    type: "infix",
-                    replaceWith: replaceWith
-                };
-            }
-        }
-    },
-
-    // Row breaks for aligned data
-    {
-        funcs: ["\\\\", "\\cr"],
-        data: {
-            numArgs: 0,
-            numOptionalArgs: 1,
-            argTypes: ["size"],
-            handler: function(func, size) {
-                return {
-                    type: "cr",
-                    size: size
-                };
-            }
-        }
-    },
-
-    // Environment delimiters
-    {
-        funcs: ["\\begin", "\\end"],
-        data: {
-            numArgs: 1,
-            argTypes: ["text"],
-            handler: function(func, nameGroup, positions) {
-                if (nameGroup.type !== "ordgroup") {
-                    throw new ParseError(
-                        "Invalid environment name",
-                        this.lexer, positions[1]);
-                }
-                var name = "";
-                for (var i = 0; i < nameGroup.value.length; ++i) {
-                    name += nameGroup.value[i].value;
-                }
-                return {
-                    type: "environment",
-                    name: name,
-                    namepos: positions[1]
+                    type: "delimsizing",
+                    size: delimiterSizes[func].size,
+                    delimType: delimiterSizes[func].type,
+                    value: delim.value
                 };
             }
         }
     }
-];
+},
 
-var addFuncsWithData = function(funcs, data) {
+// Sizing functions (handled in Parser.js explicitly, hence no handler)
+{
+    funcs: ["\\tiny", "\\scriptsize", "\\footnotesize", "\\small", "\\normalsize", "\\large", "\\Large", "\\LARGE", "\\huge", "\\Huge"],
+    data: {
+        numArgs: 0
+    }
+},
+
+// Style changing functions (handled in Parser.js explicitly, hence no
+// handler)
+{
+    funcs: ["\\displaystyle", "\\textstyle", "\\scriptstyle", "\\scriptscriptstyle"],
+    data: {
+        numArgs: 0
+    }
+}, {
+    funcs: [
+    // styles
+    "\\mathrm", "\\mathit", "\\mathbf",
+
+    // families
+    "\\mathbb", "\\mathcal", "\\mathfrak", "\\mathscr", "\\mathsf", "\\mathtt",
+
+    // aliases
+    "\\Bbb", "\\bold", "\\frak"],
+    data: {
+        numArgs: 1,
+        handler: function handler(func, body) {
+            if (func in fontAliases) {
+                func = fontAliases[func];
+            }
+            return {
+                type: "font",
+                font: func.slice(1),
+                body: body
+            };
+        }
+    }
+},
+
+// Accents
+{
+    funcs: ["\\acute", "\\grave", "\\ddot", "\\tilde", "\\bar", "\\breve", "\\check", "\\hat", "\\vec", "\\dot"
+    // We don't support expanding accents yet
+    // "\\widetilde", "\\widehat"
+    ],
+    data: {
+        numArgs: 1,
+        handler: function handler(func, base) {
+            return {
+                type: "accent",
+                accent: func,
+                base: base
+            };
+        }
+    }
+},
+
+// Infix generalized fractions
+{
+    funcs: ["\\over", "\\choose"],
+    data: {
+        numArgs: 0,
+        handler: function handler(func) {
+            var replaceWith;
+            switch (func) {
+                case "\\over":
+                    replaceWith = "\\frac";
+                    break;
+                case "\\choose":
+                    replaceWith = "\\binom";
+                    break;
+                default:
+                    throw new Error("Unrecognized infix genfrac command");
+            }
+            return {
+                type: "infix",
+                replaceWith: replaceWith
+            };
+        }
+    }
+},
+
+// Row breaks for aligned data
+{
+    funcs: ["\\\\", "\\cr"],
+    data: {
+        numArgs: 0,
+        numOptionalArgs: 1,
+        argTypes: ["size"],
+        handler: function handler(func, size) {
+            return {
+                type: "cr",
+                size: size
+            };
+        }
+    }
+},
+
+// Environment delimiters
+{
+    funcs: ["\\begin", "\\end"],
+    data: {
+        numArgs: 1,
+        argTypes: ["text"],
+        handler: function handler(func, nameGroup, positions) {
+            if (nameGroup.type !== "ordgroup") {
+                throw new ParseError("Invalid environment name", this.lexer, positions[1]);
+            }
+            var name = "";
+            for (var i = 0; i < nameGroup.value.length; ++i) {
+                name += nameGroup.value[i].value;
+            }
+            return {
+                type: "environment",
+                name: name,
+                namepos: positions[1]
+            };
+        }
+    }
+}];
+
+var addFuncsWithData = function addFuncsWithData(funcs, data) {
     for (var i = 0; i < funcs.length; i++) {
         functions[funcs[i]] = data;
     }
@@ -11822,10 +9622,9 @@ for (var f in functions) {
         functions[f] = {
             numArgs: func.numArgs,
             argTypes: func.argTypes,
-            greediness: (func.greediness === undefined) ? 1 : func.greediness,
+            greediness: func.greediness === undefined ? 1 : func.greediness,
             allowedInText: func.allowedInText ? func.allowedInText : false,
-            numOptionalArgs: (func.numOptionalArgs === undefined) ? 0 :
-                func.numOptionalArgs,
+            numOptionalArgs: func.numOptionalArgs === undefined ? 0 : func.numOptionalArgs,
             handler: func.handler
         };
     }
@@ -11835,7 +9634,7 @@ module.exports = {
     funcs: functions
 };
 
-},{"./ParseError":86,"./utils":104}],100:[function(require,module,exports){
+},{"./ParseError":87,"./utils":105}],101:[function(require,module,exports){
 /**
  * These objects store data about MathML nodes. This is the MathML equivalent
  * of the types in domTree.js. Since MathML handles its own rendering, and
@@ -11845,6 +9644,8 @@ module.exports = {
  * The `toNode` and `toMarkup` functions work simlarly to how they do in
  * domTree.js, creating namespaced DOM nodes and HTML text markup respectively.
  */
+
+"use strict";
 
 var utils = require("./utils");
 
@@ -11863,16 +9664,15 @@ function MathNode(type, children) {
  * Sets an attribute on a MathML node. MathML depends on attributes to convey a
  * semantic content, so this is used heavily.
  */
-MathNode.prototype.setAttribute = function(name, value) {
+MathNode.prototype.setAttribute = function (name, value) {
     this.attributes[name] = value;
 };
 
 /**
  * Converts the math node into a MathML-namespaced DOM element.
  */
-MathNode.prototype.toNode = function() {
-    var node = document.createElementNS(
-        "http://www.w3.org/1998/Math/MathML", this.type);
+MathNode.prototype.toNode = function () {
+    var node = document.createElementNS("http://www.w3.org/1998/Math/MathML", this.type);
 
     for (var attr in this.attributes) {
         if (Object.prototype.hasOwnProperty.call(this.attributes, attr)) {
@@ -11890,7 +9690,7 @@ MathNode.prototype.toNode = function() {
 /**
  * Converts the math node into an HTML markup string.
  */
-MathNode.prototype.toMarkup = function() {
+MathNode.prototype.toMarkup = function () {
     var markup = "<" + this.type;
 
     // Add the attributes
@@ -11923,14 +9723,14 @@ function TextNode(text) {
 /**
  * Converts the text node into a DOM text node.
  */
-TextNode.prototype.toNode = function() {
+TextNode.prototype.toNode = function () {
     return document.createTextNode(this.text);
 };
 
 /**
  * Converts the text node into HTML markup (which is just the text itself).
  */
-TextNode.prototype.toMarkup = function() {
+TextNode.prototype.toMarkup = function () {
     return utils.escape(this.text);
 };
 
@@ -11939,10 +9739,12 @@ module.exports = {
     TextNode: TextNode
 };
 
-},{"./utils":104}],101:[function(require,module,exports){
+},{"./utils":105}],102:[function(require,module,exports){
 /**
  * The resulting parse tree nodes of the parse tree.
  */
+"use strict";
+
 function ParseNode(type, value, mode) {
     this.type = type;
     this.value = value;
@@ -11963,27 +9765,28 @@ module.exports = {
     ParseResult: ParseResult
 };
 
-
-},{}],102:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 /**
  * Provides a single function for parsing an expression using a Parser
  * TODO(emily): Remove this
  */
+
+"use strict";
 
 var Parser = require("./Parser");
 
 /**
  * Parses an expression using a Parser, then returns the parsed result.
  */
-var parseTree = function(toParse, settings) {
-    var parser = new Parser(toParse, settings);
+var parseTree = function parseTree(toParse, settings) {
+  var parser = new Parser(toParse, settings);
 
-    return parser.parse();
+  return parser.parse();
 };
 
 module.exports = parseTree;
 
-},{"./Parser":87}],103:[function(require,module,exports){
+},{"./Parser":88}],104:[function(require,module,exports){
 /**
  * This file holds a list of all no-argument functions and single-character
  * symbols (like 'a' or ';').
@@ -12002,1569 +9805,1571 @@ module.exports = parseTree;
  * accepted in (e.g. "math" or "text").
  */
 
+"use strict";
+
 var symbols = {
-    "math": {
+    math: {
         // Relation Symbols
         "\\equiv": {
             font: "main",
             group: "rel",
-            replace: "\u2261"
+            replace: "≡"
         },
         "\\prec": {
             font: "main",
             group: "rel",
-            replace: "\u227a"
+            replace: "≺"
         },
         "\\succ": {
             font: "main",
             group: "rel",
-            replace: "\u227b"
+            replace: "≻"
         },
         "\\sim": {
             font: "main",
             group: "rel",
-            replace: "\u223c"
+            replace: "∼"
         },
         "\\perp": {
             font: "main",
             group: "rel",
-            replace: "\u22a5"
+            replace: "⊥"
         },
         "\\preceq": {
             font: "main",
             group: "rel",
-            replace: "\u2aaf"
+            replace: "⪯"
         },
         "\\succeq": {
             font: "main",
             group: "rel",
-            replace: "\u2ab0"
+            replace: "⪰"
         },
         "\\simeq": {
             font: "main",
             group: "rel",
-            replace: "\u2243"
+            replace: "≃"
         },
         "\\mid": {
             font: "main",
             group: "rel",
-            replace: "\u2223"
+            replace: "∣"
         },
         "\\ll": {
             font: "main",
             group: "rel",
-            replace: "\u226a"
+            replace: "≪"
         },
         "\\gg": {
             font: "main",
             group: "rel",
-            replace: "\u226b"
+            replace: "≫"
         },
         "\\asymp": {
             font: "main",
             group: "rel",
-            replace: "\u224d"
+            replace: "≍"
         },
         "\\parallel": {
             font: "main",
             group: "rel",
-            replace: "\u2225"
+            replace: "∥"
         },
         "\\bowtie": {
             font: "main",
             group: "rel",
-            replace: "\u22c8"
+            replace: "⋈"
         },
         "\\smile": {
             font: "main",
             group: "rel",
-            replace: "\u2323"
+            replace: "⌣"
         },
         "\\sqsubseteq": {
             font: "main",
             group: "rel",
-            replace: "\u2291"
+            replace: "⊑"
         },
         "\\sqsupseteq": {
             font: "main",
             group: "rel",
-            replace: "\u2292"
+            replace: "⊒"
         },
         "\\doteq": {
             font: "main",
             group: "rel",
-            replace: "\u2250"
+            replace: "≐"
         },
         "\\frown": {
             font: "main",
             group: "rel",
-            replace: "\u2322"
+            replace: "⌢"
         },
         "\\ni": {
             font: "main",
             group: "rel",
-            replace: "\u220b"
+            replace: "∋"
         },
         "\\propto": {
             font: "main",
             group: "rel",
-            replace: "\u221d"
+            replace: "∝"
         },
         "\\vdash": {
             font: "main",
             group: "rel",
-            replace: "\u22a2"
+            replace: "⊢"
         },
         "\\dashv": {
             font: "main",
             group: "rel",
-            replace: "\u22a3"
+            replace: "⊣"
         },
         "\\owns": {
             font: "main",
             group: "rel",
-            replace: "\u220b"
+            replace: "∋"
         },
 
         // Punctuation
         "\\ldotp": {
             font: "main",
             group: "punct",
-            replace: "\u002e"
+            replace: "."
         },
         "\\cdotp": {
             font: "main",
             group: "punct",
-            replace: "\u22c5"
+            replace: "⋅"
         },
 
         // Misc Symbols
         "\\#": {
-          font: "main",
-          group: "textord",
-          replace: "\u0023"
+            font: "main",
+            group: "textord",
+            replace: "#"
         },
         "\\&": {
-          font: "main",
-          group: "textord",
-          replace: "\u0026"
+            font: "main",
+            group: "textord",
+            replace: "&"
         },
         "\\aleph": {
             font: "main",
             group: "textord",
-            replace: "\u2135"
+            replace: "ℵ"
         },
         "\\forall": {
             font: "main",
             group: "textord",
-            replace: "\u2200"
+            replace: "∀"
         },
         "\\hbar": {
             font: "main",
             group: "textord",
-            replace: "\u210f"
+            replace: "ℏ"
         },
         "\\exists": {
             font: "main",
             group: "textord",
-            replace: "\u2203"
+            replace: "∃"
         },
         "\\nabla": {
             font: "main",
             group: "textord",
-            replace: "\u2207"
+            replace: "∇"
         },
         "\\flat": {
             font: "main",
             group: "textord",
-            replace: "\u266d"
+            replace: "♭"
         },
         "\\ell": {
             font: "main",
             group: "textord",
-            replace: "\u2113"
+            replace: "ℓ"
         },
         "\\natural": {
             font: "main",
             group: "textord",
-            replace: "\u266e"
+            replace: "♮"
         },
         "\\clubsuit": {
             font: "main",
             group: "textord",
-            replace: "\u2663"
+            replace: "♣"
         },
         "\\wp": {
             font: "main",
             group: "textord",
-            replace: "\u2118"
+            replace: "℘"
         },
         "\\sharp": {
             font: "main",
             group: "textord",
-            replace: "\u266f"
+            replace: "♯"
         },
         "\\diamondsuit": {
             font: "main",
             group: "textord",
-            replace: "\u2662"
+            replace: "♢"
         },
         "\\Re": {
             font: "main",
             group: "textord",
-            replace: "\u211c"
+            replace: "ℜ"
         },
         "\\heartsuit": {
             font: "main",
             group: "textord",
-            replace: "\u2661"
+            replace: "♡"
         },
         "\\Im": {
             font: "main",
             group: "textord",
-            replace: "\u2111"
+            replace: "ℑ"
         },
         "\\spadesuit": {
             font: "main",
             group: "textord",
-            replace: "\u2660"
+            replace: "♠"
         },
 
         // Math and Text
         "\\dag": {
             font: "main",
             group: "textord",
-            replace: "\u2020"
+            replace: "†"
         },
         "\\ddag": {
             font: "main",
             group: "textord",
-            replace: "\u2021"
+            replace: "‡"
         },
 
         // Large Delimiters
         "\\rmoustache": {
             font: "main",
             group: "close",
-            replace: "\u23b1"
+            replace: "⎱"
         },
         "\\lmoustache": {
             font: "main",
             group: "open",
-            replace: "\u23b0"
+            replace: "⎰"
         },
         "\\rgroup": {
             font: "main",
             group: "close",
-            replace: "\u27ef"
+            replace: "⟯"
         },
         "\\lgroup": {
             font: "main",
             group: "open",
-            replace: "\u27ee"
+            replace: "⟮"
         },
 
         // Binary Operators
         "\\mp": {
             font: "main",
             group: "bin",
-            replace: "\u2213"
+            replace: "∓"
         },
         "\\ominus": {
             font: "main",
             group: "bin",
-            replace: "\u2296"
+            replace: "⊖"
         },
         "\\uplus": {
             font: "main",
             group: "bin",
-            replace: "\u228e"
+            replace: "⊎"
         },
         "\\sqcap": {
             font: "main",
             group: "bin",
-            replace: "\u2293"
+            replace: "⊓"
         },
         "\\ast": {
             font: "main",
             group: "bin",
-            replace: "\u2217"
+            replace: "∗"
         },
         "\\sqcup": {
             font: "main",
             group: "bin",
-            replace: "\u2294"
+            replace: "⊔"
         },
         "\\bigcirc": {
             font: "main",
             group: "bin",
-            replace: "\u25ef"
+            replace: "◯"
         },
         "\\bullet": {
             font: "main",
             group: "bin",
-            replace: "\u2219"
+            replace: "∙"
         },
         "\\ddagger": {
             font: "main",
             group: "bin",
-            replace: "\u2021"
+            replace: "‡"
         },
         "\\wr": {
             font: "main",
             group: "bin",
-            replace: "\u2240"
+            replace: "≀"
         },
         "\\amalg": {
             font: "main",
             group: "bin",
-            replace: "\u2a3f"
+            replace: "⨿"
         },
 
         // Arrow Symbols
         "\\longleftarrow": {
             font: "main",
             group: "rel",
-            replace: "\u27f5"
+            replace: "⟵"
         },
         "\\Leftarrow": {
             font: "main",
             group: "rel",
-            replace: "\u21d0"
+            replace: "⇐"
         },
         "\\Longleftarrow": {
             font: "main",
             group: "rel",
-            replace: "\u27f8"
+            replace: "⟸"
         },
         "\\longrightarrow": {
             font: "main",
             group: "rel",
-            replace: "\u27f6"
+            replace: "⟶"
         },
         "\\Rightarrow": {
             font: "main",
             group: "rel",
-            replace: "\u21d2"
+            replace: "⇒"
         },
         "\\Longrightarrow": {
             font: "main",
             group: "rel",
-            replace: "\u27f9"
+            replace: "⟹"
         },
         "\\leftrightarrow": {
             font: "main",
             group: "rel",
-            replace: "\u2194"
+            replace: "↔"
         },
         "\\longleftrightarrow": {
             font: "main",
             group: "rel",
-            replace: "\u27f7"
+            replace: "⟷"
         },
         "\\Leftrightarrow": {
             font: "main",
             group: "rel",
-            replace: "\u21d4"
+            replace: "⇔"
         },
         "\\Longleftrightarrow": {
             font: "main",
             group: "rel",
-            replace: "\u27fa"
+            replace: "⟺"
         },
         "\\mapsto": {
             font: "main",
             group: "rel",
-            replace: "\u21a6"
+            replace: "↦"
         },
         "\\longmapsto": {
             font: "main",
             group: "rel",
-            replace: "\u27fc"
+            replace: "⟼"
         },
         "\\nearrow": {
             font: "main",
             group: "rel",
-            replace: "\u2197"
+            replace: "↗"
         },
         "\\hookleftarrow": {
             font: "main",
             group: "rel",
-            replace: "\u21a9"
+            replace: "↩"
         },
         "\\hookrightarrow": {
             font: "main",
             group: "rel",
-            replace: "\u21aa"
+            replace: "↪"
         },
         "\\searrow": {
             font: "main",
             group: "rel",
-            replace: "\u2198"
+            replace: "↘"
         },
         "\\leftharpoonup": {
             font: "main",
             group: "rel",
-            replace: "\u21bc"
+            replace: "↼"
         },
         "\\rightharpoonup": {
             font: "main",
             group: "rel",
-            replace: "\u21c0"
+            replace: "⇀"
         },
         "\\swarrow": {
             font: "main",
             group: "rel",
-            replace: "\u2199"
+            replace: "↙"
         },
         "\\leftharpoondown": {
             font: "main",
             group: "rel",
-            replace: "\u21bd"
+            replace: "↽"
         },
         "\\rightharpoondown": {
             font: "main",
             group: "rel",
-            replace: "\u21c1"
+            replace: "⇁"
         },
         "\\nwarrow": {
             font: "main",
             group: "rel",
-            replace: "\u2196"
+            replace: "↖"
         },
         "\\rightleftharpoons": {
             font: "main",
             group: "rel",
-            replace: "\u21cc"
+            replace: "⇌"
         },
 
         // AMS Negated Binary Relations
         "\\nless": {
             font: "ams",
             group: "rel",
-            replace: "\u226e"
+            replace: "≮"
         },
         "\\nleqslant": {
             font: "ams",
             group: "rel",
-            replace: "\ue010"
+            replace: ""
         },
         "\\nleqq": {
             font: "ams",
             group: "rel",
-            replace: "\ue011"
+            replace: ""
         },
         "\\lneq": {
             font: "ams",
             group: "rel",
-            replace: "\u2a87"
+            replace: "⪇"
         },
         "\\lneqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2268"
+            replace: "≨"
         },
         "\\lvertneqq": {
             font: "ams",
             group: "rel",
-            replace: "\ue00c"
+            replace: ""
         },
         "\\lnsim": {
             font: "ams",
             group: "rel",
-            replace: "\u22e6"
+            replace: "⋦"
         },
         "\\lnapprox": {
             font: "ams",
             group: "rel",
-            replace: "\u2a89"
+            replace: "⪉"
         },
         "\\nprec": {
             font: "ams",
             group: "rel",
-            replace: "\u2280"
+            replace: "⊀"
         },
         "\\npreceq": {
             font: "ams",
             group: "rel",
-            replace: "\u22e0"
+            replace: "⋠"
         },
         "\\precnsim": {
             font: "ams",
             group: "rel",
-            replace: "\u22e8"
+            replace: "⋨"
         },
         "\\precnapprox": {
             font: "ams",
             group: "rel",
-            replace: "\u2ab9"
+            replace: "⪹"
         },
         "\\nsim": {
             font: "ams",
             group: "rel",
-            replace: "\u2241"
+            replace: "≁"
         },
         "\\nshortmid": {
             font: "ams",
             group: "rel",
-            replace: "\ue006"
+            replace: ""
         },
         "\\nmid": {
             font: "ams",
             group: "rel",
-            replace: "\u2224"
+            replace: "∤"
         },
         "\\nvdash": {
             font: "ams",
             group: "rel",
-            replace: "\u22ac"
+            replace: "⊬"
         },
         "\\nvDash": {
             font: "ams",
             group: "rel",
-            replace: "\u22ad"
+            replace: "⊭"
         },
         "\\ntriangleleft": {
             font: "ams",
             group: "rel",
-            replace: "\u22ea"
+            replace: "⋪"
         },
         "\\ntrianglelefteq": {
             font: "ams",
             group: "rel",
-            replace: "\u22ec"
+            replace: "⋬"
         },
         "\\subsetneq": {
             font: "ams",
             group: "rel",
-            replace: "\u228a"
+            replace: "⊊"
         },
         "\\varsubsetneq": {
             font: "ams",
             group: "rel",
-            replace: "\ue01a"
+            replace: ""
         },
         "\\subsetneqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2acb"
+            replace: "⫋"
         },
         "\\varsubsetneqq": {
             font: "ams",
             group: "rel",
-            replace: "\ue017"
+            replace: ""
         },
         "\\ngtr": {
             font: "ams",
             group: "rel",
-            replace: "\u226f"
+            replace: "≯"
         },
         "\\ngeqslant": {
             font: "ams",
             group: "rel",
-            replace: "\ue00f"
+            replace: ""
         },
         "\\ngeqq": {
             font: "ams",
             group: "rel",
-            replace: "\ue00e"
+            replace: ""
         },
         "\\gneq": {
             font: "ams",
             group: "rel",
-            replace: "\u2a88"
+            replace: "⪈"
         },
         "\\gneqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2269"
+            replace: "≩"
         },
         "\\gvertneqq": {
             font: "ams",
             group: "rel",
-            replace: "\ue00d"
+            replace: ""
         },
         "\\gnsim": {
             font: "ams",
             group: "rel",
-            replace: "\u22e7"
+            replace: "⋧"
         },
         "\\gnapprox": {
             font: "ams",
             group: "rel",
-            replace: "\u2a8a"
+            replace: "⪊"
         },
         "\\nsucc": {
             font: "ams",
             group: "rel",
-            replace: "\u2281"
+            replace: "⊁"
         },
         "\\nsucceq": {
             font: "ams",
             group: "rel",
-            replace: "\u22e1"
+            replace: "⋡"
         },
         "\\succnsim": {
             font: "ams",
             group: "rel",
-            replace: "\u22e9"
+            replace: "⋩"
         },
         "\\succnapprox": {
             font: "ams",
             group: "rel",
-            replace: "\u2aba"
+            replace: "⪺"
         },
         "\\ncong": {
             font: "ams",
             group: "rel",
-            replace: "\u2246"
+            replace: "≆"
         },
         "\\nshortparallel": {
             font: "ams",
             group: "rel",
-            replace: "\ue007"
+            replace: ""
         },
         "\\nparallel": {
             font: "ams",
             group: "rel",
-            replace: "\u2226"
+            replace: "∦"
         },
         "\\nVDash": {
             font: "ams",
             group: "rel",
-            replace: "\u22af"
+            replace: "⊯"
         },
         "\\ntriangleright": {
             font: "ams",
             group: "rel",
-            replace: "\u22eb"
+            replace: "⋫"
         },
         "\\ntrianglerighteq": {
             font: "ams",
             group: "rel",
-            replace: "\u22ed"
+            replace: "⋭"
         },
         "\\nsupseteqq": {
             font: "ams",
             group: "rel",
-            replace: "\ue018"
+            replace: ""
         },
         "\\supsetneq": {
             font: "ams",
             group: "rel",
-            replace: "\u228b"
+            replace: "⊋"
         },
         "\\varsupsetneq": {
             font: "ams",
             group: "rel",
-            replace: "\ue01b"
+            replace: ""
         },
         "\\supsetneqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2acc"
+            replace: "⫌"
         },
         "\\varsupsetneqq": {
             font: "ams",
             group: "rel",
-            replace: "\ue019"
+            replace: ""
         },
         "\\nVdash": {
             font: "ams",
             group: "rel",
-            replace: "\u22ae"
+            replace: "⊮"
         },
         "\\precneqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2ab5"
+            replace: "⪵"
         },
         "\\succneqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2ab6"
+            replace: "⪶"
         },
         "\\nsubseteqq": {
             font: "ams",
             group: "rel",
-            replace: "\ue016"
+            replace: ""
         },
         "\\unlhd": {
             font: "ams",
             group: "bin",
-            replace: "\u22b4"
+            replace: "⊴"
         },
         "\\unrhd": {
             font: "ams",
             group: "bin",
-            replace: "\u22b5"
+            replace: "⊵"
         },
 
         // AMS Negated Arrows
-         "\\nleftarrow": {
+        "\\nleftarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u219a"
+            replace: "↚"
         },
         "\\nrightarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u219b"
+            replace: "↛"
         },
         "\\nLeftarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21cd"
+            replace: "⇍"
         },
         "\\nRightarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21cf"
+            replace: "⇏"
         },
         "\\nleftrightarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21ae"
+            replace: "↮"
         },
         "\\nLeftrightarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21ce"
+            replace: "⇎"
         },
 
         // AMS Misc
         "\\vartriangle": {
             font: "ams",
             group: "rel",
-            replace: "\u25b3"
+            replace: "△"
         },
         "\\hslash": {
             font: "ams",
             group: "textord",
-            replace: "\u210f"
+            replace: "ℏ"
         },
         "\\triangledown": {
             font: "ams",
             group: "textord",
-            replace: "\u25bd"
+            replace: "▽"
         },
         "\\lozenge": {
             font: "ams",
             group: "textord",
-            replace: "\u25ca"
+            replace: "◊"
         },
         "\\circledS": {
             font: "ams",
             group: "textord",
-            replace: "\u24c8"
+            replace: "Ⓢ"
         },
         "\\circledR": {
             font: "ams",
             group: "textord",
-            replace: "\u00ae"
+            replace: "®"
         },
         "\\measuredangle": {
             font: "ams",
             group: "textord",
-            replace: "\u2221"
+            replace: "∡"
         },
         "\\nexists": {
             font: "ams",
             group: "textord",
-            replace: "\u2204"
+            replace: "∄"
         },
         "\\mho": {
             font: "ams",
             group: "textord",
-            replace: "\u2127"
+            replace: "℧"
         },
         "\\Finv": {
             font: "ams",
             group: "textord",
-            replace: "\u2132"
+            replace: "Ⅎ"
         },
         "\\Game": {
             font: "ams",
             group: "textord",
-            replace: "\u2141"
+            replace: "⅁"
         },
         "\\Bbbk": {
             font: "ams",
             group: "textord",
-            replace: "\u006b"
+            replace: "k"
         },
         "\\backprime": {
             font: "ams",
             group: "textord",
-            replace: "\u2035"
+            replace: "‵"
         },
         "\\blacktriangle": {
             font: "ams",
             group: "textord",
-            replace: "\u25b2"
+            replace: "▲"
         },
         "\\blacktriangledown": {
             font: "ams",
             group: "textord",
-            replace: "\u25bc"
+            replace: "▼"
         },
         "\\blacksquare": {
             font: "ams",
             group: "textord",
-            replace: "\u25a0"
+            replace: "■"
         },
         "\\blacklozenge": {
             font: "ams",
             group: "textord",
-            replace: "\u29eb"
+            replace: "⧫"
         },
         "\\bigstar": {
             font: "ams",
             group: "textord",
-            replace: "\u2605"
+            replace: "★"
         },
         "\\sphericalangle": {
             font: "ams",
             group: "textord",
-            replace: "\u2222"
+            replace: "∢"
         },
         "\\complement": {
             font: "ams",
             group: "textord",
-            replace: "\u2201"
+            replace: "∁"
         },
         "\\eth": {
             font: "ams",
             group: "textord",
-            replace: "\u00f0"
+            replace: "ð"
         },
         "\\diagup": {
             font: "ams",
             group: "textord",
-            replace: "\u2571"
+            replace: "╱"
         },
         "\\diagdown": {
             font: "ams",
             group: "textord",
-            replace: "\u2572"
+            replace: "╲"
         },
         "\\square": {
             font: "ams",
             group: "textord",
-            replace: "\u25a1"
+            replace: "□"
         },
         "\\Box": {
             font: "ams",
             group: "textord",
-            replace: "\u25a1"
+            replace: "□"
         },
         "\\Diamond": {
             font: "ams",
             group: "textord",
-            replace: "\u25ca"
+            replace: "◊"
         },
         "\\yen": {
             font: "ams",
             group: "textord",
-            replace: "\u00a5"
+            replace: "¥"
         },
         "\\checkmark": {
             font: "ams",
             group: "textord",
-            replace: "\u2713"
+            replace: "✓"
         },
 
         // AMS Hebrew
         "\\beth": {
             font: "ams",
             group: "textord",
-            replace: "\u2136"
+            replace: "ℶ"
         },
         "\\daleth": {
             font: "ams",
             group: "textord",
-            replace: "\u2138"
+            replace: "ℸ"
         },
         "\\gimel": {
             font: "ams",
             group: "textord",
-            replace: "\u2137"
+            replace: "ℷ"
         },
 
         // AMS Greek
         "\\digamma": {
             font: "ams",
             group: "textord",
-            replace: "\u03dd"
+            replace: "ϝ"
         },
         "\\varkappa": {
             font: "ams",
             group: "textord",
-            replace: "\u03f0"
+            replace: "ϰ"
         },
 
         // AMS Delimiters
         "\\ulcorner": {
             font: "ams",
             group: "open",
-            replace: "\u250c"
+            replace: "┌"
         },
         "\\urcorner": {
             font: "ams",
             group: "close",
-            replace: "\u2510"
+            replace: "┐"
         },
         "\\llcorner": {
             font: "ams",
             group: "open",
-            replace: "\u2514"
+            replace: "└"
         },
         "\\lrcorner": {
             font: "ams",
             group: "close",
-            replace: "\u2518"
+            replace: "┘"
         },
 
         // AMS Binary Relations
         "\\leqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2266"
+            replace: "≦"
         },
         "\\leqslant": {
             font: "ams",
             group: "rel",
-            replace: "\u2a7d"
+            replace: "⩽"
         },
         "\\eqslantless": {
             font: "ams",
             group: "rel",
-            replace: "\u2a95"
+            replace: "⪕"
         },
         "\\lesssim": {
             font: "ams",
             group: "rel",
-            replace: "\u2272"
+            replace: "≲"
         },
         "\\lessapprox": {
             font: "ams",
             group: "rel",
-            replace: "\u2a85"
+            replace: "⪅"
         },
         "\\approxeq": {
             font: "ams",
             group: "rel",
-            replace: "\u224a"
+            replace: "≊"
         },
         "\\lessdot": {
             font: "ams",
             group: "bin",
-            replace: "\u22d6"
+            replace: "⋖"
         },
         "\\lll": {
             font: "ams",
             group: "rel",
-            replace: "\u22d8"
+            replace: "⋘"
         },
         "\\lessgtr": {
             font: "ams",
             group: "rel",
-            replace: "\u2276"
+            replace: "≶"
         },
         "\\lesseqgtr": {
             font: "ams",
             group: "rel",
-            replace: "\u22da"
+            replace: "⋚"
         },
         "\\lesseqqgtr": {
             font: "ams",
             group: "rel",
-            replace: "\u2a8b"
+            replace: "⪋"
         },
         "\\doteqdot": {
             font: "ams",
             group: "rel",
-            replace: "\u2251"
+            replace: "≑"
         },
         "\\risingdotseq": {
             font: "ams",
             group: "rel",
-            replace: "\u2253"
+            replace: "≓"
         },
         "\\fallingdotseq": {
             font: "ams",
             group: "rel",
-            replace: "\u2252"
+            replace: "≒"
         },
         "\\backsim": {
             font: "ams",
             group: "rel",
-            replace: "\u223d"
+            replace: "∽"
         },
         "\\backsimeq": {
             font: "ams",
             group: "rel",
-            replace: "\u22cd"
+            replace: "⋍"
         },
         "\\subseteqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2ac5"
+            replace: "⫅"
         },
         "\\Subset": {
             font: "ams",
             group: "rel",
-            replace: "\u22d0"
+            replace: "⋐"
         },
         "\\sqsubset": {
             font: "ams",
             group: "rel",
-            replace: "\u228f"
+            replace: "⊏"
         },
         "\\preccurlyeq": {
             font: "ams",
             group: "rel",
-            replace: "\u227c"
+            replace: "≼"
         },
         "\\curlyeqprec": {
             font: "ams",
             group: "rel",
-            replace: "\u22de"
+            replace: "⋞"
         },
         "\\precsim": {
             font: "ams",
             group: "rel",
-            replace: "\u227e"
+            replace: "≾"
         },
         "\\precapprox": {
             font: "ams",
             group: "rel",
-            replace: "\u2ab7"
+            replace: "⪷"
         },
         "\\vartriangleleft": {
             font: "ams",
             group: "rel",
-            replace: "\u22b2"
+            replace: "⊲"
         },
         "\\trianglelefteq": {
             font: "ams",
             group: "rel",
-            replace: "\u22b4"
+            replace: "⊴"
         },
         "\\vDash": {
             font: "ams",
             group: "rel",
-            replace: "\u22a8"
+            replace: "⊨"
         },
         "\\Vvdash": {
             font: "ams",
             group: "rel",
-            replace: "\u22aa"
+            replace: "⊪"
         },
         "\\smallsmile": {
             font: "ams",
             group: "rel",
-            replace: "\u2323"
+            replace: "⌣"
         },
         "\\smallfrown": {
             font: "ams",
             group: "rel",
-            replace: "\u2322"
+            replace: "⌢"
         },
         "\\bumpeq": {
             font: "ams",
             group: "rel",
-            replace: "\u224f"
+            replace: "≏"
         },
         "\\Bumpeq": {
             font: "ams",
             group: "rel",
-            replace: "\u224e"
+            replace: "≎"
         },
         "\\geqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2267"
+            replace: "≧"
         },
         "\\geqslant": {
             font: "ams",
             group: "rel",
-            replace: "\u2a7e"
+            replace: "⩾"
         },
         "\\eqslantgtr": {
             font: "ams",
             group: "rel",
-            replace: "\u2a96"
+            replace: "⪖"
         },
         "\\gtrsim": {
             font: "ams",
             group: "rel",
-            replace: "\u2273"
+            replace: "≳"
         },
         "\\gtrapprox": {
             font: "ams",
             group: "rel",
-            replace: "\u2a86"
+            replace: "⪆"
         },
         "\\gtrdot": {
             font: "ams",
             group: "bin",
-            replace: "\u22d7"
+            replace: "⋗"
         },
         "\\ggg": {
             font: "ams",
             group: "rel",
-            replace: "\u22d9"
+            replace: "⋙"
         },
         "\\gtrless": {
             font: "ams",
             group: "rel",
-            replace: "\u2277"
+            replace: "≷"
         },
         "\\gtreqless": {
             font: "ams",
             group: "rel",
-            replace: "\u22db"
+            replace: "⋛"
         },
         "\\gtreqqless": {
             font: "ams",
             group: "rel",
-            replace: "\u2a8c"
+            replace: "⪌"
         },
         "\\eqcirc": {
             font: "ams",
             group: "rel",
-            replace: "\u2256"
+            replace: "≖"
         },
         "\\circeq": {
             font: "ams",
             group: "rel",
-            replace: "\u2257"
+            replace: "≗"
         },
         "\\triangleq": {
             font: "ams",
             group: "rel",
-            replace: "\u225c"
+            replace: "≜"
         },
         "\\thicksim": {
             font: "ams",
             group: "rel",
-            replace: "\u223c"
+            replace: "∼"
         },
         "\\thickapprox": {
             font: "ams",
             group: "rel",
-            replace: "\u2248"
+            replace: "≈"
         },
         "\\supseteqq": {
             font: "ams",
             group: "rel",
-            replace: "\u2ac6"
+            replace: "⫆"
         },
         "\\Supset": {
             font: "ams",
             group: "rel",
-            replace: "\u22d1"
+            replace: "⋑"
         },
         "\\sqsupset": {
             font: "ams",
             group: "rel",
-            replace: "\u2290"
+            replace: "⊐"
         },
         "\\succcurlyeq": {
             font: "ams",
             group: "rel",
-            replace: "\u227d"
+            replace: "≽"
         },
         "\\curlyeqsucc": {
             font: "ams",
             group: "rel",
-            replace: "\u22df"
+            replace: "⋟"
         },
         "\\succsim": {
             font: "ams",
             group: "rel",
-            replace: "\u227f"
+            replace: "≿"
         },
         "\\succapprox": {
             font: "ams",
             group: "rel",
-            replace: "\u2ab8"
+            replace: "⪸"
         },
         "\\vartriangleright": {
             font: "ams",
             group: "rel",
-            replace: "\u22b3"
+            replace: "⊳"
         },
         "\\trianglerighteq": {
             font: "ams",
             group: "rel",
-            replace: "\u22b5"
+            replace: "⊵"
         },
         "\\Vdash": {
             font: "ams",
             group: "rel",
-            replace: "\u22a9"
+            replace: "⊩"
         },
         "\\shortmid": {
             font: "ams",
             group: "rel",
-            replace: "\u2223"
+            replace: "∣"
         },
         "\\shortparallel": {
             font: "ams",
             group: "rel",
-            replace: "\u2225"
+            replace: "∥"
         },
         "\\between": {
             font: "ams",
             group: "rel",
-            replace: "\u226c"
+            replace: "≬"
         },
         "\\pitchfork": {
             font: "ams",
             group: "rel",
-            replace: "\u22d4"
+            replace: "⋔"
         },
         "\\varpropto": {
             font: "ams",
             group: "rel",
-            replace: "\u221d"
+            replace: "∝"
         },
         "\\blacktriangleleft": {
             font: "ams",
             group: "rel",
-            replace: "\u25c0"
+            replace: "◀"
         },
         "\\therefore": {
             font: "ams",
             group: "rel",
-            replace: "\u2234"
+            replace: "∴"
         },
         "\\backepsilon": {
             font: "ams",
             group: "rel",
-            replace: "\u220d"
+            replace: "∍"
         },
         "\\blacktriangleright": {
             font: "ams",
             group: "rel",
-            replace: "\u25b6"
+            replace: "▶"
         },
         "\\because": {
             font: "ams",
             group: "rel",
-            replace: "\u2235"
+            replace: "∵"
         },
         "\\llless": {
             font: "ams",
             group: "rel",
-            replace: "\u22d8"
+            replace: "⋘"
         },
         "\\gggtr": {
             font: "ams",
             group: "rel",
-            replace: "\u22d9"
+            replace: "⋙"
         },
         "\\lhd": {
             font: "ams",
             group: "bin",
-            replace: "\u22b2"
+            replace: "⊲"
         },
         "\\rhd": {
             font: "ams",
             group: "bin",
-            replace: "\u22b3"
+            replace: "⊳"
         },
         "\\eqsim": {
             font: "ams",
             group: "rel",
-            replace: "\u2242"
+            replace: "≂"
         },
         "\\Join": {
             font: "main",
             group: "rel",
-            replace: "\u22c8"
+            replace: "⋈"
         },
         "\\Doteq": {
             font: "ams",
             group: "rel",
-            replace: "\u2251"
+            replace: "≑"
         },
 
         // AMS Binary Operators
         "\\dotplus": {
             font: "ams",
             group: "bin",
-            replace: "\u2214"
+            replace: "∔"
         },
         "\\smallsetminus": {
             font: "ams",
             group: "bin",
-            replace: "\u2216"
+            replace: "∖"
         },
         "\\Cap": {
             font: "ams",
             group: "bin",
-            replace: "\u22d2"
+            replace: "⋒"
         },
         "\\Cup": {
             font: "ams",
             group: "bin",
-            replace: "\u22d3"
+            replace: "⋓"
         },
         "\\doublebarwedge": {
             font: "ams",
             group: "bin",
-            replace: "\u2a5e"
+            replace: "⩞"
         },
         "\\boxminus": {
             font: "ams",
             group: "bin",
-            replace: "\u229f"
+            replace: "⊟"
         },
         "\\boxplus": {
             font: "ams",
             group: "bin",
-            replace: "\u229e"
+            replace: "⊞"
         },
         "\\divideontimes": {
             font: "ams",
             group: "bin",
-            replace: "\u22c7"
+            replace: "⋇"
         },
         "\\ltimes": {
             font: "ams",
             group: "bin",
-            replace: "\u22c9"
+            replace: "⋉"
         },
         "\\rtimes": {
             font: "ams",
             group: "bin",
-            replace: "\u22ca"
+            replace: "⋊"
         },
         "\\leftthreetimes": {
             font: "ams",
             group: "bin",
-            replace: "\u22cb"
+            replace: "⋋"
         },
         "\\rightthreetimes": {
             font: "ams",
             group: "bin",
-            replace: "\u22cc"
+            replace: "⋌"
         },
         "\\curlywedge": {
             font: "ams",
             group: "bin",
-            replace: "\u22cf"
+            replace: "⋏"
         },
         "\\curlyvee": {
             font: "ams",
             group: "bin",
-            replace: "\u22ce"
+            replace: "⋎"
         },
         "\\circleddash": {
             font: "ams",
             group: "bin",
-            replace: "\u229d"
+            replace: "⊝"
         },
         "\\circledast": {
             font: "ams",
             group: "bin",
-            replace: "\u229b"
+            replace: "⊛"
         },
         "\\centerdot": {
             font: "ams",
             group: "bin",
-            replace: "\u22c5"
+            replace: "⋅"
         },
         "\\intercal": {
             font: "ams",
             group: "bin",
-            replace: "\u22ba"
+            replace: "⊺"
         },
         "\\doublecap": {
             font: "ams",
             group: "bin",
-            replace: "\u22d2"
+            replace: "⋒"
         },
         "\\doublecup": {
             font: "ams",
             group: "bin",
-            replace: "\u22d3"
+            replace: "⋓"
         },
         "\\boxtimes": {
             font: "ams",
             group: "bin",
-            replace: "\u22a0"
+            replace: "⊠"
         },
 
         // AMS Arrows
         "\\dashrightarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21e2"
+            replace: "⇢"
         },
         "\\dashleftarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21e0"
+            replace: "⇠"
         },
         "\\leftleftarrows": {
             font: "ams",
             group: "rel",
-            replace: "\u21c7"
+            replace: "⇇"
         },
         "\\leftrightarrows": {
             font: "ams",
             group: "rel",
-            replace: "\u21c6"
+            replace: "⇆"
         },
         "\\Lleftarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21da"
+            replace: "⇚"
         },
         "\\twoheadleftarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u219e"
+            replace: "↞"
         },
         "\\leftarrowtail": {
             font: "ams",
             group: "rel",
-            replace: "\u21a2"
+            replace: "↢"
         },
         "\\looparrowleft": {
             font: "ams",
             group: "rel",
-            replace: "\u21ab"
+            replace: "↫"
         },
         "\\leftrightharpoons": {
             font: "ams",
             group: "rel",
-            replace: "\u21cb"
+            replace: "⇋"
         },
         "\\curvearrowleft": {
             font: "ams",
             group: "rel",
-            replace: "\u21b6"
+            replace: "↶"
         },
         "\\circlearrowleft": {
             font: "ams",
             group: "rel",
-            replace: "\u21ba"
+            replace: "↺"
         },
         "\\Lsh": {
             font: "ams",
             group: "rel",
-            replace: "\u21b0"
+            replace: "↰"
         },
         "\\upuparrows": {
             font: "ams",
             group: "rel",
-            replace: "\u21c8"
+            replace: "⇈"
         },
         "\\upharpoonleft": {
             font: "ams",
             group: "rel",
-            replace: "\u21bf"
+            replace: "↿"
         },
         "\\downharpoonleft": {
             font: "ams",
             group: "rel",
-            replace: "\u21c3"
+            replace: "⇃"
         },
         "\\multimap": {
             font: "ams",
             group: "rel",
-            replace: "\u22b8"
+            replace: "⊸"
         },
         "\\leftrightsquigarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21ad"
+            replace: "↭"
         },
         "\\rightrightarrows": {
             font: "ams",
             group: "rel",
-            replace: "\u21c9"
+            replace: "⇉"
         },
         "\\rightleftarrows": {
             font: "ams",
             group: "rel",
-            replace: "\u21c4"
+            replace: "⇄"
         },
         "\\twoheadrightarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21a0"
+            replace: "↠"
         },
         "\\rightarrowtail": {
             font: "ams",
             group: "rel",
-            replace: "\u21a3"
+            replace: "↣"
         },
         "\\looparrowright": {
             font: "ams",
             group: "rel",
-            replace: "\u21ac"
+            replace: "↬"
         },
         "\\curvearrowright": {
             font: "ams",
             group: "rel",
-            replace: "\u21b7"
+            replace: "↷"
         },
         "\\circlearrowright": {
             font: "ams",
             group: "rel",
-            replace: "\u21bb"
+            replace: "↻"
         },
         "\\Rsh": {
             font: "ams",
             group: "rel",
-            replace: "\u21b1"
+            replace: "↱"
         },
         "\\downdownarrows": {
             font: "ams",
             group: "rel",
-            replace: "\u21ca"
+            replace: "⇊"
         },
         "\\upharpoonright": {
             font: "ams",
             group: "rel",
-            replace: "\u21be"
+            replace: "↾"
         },
         "\\downharpoonright": {
             font: "ams",
             group: "rel",
-            replace: "\u21c2"
+            replace: "⇂"
         },
         "\\rightsquigarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21dd"
+            replace: "⇝"
         },
         "\\leadsto": {
             font: "ams",
             group: "rel",
-            replace: "\u21dd"
+            replace: "⇝"
         },
         "\\Rrightarrow": {
             font: "ams",
             group: "rel",
-            replace: "\u21db"
+            replace: "⇛"
         },
         "\\restriction": {
             font: "ams",
             group: "rel",
-            replace: "\u21be"
+            replace: "↾"
         },
 
         "`": {
             font: "main",
             group: "textord",
-            replace: "\u2018"
+            replace: "‘"
         },
         "\\$": {
             font: "main",
@@ -13584,177 +11389,177 @@ var symbols = {
         "\\angle": {
             font: "main",
             group: "textord",
-            replace: "\u2220"
+            replace: "∠"
         },
         "\\infty": {
             font: "main",
             group: "textord",
-            replace: "\u221e"
+            replace: "∞"
         },
         "\\prime": {
             font: "main",
             group: "textord",
-            replace: "\u2032"
+            replace: "′"
         },
         "\\triangle": {
             font: "main",
             group: "textord",
-            replace: "\u25b3"
+            replace: "△"
         },
         "\\Gamma": {
             font: "main",
             group: "textord",
-            replace: "\u0393"
+            replace: "Γ"
         },
         "\\Delta": {
             font: "main",
             group: "textord",
-            replace: "\u0394"
+            replace: "Δ"
         },
         "\\Theta": {
             font: "main",
             group: "textord",
-            replace: "\u0398"
+            replace: "Θ"
         },
         "\\Lambda": {
             font: "main",
             group: "textord",
-            replace: "\u039b"
+            replace: "Λ"
         },
         "\\Xi": {
             font: "main",
             group: "textord",
-            replace: "\u039e"
+            replace: "Ξ"
         },
         "\\Pi": {
             font: "main",
             group: "textord",
-            replace: "\u03a0"
+            replace: "Π"
         },
         "\\Sigma": {
             font: "main",
             group: "textord",
-            replace: "\u03a3"
+            replace: "Σ"
         },
         "\\Upsilon": {
             font: "main",
             group: "textord",
-            replace: "\u03a5"
+            replace: "Υ"
         },
         "\\Phi": {
             font: "main",
             group: "textord",
-            replace: "\u03a6"
+            replace: "Φ"
         },
         "\\Psi": {
             font: "main",
             group: "textord",
-            replace: "\u03a8"
+            replace: "Ψ"
         },
         "\\Omega": {
             font: "main",
             group: "textord",
-            replace: "\u03a9"
+            replace: "Ω"
         },
         "\\neg": {
             font: "main",
             group: "textord",
-            replace: "\u00ac"
+            replace: "¬"
         },
         "\\lnot": {
             font: "main",
             group: "textord",
-            replace: "\u00ac"
+            replace: "¬"
         },
         "\\top": {
             font: "main",
             group: "textord",
-            replace: "\u22a4"
+            replace: "⊤"
         },
         "\\bot": {
             font: "main",
             group: "textord",
-            replace: "\u22a5"
+            replace: "⊥"
         },
         "\\emptyset": {
             font: "main",
             group: "textord",
-            replace: "\u2205"
+            replace: "∅"
         },
         "\\varnothing": {
             font: "ams",
             group: "textord",
-            replace: "\u2205"
+            replace: "∅"
         },
         "\\alpha": {
             font: "main",
             group: "mathord",
-            replace: "\u03b1"
+            replace: "α"
         },
         "\\beta": {
             font: "main",
             group: "mathord",
-            replace: "\u03b2"
+            replace: "β"
         },
         "\\gamma": {
             font: "main",
             group: "mathord",
-            replace: "\u03b3"
+            replace: "γ"
         },
         "\\delta": {
             font: "main",
             group: "mathord",
-            replace: "\u03b4"
+            replace: "δ"
         },
         "\\epsilon": {
             font: "main",
             group: "mathord",
-            replace: "\u03f5"
+            replace: "ϵ"
         },
         "\\zeta": {
             font: "main",
             group: "mathord",
-            replace: "\u03b6"
+            replace: "ζ"
         },
         "\\eta": {
             font: "main",
             group: "mathord",
-            replace: "\u03b7"
+            replace: "η"
         },
         "\\theta": {
             font: "main",
             group: "mathord",
-            replace: "\u03b8"
+            replace: "θ"
         },
         "\\iota": {
             font: "main",
             group: "mathord",
-            replace: "\u03b9"
+            replace: "ι"
         },
         "\\kappa": {
             font: "main",
             group: "mathord",
-            replace: "\u03ba"
+            replace: "κ"
         },
         "\\lambda": {
             font: "main",
             group: "mathord",
-            replace: "\u03bb"
+            replace: "λ"
         },
         "\\mu": {
             font: "main",
             group: "mathord",
-            replace: "\u03bc"
+            replace: "μ"
         },
         "\\nu": {
             font: "main",
             group: "mathord",
-            replace: "\u03bd"
+            replace: "ν"
         },
         "\\xi": {
             font: "main",
             group: "mathord",
-            replace: "\u03be"
+            replace: "ξ"
         },
         "\\omicron": {
             font: "main",
@@ -13764,82 +11569,82 @@ var symbols = {
         "\\pi": {
             font: "main",
             group: "mathord",
-            replace: "\u03c0"
+            replace: "π"
         },
         "\\rho": {
             font: "main",
             group: "mathord",
-            replace: "\u03c1"
+            replace: "ρ"
         },
         "\\sigma": {
             font: "main",
             group: "mathord",
-            replace: "\u03c3"
+            replace: "σ"
         },
         "\\tau": {
             font: "main",
             group: "mathord",
-            replace: "\u03c4"
+            replace: "τ"
         },
         "\\upsilon": {
             font: "main",
             group: "mathord",
-            replace: "\u03c5"
+            replace: "υ"
         },
         "\\phi": {
             font: "main",
             group: "mathord",
-            replace: "\u03d5"
+            replace: "ϕ"
         },
         "\\chi": {
             font: "main",
             group: "mathord",
-            replace: "\u03c7"
+            replace: "χ"
         },
         "\\psi": {
             font: "main",
             group: "mathord",
-            replace: "\u03c8"
+            replace: "ψ"
         },
         "\\omega": {
             font: "main",
             group: "mathord",
-            replace: "\u03c9"
+            replace: "ω"
         },
         "\\varepsilon": {
             font: "main",
             group: "mathord",
-            replace: "\u03b5"
+            replace: "ε"
         },
         "\\vartheta": {
             font: "main",
             group: "mathord",
-            replace: "\u03d1"
+            replace: "ϑ"
         },
         "\\varpi": {
             font: "main",
             group: "mathord",
-            replace: "\u03d6"
+            replace: "ϖ"
         },
         "\\varrho": {
             font: "main",
             group: "mathord",
-            replace: "\u03f1"
+            replace: "ϱ"
         },
         "\\varsigma": {
             font: "main",
             group: "mathord",
-            replace: "\u03c2"
+            replace: "ς"
         },
         "\\varphi": {
             font: "main",
             group: "mathord",
-            replace: "\u03c6"
+            replace: "φ"
         },
         "*": {
             font: "main",
             group: "bin",
-            replace: "\u2217"
+            replace: "∗"
         },
         "+": {
             font: "main",
@@ -13848,72 +11653,72 @@ var symbols = {
         "-": {
             font: "main",
             group: "bin",
-            replace: "\u2212"
+            replace: "−"
         },
         "\\cdot": {
             font: "main",
             group: "bin",
-            replace: "\u22c5"
+            replace: "⋅"
         },
         "\\circ": {
             font: "main",
             group: "bin",
-            replace: "\u2218"
+            replace: "∘"
         },
         "\\div": {
             font: "main",
             group: "bin",
-            replace: "\u00f7"
+            replace: "÷"
         },
         "\\pm": {
             font: "main",
             group: "bin",
-            replace: "\u00b1"
+            replace: "±"
         },
         "\\times": {
             font: "main",
             group: "bin",
-            replace: "\u00d7"
+            replace: "×"
         },
         "\\cap": {
             font: "main",
             group: "bin",
-            replace: "\u2229"
+            replace: "∩"
         },
         "\\cup": {
             font: "main",
             group: "bin",
-            replace: "\u222a"
+            replace: "∪"
         },
         "\\setminus": {
             font: "main",
             group: "bin",
-            replace: "\u2216"
+            replace: "∖"
         },
         "\\land": {
             font: "main",
             group: "bin",
-            replace: "\u2227"
+            replace: "∧"
         },
         "\\lor": {
             font: "main",
             group: "bin",
-            replace: "\u2228"
+            replace: "∨"
         },
         "\\wedge": {
             font: "main",
             group: "bin",
-            replace: "\u2227"
+            replace: "∧"
         },
         "\\vee": {
             font: "main",
             group: "bin",
-            replace: "\u2228"
+            replace: "∨"
         },
         "\\surd": {
             font: "main",
             group: "textord",
-            replace: "\u221a"
+            replace: "√"
         },
         "(": {
             font: "main",
@@ -13926,17 +11731,17 @@ var symbols = {
         "\\langle": {
             font: "main",
             group: "open",
-            replace: "\u27e8"
+            replace: "⟨"
         },
         "\\lvert": {
             font: "main",
             group: "open",
-            replace: "\u2223"
+            replace: "∣"
         },
         "\\lVert": {
             font: "main",
             group: "open",
-            replace: "\u2225"
+            replace: "∥"
         },
         ")": {
             font: "main",
@@ -13957,17 +11762,17 @@ var symbols = {
         "\\rangle": {
             font: "main",
             group: "close",
-            replace: "\u27e9"
+            replace: "⟩"
         },
         "\\rvert": {
             font: "main",
             group: "close",
-            replace: "\u2223"
+            replace: "∣"
         },
         "\\rVert": {
             font: "main",
             group: "close",
-            replace: "\u2225"
+            replace: "∥"
         },
         "=": {
             font: "main",
@@ -13988,117 +11793,117 @@ var symbols = {
         "\\approx": {
             font: "main",
             group: "rel",
-            replace: "\u2248"
+            replace: "≈"
         },
         "\\cong": {
             font: "main",
             group: "rel",
-            replace: "\u2245"
+            replace: "≅"
         },
         "\\ge": {
             font: "main",
             group: "rel",
-            replace: "\u2265"
+            replace: "≥"
         },
         "\\geq": {
             font: "main",
             group: "rel",
-            replace: "\u2265"
+            replace: "≥"
         },
         "\\gets": {
             font: "main",
             group: "rel",
-            replace: "\u2190"
+            replace: "←"
         },
         "\\in": {
             font: "main",
             group: "rel",
-            replace: "\u2208"
+            replace: "∈"
         },
         "\\notin": {
             font: "main",
             group: "rel",
-            replace: "\u2209"
+            replace: "∉"
         },
         "\\subset": {
             font: "main",
             group: "rel",
-            replace: "\u2282"
+            replace: "⊂"
         },
         "\\supset": {
             font: "main",
             group: "rel",
-            replace: "\u2283"
+            replace: "⊃"
         },
         "\\subseteq": {
             font: "main",
             group: "rel",
-            replace: "\u2286"
+            replace: "⊆"
         },
         "\\supseteq": {
             font: "main",
             group: "rel",
-            replace: "\u2287"
+            replace: "⊇"
         },
         "\\nsubseteq": {
             font: "ams",
             group: "rel",
-            replace: "\u2288"
+            replace: "⊈"
         },
         "\\nsupseteq": {
             font: "ams",
             group: "rel",
-            replace: "\u2289"
+            replace: "⊉"
         },
         "\\models": {
             font: "main",
             group: "rel",
-            replace: "\u22a8"
+            replace: "⊨"
         },
         "\\leftarrow": {
             font: "main",
             group: "rel",
-            replace: "\u2190"
+            replace: "←"
         },
         "\\le": {
             font: "main",
             group: "rel",
-            replace: "\u2264"
+            replace: "≤"
         },
         "\\leq": {
             font: "main",
             group: "rel",
-            replace: "\u2264"
+            replace: "≤"
         },
         "\\ne": {
             font: "main",
             group: "rel",
-            replace: "\u2260"
+            replace: "≠"
         },
         "\\neq": {
             font: "main",
             group: "rel",
-            replace: "\u2260"
+            replace: "≠"
         },
         "\\rightarrow": {
             font: "main",
             group: "rel",
-            replace: "\u2192"
+            replace: "→"
         },
         "\\to": {
             font: "main",
             group: "rel",
-            replace: "\u2192"
+            replace: "→"
         },
         "\\ngeq": {
             font: "ams",
             group: "rel",
-            replace: "\u2271"
+            replace: "≱"
         },
         "\\nleq": {
             font: "ams",
             group: "rel",
-            replace: "\u2270"
+            replace: "≰"
         },
         "\\!": {
             font: "main",
@@ -14107,12 +11912,12 @@ var symbols = {
         "\\ ": {
             font: "main",
             group: "spacing",
-            replace: "\u00a0"
+            replace: " "
         },
         "~": {
             font: "main",
             group: "spacing",
-            replace: "\u00a0"
+            replace: " "
         },
         "\\,": {
             font: "main",
@@ -14141,7 +11946,7 @@ var symbols = {
         "\\space": {
             font: "main",
             group: "spacing",
-            replace: "\u00a0"
+            replace: " "
         },
         ",": {
             font: "main",
@@ -14159,82 +11964,82 @@ var symbols = {
         "\\barwedge": {
             font: "ams",
             group: "bin",
-            replace: "\u22bc"
+            replace: "⊼"
         },
         "\\veebar": {
             font: "ams",
             group: "bin",
-            replace: "\u22bb"
+            replace: "⊻"
         },
         "\\odot": {
             font: "main",
             group: "bin",
-            replace: "\u2299"
+            replace: "⊙"
         },
         "\\oplus": {
             font: "main",
             group: "bin",
-            replace: "\u2295"
+            replace: "⊕"
         },
         "\\otimes": {
             font: "main",
             group: "bin",
-            replace: "\u2297"
+            replace: "⊗"
         },
-        "\\partial":{
+        "\\partial": {
             font: "main",
             group: "textord",
-            replace: "\u2202"
+            replace: "∂"
         },
         "\\oslash": {
             font: "main",
             group: "bin",
-            replace: "\u2298"
+            replace: "⊘"
         },
         "\\circledcirc": {
             font: "ams",
             group: "bin",
-            replace: "\u229a"
+            replace: "⊚"
         },
         "\\boxdot": {
             font: "ams",
             group: "bin",
-            replace: "\u22a1"
+            replace: "⊡"
         },
         "\\bigtriangleup": {
             font: "main",
             group: "bin",
-            replace: "\u25b3"
+            replace: "△"
         },
         "\\bigtriangledown": {
             font: "main",
             group: "bin",
-            replace: "\u25bd"
+            replace: "▽"
         },
         "\\dagger": {
             font: "main",
             group: "bin",
-            replace: "\u2020"
+            replace: "†"
         },
         "\\diamond": {
             font: "main",
             group: "bin",
-            replace: "\u22c4"
+            replace: "⋄"
         },
         "\\star": {
             font: "main",
             group: "bin",
-            replace: "\u22c6"
+            replace: "⋆"
         },
         "\\triangleleft": {
             font: "main",
             group: "bin",
-            replace: "\u25c3"
+            replace: "◃"
         },
         "\\triangleright": {
             font: "main",
             group: "bin",
-            replace: "\u25b9"
+            replace: "▹"
         },
         "\\{": {
             font: "main",
@@ -14269,22 +12074,22 @@ var symbols = {
         "\\lfloor": {
             font: "main",
             group: "open",
-            replace: "\u230a"
+            replace: "⌊"
         },
         "\\rfloor": {
             font: "main",
             group: "close",
-            replace: "\u230b"
+            replace: "⌋"
         },
         "\\lceil": {
             font: "main",
             group: "open",
-            replace: "\u2308"
+            replace: "⌈"
         },
         "\\rceil": {
             font: "main",
             group: "close",
-            replace: "\u2309"
+            replace: "⌉"
         },
         "\\backslash": {
             font: "main",
@@ -14294,240 +12099,240 @@ var symbols = {
         "|": {
             font: "main",
             group: "textord",
-            replace: "\u2223"
+            replace: "∣"
         },
         "\\vert": {
             font: "main",
             group: "textord",
-            replace: "\u2223"
+            replace: "∣"
         },
         "\\|": {
             font: "main",
             group: "textord",
-            replace: "\u2225"
+            replace: "∥"
         },
         "\\Vert": {
             font: "main",
             group: "textord",
-            replace: "\u2225"
+            replace: "∥"
         },
         "\\uparrow": {
             font: "main",
             group: "rel",
-            replace: "\u2191"
+            replace: "↑"
         },
         "\\Uparrow": {
             font: "main",
             group: "rel",
-            replace: "\u21d1"
+            replace: "⇑"
         },
         "\\downarrow": {
             font: "main",
             group: "rel",
-            replace: "\u2193"
+            replace: "↓"
         },
         "\\Downarrow": {
             font: "main",
             group: "rel",
-            replace: "\u21d3"
+            replace: "⇓"
         },
         "\\updownarrow": {
             font: "main",
             group: "rel",
-            replace: "\u2195"
+            replace: "↕"
         },
         "\\Updownarrow": {
             font: "main",
             group: "rel",
-            replace: "\u21d5"
+            replace: "⇕"
         },
         "\\coprod": {
             font: "math",
             group: "op",
-            replace: "\u2210"
+            replace: "∐"
         },
         "\\bigvee": {
             font: "math",
             group: "op",
-            replace: "\u22c1"
+            replace: "⋁"
         },
         "\\bigwedge": {
             font: "math",
             group: "op",
-            replace: "\u22c0"
+            replace: "⋀"
         },
         "\\biguplus": {
             font: "math",
             group: "op",
-            replace: "\u2a04"
+            replace: "⨄"
         },
         "\\bigcap": {
             font: "math",
             group: "op",
-            replace: "\u22c2"
+            replace: "⋂"
         },
         "\\bigcup": {
             font: "math",
             group: "op",
-            replace: "\u22c3"
+            replace: "⋃"
         },
         "\\int": {
             font: "math",
             group: "op",
-            replace: "\u222b"
+            replace: "∫"
         },
         "\\intop": {
             font: "math",
             group: "op",
-            replace: "\u222b"
+            replace: "∫"
         },
         "\\iint": {
             font: "math",
             group: "op",
-            replace: "\u222c"
+            replace: "∬"
         },
         "\\iiint": {
             font: "math",
             group: "op",
-            replace: "\u222d"
+            replace: "∭"
         },
         "\\prod": {
             font: "math",
             group: "op",
-            replace: "\u220f"
+            replace: "∏"
         },
         "\\sum": {
             font: "math",
             group: "op",
-            replace: "\u2211"
+            replace: "∑"
         },
         "\\bigotimes": {
             font: "math",
             group: "op",
-            replace: "\u2a02"
+            replace: "⨂"
         },
         "\\bigoplus": {
             font: "math",
             group: "op",
-            replace: "\u2a01"
+            replace: "⨁"
         },
         "\\bigodot": {
             font: "math",
             group: "op",
-            replace: "\u2a00"
+            replace: "⨀"
         },
         "\\oint": {
             font: "math",
             group: "op",
-            replace: "\u222e"
+            replace: "∮"
         },
         "\\bigsqcup": {
             font: "math",
             group: "op",
-            replace: "\u2a06"
+            replace: "⨆"
         },
         "\\smallint": {
             font: "math",
             group: "op",
-            replace: "\u222b"
+            replace: "∫"
         },
         "\\ldots": {
             font: "main",
             group: "inner",
-            replace: "\u2026"
+            replace: "…"
         },
         "\\cdots": {
             font: "main",
             group: "inner",
-            replace: "\u22ef"
+            replace: "⋯"
         },
         "\\ddots": {
             font: "main",
             group: "inner",
-            replace: "\u22f1"
+            replace: "⋱"
         },
         "\\vdots": {
             font: "main",
             group: "textord",
-            replace: "\u22ee"
+            replace: "⋮"
         },
         "\\acute": {
             font: "main",
             group: "accent",
-            replace: "\u00b4"
+            replace: "´"
         },
         "\\grave": {
             font: "main",
             group: "accent",
-            replace: "\u0060"
+            replace: "`"
         },
         "\\ddot": {
             font: "main",
             group: "accent",
-            replace: "\u00a8"
+            replace: "¨"
         },
         "\\tilde": {
             font: "main",
             group: "accent",
-            replace: "\u007e"
+            replace: "~"
         },
         "\\bar": {
             font: "main",
             group: "accent",
-            replace: "\u00af"
+            replace: "¯"
         },
         "\\breve": {
             font: "main",
             group: "accent",
-            replace: "\u02d8"
+            replace: "˘"
         },
         "\\check": {
             font: "main",
             group: "accent",
-            replace: "\u02c7"
+            replace: "ˇ"
         },
         "\\hat": {
             font: "main",
             group: "accent",
-            replace: "\u005e"
+            replace: "^"
         },
         "\\vec": {
             font: "main",
             group: "accent",
-            replace: "\u20d7"
+            replace: "⃗"
         },
         "\\dot": {
             font: "main",
             group: "accent",
-            replace: "\u02d9"
+            replace: "˙"
         },
 
         "\\imath": {
             font: "main",
             group: "mathord",
-            replace: "\u0131"
+            replace: "ı"
         },
         "\\jmath": {
             font: "main",
             group: "mathord",
-            replace: "\u0237"
+            replace: "ȷ"
         }
     },
-    "text": {
+    text: {
         "\\ ": {
             font: "main",
             group: "spacing",
-            replace: "\u00a0"
+            replace: " "
         },
         " ": {
             font: "main",
             group: "spacing",
-            replace: "\u00a0"
+            replace: " "
         },
         "~": {
             font: "main",
             group: "spacing",
-            replace: "\u00a0"
+            replace: " "
         }
     }
 };
@@ -14570,7 +12375,7 @@ for (var i = 0; i < letters.length; i++) {
 
 module.exports = symbols;
 
-},{}],104:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 /**
  * This file contains a list of utility functions which are useful in other
  * files.
@@ -14580,15 +12385,18 @@ module.exports = symbols;
  * Provide an `indexOf` function which works in IE8, but defers to native if
  * possible.
  */
+"use strict";
+
 var nativeIndexOf = Array.prototype.indexOf;
-var indexOf = function(list, elem) {
+var indexOf = function indexOf(list, elem) {
     if (list == null) {
         return -1;
     }
     if (nativeIndexOf && list.indexOf === nativeIndexOf) {
         return list.indexOf(elem);
     }
-    var i = 0, l = list.length;
+    var i = 0,
+        l = list.length;
     for (; i < l; i++) {
         if (list[i] === elem) {
             return i;
@@ -14600,36 +12408,36 @@ var indexOf = function(list, elem) {
 /**
  * Return whether an element is contained in a list
  */
-var contains = function(list, elem) {
+var contains = function contains(list, elem) {
     return indexOf(list, elem) !== -1;
 };
 
 /**
  * Provide a default value if a setting is undefined
  */
-var deflt = function(setting, defaultIfUndefined) {
+var deflt = function deflt(setting, defaultIfUndefined) {
     return setting === undefined ? defaultIfUndefined : setting;
 };
 
 // hyphenate and escape adapted from Facebook's React under Apache 2 license
 
 var uppercase = /([A-Z])/g;
-var hyphenate = function(str) {
+var hyphenate = function hyphenate(str) {
     return str.replace(uppercase, "-$1").toLowerCase();
 };
 
 var ESCAPE_LOOKUP = {
-  "&": "&amp;",
-  ">": "&gt;",
-  "<": "&lt;",
-  "\"": "&quot;",
-  "'": "&#x27;"
+    "&": "&amp;",
+    ">": "&gt;",
+    "<": "&lt;",
+    "\"": "&quot;",
+    "'": "&#x27;"
 };
 
 var ESCAPE_REGEX = /[&><"']/g;
 
 function escaper(match) {
-  return ESCAPE_LOOKUP[match];
+    return ESCAPE_LOOKUP[match];
 }
 
 /**
@@ -14639,7 +12447,7 @@ function escaper(match) {
  * @return {string} An escaped string.
  */
 function escape(text) {
-  return ("" + text).replace(ESCAPE_REGEX, escaper);
+    return ("" + text).replace(ESCAPE_REGEX, escaper);
 }
 
 /**
@@ -14650,11 +12458,11 @@ var setTextContent;
 if (typeof document !== "undefined") {
     var testNode = document.createElement("span");
     if ("textContent" in testNode) {
-        setTextContent = function(node, text) {
+        setTextContent = function (node, text) {
             node.textContent = text;
         };
     } else {
-        setTextContent = function(node, text) {
+        setTextContent = function (node, text) {
             node.innerText = text;
         };
     }
@@ -14677,13 +12485,13 @@ module.exports = {
     clearNode: clearNode
 };
 
-},{}],105:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 'use strict';
 
 
 module.exports = require('./lib/');
 
-},{"./lib/":115}],106:[function(require,module,exports){
+},{"./lib/":116}],107:[function(require,module,exports){
 // HTML5 entities map: { name -> utf16string }
 //
 'use strict';
@@ -14691,7 +12499,7 @@ module.exports = require('./lib/');
 /*eslint quotes:0*/
 module.exports = require('entities/maps/entities.json');
 
-},{"entities/maps/entities.json":158}],107:[function(require,module,exports){
+},{"entities/maps/entities.json":159}],108:[function(require,module,exports){
 // List of valid html blocks names, accorting to commonmark spec
 // http://jgm.github.io/CommonMark/spec.html#html-blocks
 
@@ -14761,7 +12569,7 @@ module.exports = [
   'ul'
 ];
 
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 // Regexps to match html elements
 
 'use strict';
@@ -14791,7 +12599,7 @@ var HTML_OPEN_CLOSE_TAG_RE = new RegExp('^(?:' + open_tag + '|' + close_tag + ')
 module.exports.HTML_TAG_RE = HTML_TAG_RE;
 module.exports.HTML_OPEN_CLOSE_TAG_RE = HTML_OPEN_CLOSE_TAG_RE;
 
-},{}],109:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 // List of valid url schemas, accorting to commonmark spec
 // http://jgm.github.io/CommonMark/spec.html#autolinks
 
@@ -14965,7 +12773,7 @@ module.exports = [
   'ymsgr'
 ];
 
-},{}],110:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 // Utilities
 //
 'use strict';
@@ -15242,7 +13050,7 @@ exports.isPunctChar         = isPunctChar;
 exports.escapeRE            = escapeRE;
 exports.normalizeReference  = normalizeReference;
 
-},{"./entities":106,"mdurl":164,"uc.micro":170,"uc.micro/categories/P/regex":168}],111:[function(require,module,exports){
+},{"./entities":107,"mdurl":165,"uc.micro":171,"uc.micro/categories/P/regex":169}],112:[function(require,module,exports){
 // Just a shortcut for bulk export
 'use strict';
 
@@ -15251,7 +13059,7 @@ exports.parseLinkLabel       = require('./parse_link_label');
 exports.parseLinkDestination = require('./parse_link_destination');
 exports.parseLinkTitle       = require('./parse_link_title');
 
-},{"./parse_link_destination":112,"./parse_link_label":113,"./parse_link_title":114}],112:[function(require,module,exports){
+},{"./parse_link_destination":113,"./parse_link_label":114,"./parse_link_title":115}],113:[function(require,module,exports){
 // Parse link destination
 //
 'use strict';
@@ -15332,7 +13140,7 @@ module.exports = function parseLinkDestination(str, pos, max) {
   return result;
 };
 
-},{"../common/utils":110}],113:[function(require,module,exports){
+},{"../common/utils":111}],114:[function(require,module,exports){
 // Parse link label
 //
 // this function assumes that first character ("[") already matches;
@@ -15382,7 +13190,7 @@ module.exports = function parseLinkLabel(state, start, disableNested) {
   return labelEnd;
 };
 
-},{}],114:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 // Parse link title
 //
 'use strict';
@@ -15437,7 +13245,7 @@ module.exports = function parseLinkTitle(str, pos, max) {
   return result;
 };
 
-},{"../common/utils":110}],115:[function(require,module,exports){
+},{"../common/utils":111}],116:[function(require,module,exports){
 // Main perser class
 
 'use strict';
@@ -15997,7 +13805,7 @@ MarkdownIt.prototype.renderInline = function (src, env) {
 
 module.exports = MarkdownIt;
 
-},{"./common/utils":110,"./helpers":111,"./parser_block":116,"./parser_core":117,"./parser_inline":118,"./presets/commonmark":119,"./presets/default":120,"./presets/zero":121,"./renderer":122,"linkify-it":159,"mdurl":164,"punycode":14}],116:[function(require,module,exports){
+},{"./common/utils":111,"./helpers":112,"./parser_block":117,"./parser_core":118,"./parser_inline":119,"./presets/commonmark":120,"./presets/default":121,"./presets/zero":122,"./renderer":123,"linkify-it":160,"mdurl":165,"punycode":15}],117:[function(require,module,exports){
 /** internal
  * class ParserBlock
  *
@@ -16124,7 +13932,7 @@ ParserBlock.prototype.State = require('./rules_block/state_block');
 
 module.exports = ParserBlock;
 
-},{"./ruler":123,"./rules_block/blockquote":124,"./rules_block/code":125,"./rules_block/fence":126,"./rules_block/heading":127,"./rules_block/hr":128,"./rules_block/html_block":129,"./rules_block/lheading":130,"./rules_block/list":131,"./rules_block/paragraph":132,"./rules_block/reference":133,"./rules_block/state_block":134,"./rules_block/table":135}],117:[function(require,module,exports){
+},{"./ruler":124,"./rules_block/blockquote":125,"./rules_block/code":126,"./rules_block/fence":127,"./rules_block/heading":128,"./rules_block/hr":129,"./rules_block/html_block":130,"./rules_block/lheading":131,"./rules_block/list":132,"./rules_block/paragraph":133,"./rules_block/reference":134,"./rules_block/state_block":135,"./rules_block/table":136}],118:[function(require,module,exports){
 /** internal
  * class Core
  *
@@ -16184,7 +13992,7 @@ Core.prototype.State = require('./rules_core/state_core');
 
 module.exports = Core;
 
-},{"./ruler":123,"./rules_core/block":136,"./rules_core/inline":137,"./rules_core/linkify":138,"./rules_core/normalize":139,"./rules_core/replacements":140,"./rules_core/smartquotes":141,"./rules_core/state_core":142}],118:[function(require,module,exports){
+},{"./ruler":124,"./rules_core/block":137,"./rules_core/inline":138,"./rules_core/linkify":139,"./rules_core/normalize":140,"./rules_core/replacements":141,"./rules_core/smartquotes":142,"./rules_core/state_core":143}],119:[function(require,module,exports){
 /** internal
  * class ParserInline
  *
@@ -16346,7 +14154,7 @@ ParserInline.prototype.State = require('./rules_inline/state_inline');
 
 module.exports = ParserInline;
 
-},{"./ruler":123,"./rules_inline/autolink":143,"./rules_inline/backticks":144,"./rules_inline/balance_pairs":145,"./rules_inline/emphasis":146,"./rules_inline/entity":147,"./rules_inline/escape":148,"./rules_inline/html_inline":149,"./rules_inline/image":150,"./rules_inline/link":151,"./rules_inline/newline":152,"./rules_inline/state_inline":153,"./rules_inline/strikethrough":154,"./rules_inline/text":155,"./rules_inline/text_collapse":156}],119:[function(require,module,exports){
+},{"./ruler":124,"./rules_inline/autolink":144,"./rules_inline/backticks":145,"./rules_inline/balance_pairs":146,"./rules_inline/emphasis":147,"./rules_inline/entity":148,"./rules_inline/escape":149,"./rules_inline/html_inline":150,"./rules_inline/image":151,"./rules_inline/link":152,"./rules_inline/newline":153,"./rules_inline/state_inline":154,"./rules_inline/strikethrough":155,"./rules_inline/text":156,"./rules_inline/text_collapse":157}],120:[function(require,module,exports){
 // Commonmark default options
 
 'use strict';
@@ -16427,7 +14235,7 @@ module.exports = {
   }
 };
 
-},{}],120:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 // markdown-it default options
 
 'use strict';
@@ -16469,7 +14277,7 @@ module.exports = {
   }
 };
 
-},{}],121:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 // "Zero" preset, with nothing enabled. Useful for manual configuring of simple
 // modes. For example, to parse bold/italic only.
 
@@ -16532,7 +14340,7 @@ module.exports = {
   }
 };
 
-},{}],122:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 /**
  * class Renderer
  *
@@ -16835,7 +14643,7 @@ Renderer.prototype.render = function (tokens, options, env) {
 
 module.exports = Renderer;
 
-},{"./common/utils":110}],123:[function(require,module,exports){
+},{"./common/utils":111}],124:[function(require,module,exports){
 /**
  * class Ruler
  *
@@ -17189,7 +14997,7 @@ Ruler.prototype.getRules = function (chainName) {
 
 module.exports = Ruler;
 
-},{}],124:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 // Block quotes
 
 'use strict';
@@ -17365,7 +15173,7 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
   return true;
 };
 
-},{"../common/utils":110}],125:[function(require,module,exports){
+},{"../common/utils":111}],126:[function(require,module,exports){
 // Code block (4 spaces padded)
 
 'use strict';
@@ -17400,7 +15208,7 @@ module.exports = function code(state, startLine, endLine/*, silent*/) {
   return true;
 };
 
-},{}],126:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 // fences (``` lang, ~~~ lang)
 
 'use strict';
@@ -17493,7 +15301,7 @@ module.exports = function fence(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],127:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 // heading (#, ##, ...)
 
 'use strict';
@@ -17547,7 +15355,7 @@ module.exports = function heading(state, startLine, endLine, silent) {
   return true;
 };
 
-},{"../common/utils":110}],128:[function(require,module,exports){
+},{"../common/utils":111}],129:[function(require,module,exports){
 // Horizontal rule
 
 'use strict';
@@ -17591,7 +15399,7 @@ module.exports = function hr(state, startLine, endLine, silent) {
   return true;
 };
 
-},{"../common/utils":110}],129:[function(require,module,exports){
+},{"../common/utils":111}],130:[function(require,module,exports){
 // HTML block
 
 'use strict';
@@ -17664,7 +15472,7 @@ module.exports = function html_block(state, startLine, endLine, silent) {
   return true;
 };
 
-},{"../common/html_blocks":107,"../common/html_re":108}],130:[function(require,module,exports){
+},{"../common/html_blocks":108,"../common/html_re":109}],131:[function(require,module,exports){
 // lheading (---, ===)
 
 'use strict';
@@ -17716,7 +15524,7 @@ module.exports = function lheading(state, startLine, endLine/*, silent*/) {
   return true;
 };
 
-},{}],131:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 // Lists
 
 'use strict';
@@ -18017,7 +15825,7 @@ module.exports = function list(state, startLine, endLine, silent) {
   return true;
 };
 
-},{"../common/utils":110}],132:[function(require,module,exports){
+},{"../common/utils":111}],133:[function(require,module,exports){
 // Paragraph
 
 'use strict';
@@ -18066,7 +15874,7 @@ module.exports = function paragraph(state, startLine/*, endLine*/) {
   return true;
 };
 
-},{}],133:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 'use strict';
 
 
@@ -18259,7 +16067,7 @@ module.exports = function reference(state, startLine, _endLine, silent) {
   return true;
 };
 
-},{"../common/utils":110,"../helpers/parse_link_destination":112,"../helpers/parse_link_title":114}],134:[function(require,module,exports){
+},{"../common/utils":111,"../helpers/parse_link_destination":113,"../helpers/parse_link_title":115}],135:[function(require,module,exports){
 // Parser state class
 
 'use strict';
@@ -18468,7 +16276,7 @@ StateBlock.prototype.Token = Token;
 
 module.exports = StateBlock;
 
-},{"../common/utils":110,"../token":157}],135:[function(require,module,exports){
+},{"../common/utils":111,"../token":158}],136:[function(require,module,exports){
 // GFM table, non-standard
 
 'use strict';
@@ -18640,7 +16448,7 @@ module.exports = function table(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],136:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 'use strict';
 
 
@@ -18658,7 +16466,7 @@ module.exports = function block(state) {
   }
 };
 
-},{}],137:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 'use strict';
 
 module.exports = function inline(state) {
@@ -18673,7 +16481,7 @@ module.exports = function inline(state) {
   }
 };
 
-},{}],138:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 // Replace link-like texts with link nodes.
 //
 // Currently restricted by `md.validateLink()` to http/https/ftp
@@ -18808,7 +16616,7 @@ module.exports = function linkify(state) {
   }
 };
 
-},{"../common/utils":110}],139:[function(require,module,exports){
+},{"../common/utils":111}],140:[function(require,module,exports){
 // Normalize input string
 
 'use strict';
@@ -18830,7 +16638,7 @@ module.exports = function inline(state) {
   state.src = str;
 };
 
-},{}],140:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 // Simple typographyc replacements
 //
 // (c) (C) → ©
@@ -18921,7 +16729,7 @@ module.exports = function replace(state) {
   }
 };
 
-},{}],141:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 // Convert straight quotation marks to typographic ones
 //
 'use strict';
@@ -19088,7 +16896,7 @@ module.exports = function smartquotes(state) {
   }
 };
 
-},{"../common/utils":110}],142:[function(require,module,exports){
+},{"../common/utils":111}],143:[function(require,module,exports){
 // Core state object
 //
 'use strict';
@@ -19110,7 +16918,7 @@ StateCore.prototype.Token = Token;
 
 module.exports = StateCore;
 
-},{"../token":157}],143:[function(require,module,exports){
+},{"../token":158}],144:[function(require,module,exports){
 // Process autolinks '<protocol:...>'
 
 'use strict';
@@ -19184,7 +16992,7 @@ module.exports = function autolink(state, silent) {
   return false;
 };
 
-},{"../common/url_schemas":109}],144:[function(require,module,exports){
+},{"../common/url_schemas":110}],145:[function(require,module,exports){
 // Parse backticks
 
 'use strict';
@@ -19229,7 +17037,7 @@ module.exports = function backtick(state, silent) {
   return true;
 };
 
-},{}],145:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 // For each opening emphasis-like marker find a matching closing one
 //
 'use strict';
@@ -19267,7 +17075,7 @@ module.exports = function link_pairs(state) {
   }
 };
 
-},{}],146:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 // Process *this* and _that_
 //
 'use strict';
@@ -19392,7 +17200,7 @@ module.exports.postProcess = function emphasis(state) {
   }
 };
 
-},{}],147:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 // Process html entity - &#123;, &#xAF;, &quot;, ...
 
 'use strict';
@@ -19442,7 +17250,7 @@ module.exports = function entity(state, silent) {
   return true;
 };
 
-},{"../common/entities":106,"../common/utils":110}],148:[function(require,module,exports){
+},{"../common/entities":107,"../common/utils":111}],149:[function(require,module,exports){
 // Proceess escaped chars and hardbreaks
 
 'use strict';
@@ -19496,7 +17304,7 @@ module.exports = function escape(state, silent) {
   return true;
 };
 
-},{"../common/utils":110}],149:[function(require,module,exports){
+},{"../common/utils":111}],150:[function(require,module,exports){
 // Process html tags
 
 'use strict';
@@ -19545,7 +17353,7 @@ module.exports = function html_inline(state, silent) {
   return true;
 };
 
-},{"../common/html_re":108}],150:[function(require,module,exports){
+},{"../common/html_re":109}],151:[function(require,module,exports){
 // Process ![image](<src> "title")
 
 'use strict';
@@ -19704,7 +17512,7 @@ module.exports = function image(state, silent) {
   return true;
 };
 
-},{"../common/utils":110,"../helpers/parse_link_destination":112,"../helpers/parse_link_label":113,"../helpers/parse_link_title":114}],151:[function(require,module,exports){
+},{"../common/utils":111,"../helpers/parse_link_destination":113,"../helpers/parse_link_label":114,"../helpers/parse_link_title":115}],152:[function(require,module,exports){
 // Process [link](<to> "stuff")
 
 'use strict';
@@ -19860,7 +17668,7 @@ module.exports = function link(state, silent) {
   return true;
 };
 
-},{"../common/utils":110,"../helpers/parse_link_destination":112,"../helpers/parse_link_label":113,"../helpers/parse_link_title":114}],152:[function(require,module,exports){
+},{"../common/utils":111,"../helpers/parse_link_destination":113,"../helpers/parse_link_label":114,"../helpers/parse_link_title":115}],153:[function(require,module,exports){
 // Proceess '\n'
 
 'use strict';
@@ -19901,7 +17709,7 @@ module.exports = function newline(state, silent) {
   return true;
 };
 
-},{}],153:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 // Inline parser state
 
 'use strict';
@@ -20033,7 +17841,7 @@ StateInline.prototype.Token = Token;
 
 module.exports = StateInline;
 
-},{"../common/utils":110,"../token":157}],154:[function(require,module,exports){
+},{"../common/utils":111,"../token":158}],155:[function(require,module,exports){
 // ~~strike through~~
 //
 'use strict';
@@ -20152,7 +17960,7 @@ module.exports.postProcess = function strikethrough(state) {
   }
 };
 
-},{}],155:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 // Skip text characters for text token, place those to pending buffer
 // and increment current pos
 
@@ -20243,7 +18051,7 @@ module.exports = function text(state, silent) {
   return true;
 };*/
 
-},{}],156:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 // Merge adjacent text nodes into one, and re-calculate all token levels
 //
 'use strict';
@@ -20278,7 +18086,7 @@ module.exports = function text_collapse(state) {
   }
 };
 
-},{}],157:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 // Token class
 
 'use strict';
@@ -20429,9 +18237,9 @@ Token.prototype.attrPush = function attrPush(attrData) {
 
 module.exports = Token;
 
-},{}],158:[function(require,module,exports){
-module.exports={"Aacute":"\u00C1","aacute":"\u00E1","Abreve":"\u0102","abreve":"\u0103","ac":"\u223E","acd":"\u223F","acE":"\u223E\u0333","Acirc":"\u00C2","acirc":"\u00E2","acute":"\u00B4","Acy":"\u0410","acy":"\u0430","AElig":"\u00C6","aelig":"\u00E6","af":"\u2061","Afr":"\uD835\uDD04","afr":"\uD835\uDD1E","Agrave":"\u00C0","agrave":"\u00E0","alefsym":"\u2135","aleph":"\u2135","Alpha":"\u0391","alpha":"\u03B1","Amacr":"\u0100","amacr":"\u0101","amalg":"\u2A3F","amp":"&","AMP":"&","andand":"\u2A55","And":"\u2A53","and":"\u2227","andd":"\u2A5C","andslope":"\u2A58","andv":"\u2A5A","ang":"\u2220","ange":"\u29A4","angle":"\u2220","angmsdaa":"\u29A8","angmsdab":"\u29A9","angmsdac":"\u29AA","angmsdad":"\u29AB","angmsdae":"\u29AC","angmsdaf":"\u29AD","angmsdag":"\u29AE","angmsdah":"\u29AF","angmsd":"\u2221","angrt":"\u221F","angrtvb":"\u22BE","angrtvbd":"\u299D","angsph":"\u2222","angst":"\u00C5","angzarr":"\u237C","Aogon":"\u0104","aogon":"\u0105","Aopf":"\uD835\uDD38","aopf":"\uD835\uDD52","apacir":"\u2A6F","ap":"\u2248","apE":"\u2A70","ape":"\u224A","apid":"\u224B","apos":"'","ApplyFunction":"\u2061","approx":"\u2248","approxeq":"\u224A","Aring":"\u00C5","aring":"\u00E5","Ascr":"\uD835\uDC9C","ascr":"\uD835\uDCB6","Assign":"\u2254","ast":"*","asymp":"\u2248","asympeq":"\u224D","Atilde":"\u00C3","atilde":"\u00E3","Auml":"\u00C4","auml":"\u00E4","awconint":"\u2233","awint":"\u2A11","backcong":"\u224C","backepsilon":"\u03F6","backprime":"\u2035","backsim":"\u223D","backsimeq":"\u22CD","Backslash":"\u2216","Barv":"\u2AE7","barvee":"\u22BD","barwed":"\u2305","Barwed":"\u2306","barwedge":"\u2305","bbrk":"\u23B5","bbrktbrk":"\u23B6","bcong":"\u224C","Bcy":"\u0411","bcy":"\u0431","bdquo":"\u201E","becaus":"\u2235","because":"\u2235","Because":"\u2235","bemptyv":"\u29B0","bepsi":"\u03F6","bernou":"\u212C","Bernoullis":"\u212C","Beta":"\u0392","beta":"\u03B2","beth":"\u2136","between":"\u226C","Bfr":"\uD835\uDD05","bfr":"\uD835\uDD1F","bigcap":"\u22C2","bigcirc":"\u25EF","bigcup":"\u22C3","bigodot":"\u2A00","bigoplus":"\u2A01","bigotimes":"\u2A02","bigsqcup":"\u2A06","bigstar":"\u2605","bigtriangledown":"\u25BD","bigtriangleup":"\u25B3","biguplus":"\u2A04","bigvee":"\u22C1","bigwedge":"\u22C0","bkarow":"\u290D","blacklozenge":"\u29EB","blacksquare":"\u25AA","blacktriangle":"\u25B4","blacktriangledown":"\u25BE","blacktriangleleft":"\u25C2","blacktriangleright":"\u25B8","blank":"\u2423","blk12":"\u2592","blk14":"\u2591","blk34":"\u2593","block":"\u2588","bne":"=\u20E5","bnequiv":"\u2261\u20E5","bNot":"\u2AED","bnot":"\u2310","Bopf":"\uD835\uDD39","bopf":"\uD835\uDD53","bot":"\u22A5","bottom":"\u22A5","bowtie":"\u22C8","boxbox":"\u29C9","boxdl":"\u2510","boxdL":"\u2555","boxDl":"\u2556","boxDL":"\u2557","boxdr":"\u250C","boxdR":"\u2552","boxDr":"\u2553","boxDR":"\u2554","boxh":"\u2500","boxH":"\u2550","boxhd":"\u252C","boxHd":"\u2564","boxhD":"\u2565","boxHD":"\u2566","boxhu":"\u2534","boxHu":"\u2567","boxhU":"\u2568","boxHU":"\u2569","boxminus":"\u229F","boxplus":"\u229E","boxtimes":"\u22A0","boxul":"\u2518","boxuL":"\u255B","boxUl":"\u255C","boxUL":"\u255D","boxur":"\u2514","boxuR":"\u2558","boxUr":"\u2559","boxUR":"\u255A","boxv":"\u2502","boxV":"\u2551","boxvh":"\u253C","boxvH":"\u256A","boxVh":"\u256B","boxVH":"\u256C","boxvl":"\u2524","boxvL":"\u2561","boxVl":"\u2562","boxVL":"\u2563","boxvr":"\u251C","boxvR":"\u255E","boxVr":"\u255F","boxVR":"\u2560","bprime":"\u2035","breve":"\u02D8","Breve":"\u02D8","brvbar":"\u00A6","bscr":"\uD835\uDCB7","Bscr":"\u212C","bsemi":"\u204F","bsim":"\u223D","bsime":"\u22CD","bsolb":"\u29C5","bsol":"\\","bsolhsub":"\u27C8","bull":"\u2022","bullet":"\u2022","bump":"\u224E","bumpE":"\u2AAE","bumpe":"\u224F","Bumpeq":"\u224E","bumpeq":"\u224F","Cacute":"\u0106","cacute":"\u0107","capand":"\u2A44","capbrcup":"\u2A49","capcap":"\u2A4B","cap":"\u2229","Cap":"\u22D2","capcup":"\u2A47","capdot":"\u2A40","CapitalDifferentialD":"\u2145","caps":"\u2229\uFE00","caret":"\u2041","caron":"\u02C7","Cayleys":"\u212D","ccaps":"\u2A4D","Ccaron":"\u010C","ccaron":"\u010D","Ccedil":"\u00C7","ccedil":"\u00E7","Ccirc":"\u0108","ccirc":"\u0109","Cconint":"\u2230","ccups":"\u2A4C","ccupssm":"\u2A50","Cdot":"\u010A","cdot":"\u010B","cedil":"\u00B8","Cedilla":"\u00B8","cemptyv":"\u29B2","cent":"\u00A2","centerdot":"\u00B7","CenterDot":"\u00B7","cfr":"\uD835\uDD20","Cfr":"\u212D","CHcy":"\u0427","chcy":"\u0447","check":"\u2713","checkmark":"\u2713","Chi":"\u03A7","chi":"\u03C7","circ":"\u02C6","circeq":"\u2257","circlearrowleft":"\u21BA","circlearrowright":"\u21BB","circledast":"\u229B","circledcirc":"\u229A","circleddash":"\u229D","CircleDot":"\u2299","circledR":"\u00AE","circledS":"\u24C8","CircleMinus":"\u2296","CirclePlus":"\u2295","CircleTimes":"\u2297","cir":"\u25CB","cirE":"\u29C3","cire":"\u2257","cirfnint":"\u2A10","cirmid":"\u2AEF","cirscir":"\u29C2","ClockwiseContourIntegral":"\u2232","CloseCurlyDoubleQuote":"\u201D","CloseCurlyQuote":"\u2019","clubs":"\u2663","clubsuit":"\u2663","colon":":","Colon":"\u2237","Colone":"\u2A74","colone":"\u2254","coloneq":"\u2254","comma":",","commat":"@","comp":"\u2201","compfn":"\u2218","complement":"\u2201","complexes":"\u2102","cong":"\u2245","congdot":"\u2A6D","Congruent":"\u2261","conint":"\u222E","Conint":"\u222F","ContourIntegral":"\u222E","copf":"\uD835\uDD54","Copf":"\u2102","coprod":"\u2210","Coproduct":"\u2210","copy":"\u00A9","COPY":"\u00A9","copysr":"\u2117","CounterClockwiseContourIntegral":"\u2233","crarr":"\u21B5","cross":"\u2717","Cross":"\u2A2F","Cscr":"\uD835\uDC9E","cscr":"\uD835\uDCB8","csub":"\u2ACF","csube":"\u2AD1","csup":"\u2AD0","csupe":"\u2AD2","ctdot":"\u22EF","cudarrl":"\u2938","cudarrr":"\u2935","cuepr":"\u22DE","cuesc":"\u22DF","cularr":"\u21B6","cularrp":"\u293D","cupbrcap":"\u2A48","cupcap":"\u2A46","CupCap":"\u224D","cup":"\u222A","Cup":"\u22D3","cupcup":"\u2A4A","cupdot":"\u228D","cupor":"\u2A45","cups":"\u222A\uFE00","curarr":"\u21B7","curarrm":"\u293C","curlyeqprec":"\u22DE","curlyeqsucc":"\u22DF","curlyvee":"\u22CE","curlywedge":"\u22CF","curren":"\u00A4","curvearrowleft":"\u21B6","curvearrowright":"\u21B7","cuvee":"\u22CE","cuwed":"\u22CF","cwconint":"\u2232","cwint":"\u2231","cylcty":"\u232D","dagger":"\u2020","Dagger":"\u2021","daleth":"\u2138","darr":"\u2193","Darr":"\u21A1","dArr":"\u21D3","dash":"\u2010","Dashv":"\u2AE4","dashv":"\u22A3","dbkarow":"\u290F","dblac":"\u02DD","Dcaron":"\u010E","dcaron":"\u010F","Dcy":"\u0414","dcy":"\u0434","ddagger":"\u2021","ddarr":"\u21CA","DD":"\u2145","dd":"\u2146","DDotrahd":"\u2911","ddotseq":"\u2A77","deg":"\u00B0","Del":"\u2207","Delta":"\u0394","delta":"\u03B4","demptyv":"\u29B1","dfisht":"\u297F","Dfr":"\uD835\uDD07","dfr":"\uD835\uDD21","dHar":"\u2965","dharl":"\u21C3","dharr":"\u21C2","DiacriticalAcute":"\u00B4","DiacriticalDot":"\u02D9","DiacriticalDoubleAcute":"\u02DD","DiacriticalGrave":"`","DiacriticalTilde":"\u02DC","diam":"\u22C4","diamond":"\u22C4","Diamond":"\u22C4","diamondsuit":"\u2666","diams":"\u2666","die":"\u00A8","DifferentialD":"\u2146","digamma":"\u03DD","disin":"\u22F2","div":"\u00F7","divide":"\u00F7","divideontimes":"\u22C7","divonx":"\u22C7","DJcy":"\u0402","djcy":"\u0452","dlcorn":"\u231E","dlcrop":"\u230D","dollar":"$","Dopf":"\uD835\uDD3B","dopf":"\uD835\uDD55","Dot":"\u00A8","dot":"\u02D9","DotDot":"\u20DC","doteq":"\u2250","doteqdot":"\u2251","DotEqual":"\u2250","dotminus":"\u2238","dotplus":"\u2214","dotsquare":"\u22A1","doublebarwedge":"\u2306","DoubleContourIntegral":"\u222F","DoubleDot":"\u00A8","DoubleDownArrow":"\u21D3","DoubleLeftArrow":"\u21D0","DoubleLeftRightArrow":"\u21D4","DoubleLeftTee":"\u2AE4","DoubleLongLeftArrow":"\u27F8","DoubleLongLeftRightArrow":"\u27FA","DoubleLongRightArrow":"\u27F9","DoubleRightArrow":"\u21D2","DoubleRightTee":"\u22A8","DoubleUpArrow":"\u21D1","DoubleUpDownArrow":"\u21D5","DoubleVerticalBar":"\u2225","DownArrowBar":"\u2913","downarrow":"\u2193","DownArrow":"\u2193","Downarrow":"\u21D3","DownArrowUpArrow":"\u21F5","DownBreve":"\u0311","downdownarrows":"\u21CA","downharpoonleft":"\u21C3","downharpoonright":"\u21C2","DownLeftRightVector":"\u2950","DownLeftTeeVector":"\u295E","DownLeftVectorBar":"\u2956","DownLeftVector":"\u21BD","DownRightTeeVector":"\u295F","DownRightVectorBar":"\u2957","DownRightVector":"\u21C1","DownTeeArrow":"\u21A7","DownTee":"\u22A4","drbkarow":"\u2910","drcorn":"\u231F","drcrop":"\u230C","Dscr":"\uD835\uDC9F","dscr":"\uD835\uDCB9","DScy":"\u0405","dscy":"\u0455","dsol":"\u29F6","Dstrok":"\u0110","dstrok":"\u0111","dtdot":"\u22F1","dtri":"\u25BF","dtrif":"\u25BE","duarr":"\u21F5","duhar":"\u296F","dwangle":"\u29A6","DZcy":"\u040F","dzcy":"\u045F","dzigrarr":"\u27FF","Eacute":"\u00C9","eacute":"\u00E9","easter":"\u2A6E","Ecaron":"\u011A","ecaron":"\u011B","Ecirc":"\u00CA","ecirc":"\u00EA","ecir":"\u2256","ecolon":"\u2255","Ecy":"\u042D","ecy":"\u044D","eDDot":"\u2A77","Edot":"\u0116","edot":"\u0117","eDot":"\u2251","ee":"\u2147","efDot":"\u2252","Efr":"\uD835\uDD08","efr":"\uD835\uDD22","eg":"\u2A9A","Egrave":"\u00C8","egrave":"\u00E8","egs":"\u2A96","egsdot":"\u2A98","el":"\u2A99","Element":"\u2208","elinters":"\u23E7","ell":"\u2113","els":"\u2A95","elsdot":"\u2A97","Emacr":"\u0112","emacr":"\u0113","empty":"\u2205","emptyset":"\u2205","EmptySmallSquare":"\u25FB","emptyv":"\u2205","EmptyVerySmallSquare":"\u25AB","emsp13":"\u2004","emsp14":"\u2005","emsp":"\u2003","ENG":"\u014A","eng":"\u014B","ensp":"\u2002","Eogon":"\u0118","eogon":"\u0119","Eopf":"\uD835\uDD3C","eopf":"\uD835\uDD56","epar":"\u22D5","eparsl":"\u29E3","eplus":"\u2A71","epsi":"\u03B5","Epsilon":"\u0395","epsilon":"\u03B5","epsiv":"\u03F5","eqcirc":"\u2256","eqcolon":"\u2255","eqsim":"\u2242","eqslantgtr":"\u2A96","eqslantless":"\u2A95","Equal":"\u2A75","equals":"=","EqualTilde":"\u2242","equest":"\u225F","Equilibrium":"\u21CC","equiv":"\u2261","equivDD":"\u2A78","eqvparsl":"\u29E5","erarr":"\u2971","erDot":"\u2253","escr":"\u212F","Escr":"\u2130","esdot":"\u2250","Esim":"\u2A73","esim":"\u2242","Eta":"\u0397","eta":"\u03B7","ETH":"\u00D0","eth":"\u00F0","Euml":"\u00CB","euml":"\u00EB","euro":"\u20AC","excl":"!","exist":"\u2203","Exists":"\u2203","expectation":"\u2130","exponentiale":"\u2147","ExponentialE":"\u2147","fallingdotseq":"\u2252","Fcy":"\u0424","fcy":"\u0444","female":"\u2640","ffilig":"\uFB03","fflig":"\uFB00","ffllig":"\uFB04","Ffr":"\uD835\uDD09","ffr":"\uD835\uDD23","filig":"\uFB01","FilledSmallSquare":"\u25FC","FilledVerySmallSquare":"\u25AA","fjlig":"fj","flat":"\u266D","fllig":"\uFB02","fltns":"\u25B1","fnof":"\u0192","Fopf":"\uD835\uDD3D","fopf":"\uD835\uDD57","forall":"\u2200","ForAll":"\u2200","fork":"\u22D4","forkv":"\u2AD9","Fouriertrf":"\u2131","fpartint":"\u2A0D","frac12":"\u00BD","frac13":"\u2153","frac14":"\u00BC","frac15":"\u2155","frac16":"\u2159","frac18":"\u215B","frac23":"\u2154","frac25":"\u2156","frac34":"\u00BE","frac35":"\u2157","frac38":"\u215C","frac45":"\u2158","frac56":"\u215A","frac58":"\u215D","frac78":"\u215E","frasl":"\u2044","frown":"\u2322","fscr":"\uD835\uDCBB","Fscr":"\u2131","gacute":"\u01F5","Gamma":"\u0393","gamma":"\u03B3","Gammad":"\u03DC","gammad":"\u03DD","gap":"\u2A86","Gbreve":"\u011E","gbreve":"\u011F","Gcedil":"\u0122","Gcirc":"\u011C","gcirc":"\u011D","Gcy":"\u0413","gcy":"\u0433","Gdot":"\u0120","gdot":"\u0121","ge":"\u2265","gE":"\u2267","gEl":"\u2A8C","gel":"\u22DB","geq":"\u2265","geqq":"\u2267","geqslant":"\u2A7E","gescc":"\u2AA9","ges":"\u2A7E","gesdot":"\u2A80","gesdoto":"\u2A82","gesdotol":"\u2A84","gesl":"\u22DB\uFE00","gesles":"\u2A94","Gfr":"\uD835\uDD0A","gfr":"\uD835\uDD24","gg":"\u226B","Gg":"\u22D9","ggg":"\u22D9","gimel":"\u2137","GJcy":"\u0403","gjcy":"\u0453","gla":"\u2AA5","gl":"\u2277","glE":"\u2A92","glj":"\u2AA4","gnap":"\u2A8A","gnapprox":"\u2A8A","gne":"\u2A88","gnE":"\u2269","gneq":"\u2A88","gneqq":"\u2269","gnsim":"\u22E7","Gopf":"\uD835\uDD3E","gopf":"\uD835\uDD58","grave":"`","GreaterEqual":"\u2265","GreaterEqualLess":"\u22DB","GreaterFullEqual":"\u2267","GreaterGreater":"\u2AA2","GreaterLess":"\u2277","GreaterSlantEqual":"\u2A7E","GreaterTilde":"\u2273","Gscr":"\uD835\uDCA2","gscr":"\u210A","gsim":"\u2273","gsime":"\u2A8E","gsiml":"\u2A90","gtcc":"\u2AA7","gtcir":"\u2A7A","gt":">","GT":">","Gt":"\u226B","gtdot":"\u22D7","gtlPar":"\u2995","gtquest":"\u2A7C","gtrapprox":"\u2A86","gtrarr":"\u2978","gtrdot":"\u22D7","gtreqless":"\u22DB","gtreqqless":"\u2A8C","gtrless":"\u2277","gtrsim":"\u2273","gvertneqq":"\u2269\uFE00","gvnE":"\u2269\uFE00","Hacek":"\u02C7","hairsp":"\u200A","half":"\u00BD","hamilt":"\u210B","HARDcy":"\u042A","hardcy":"\u044A","harrcir":"\u2948","harr":"\u2194","hArr":"\u21D4","harrw":"\u21AD","Hat":"^","hbar":"\u210F","Hcirc":"\u0124","hcirc":"\u0125","hearts":"\u2665","heartsuit":"\u2665","hellip":"\u2026","hercon":"\u22B9","hfr":"\uD835\uDD25","Hfr":"\u210C","HilbertSpace":"\u210B","hksearow":"\u2925","hkswarow":"\u2926","hoarr":"\u21FF","homtht":"\u223B","hookleftarrow":"\u21A9","hookrightarrow":"\u21AA","hopf":"\uD835\uDD59","Hopf":"\u210D","horbar":"\u2015","HorizontalLine":"\u2500","hscr":"\uD835\uDCBD","Hscr":"\u210B","hslash":"\u210F","Hstrok":"\u0126","hstrok":"\u0127","HumpDownHump":"\u224E","HumpEqual":"\u224F","hybull":"\u2043","hyphen":"\u2010","Iacute":"\u00CD","iacute":"\u00ED","ic":"\u2063","Icirc":"\u00CE","icirc":"\u00EE","Icy":"\u0418","icy":"\u0438","Idot":"\u0130","IEcy":"\u0415","iecy":"\u0435","iexcl":"\u00A1","iff":"\u21D4","ifr":"\uD835\uDD26","Ifr":"\u2111","Igrave":"\u00CC","igrave":"\u00EC","ii":"\u2148","iiiint":"\u2A0C","iiint":"\u222D","iinfin":"\u29DC","iiota":"\u2129","IJlig":"\u0132","ijlig":"\u0133","Imacr":"\u012A","imacr":"\u012B","image":"\u2111","ImaginaryI":"\u2148","imagline":"\u2110","imagpart":"\u2111","imath":"\u0131","Im":"\u2111","imof":"\u22B7","imped":"\u01B5","Implies":"\u21D2","incare":"\u2105","in":"\u2208","infin":"\u221E","infintie":"\u29DD","inodot":"\u0131","intcal":"\u22BA","int":"\u222B","Int":"\u222C","integers":"\u2124","Integral":"\u222B","intercal":"\u22BA","Intersection":"\u22C2","intlarhk":"\u2A17","intprod":"\u2A3C","InvisibleComma":"\u2063","InvisibleTimes":"\u2062","IOcy":"\u0401","iocy":"\u0451","Iogon":"\u012E","iogon":"\u012F","Iopf":"\uD835\uDD40","iopf":"\uD835\uDD5A","Iota":"\u0399","iota":"\u03B9","iprod":"\u2A3C","iquest":"\u00BF","iscr":"\uD835\uDCBE","Iscr":"\u2110","isin":"\u2208","isindot":"\u22F5","isinE":"\u22F9","isins":"\u22F4","isinsv":"\u22F3","isinv":"\u2208","it":"\u2062","Itilde":"\u0128","itilde":"\u0129","Iukcy":"\u0406","iukcy":"\u0456","Iuml":"\u00CF","iuml":"\u00EF","Jcirc":"\u0134","jcirc":"\u0135","Jcy":"\u0419","jcy":"\u0439","Jfr":"\uD835\uDD0D","jfr":"\uD835\uDD27","jmath":"\u0237","Jopf":"\uD835\uDD41","jopf":"\uD835\uDD5B","Jscr":"\uD835\uDCA5","jscr":"\uD835\uDCBF","Jsercy":"\u0408","jsercy":"\u0458","Jukcy":"\u0404","jukcy":"\u0454","Kappa":"\u039A","kappa":"\u03BA","kappav":"\u03F0","Kcedil":"\u0136","kcedil":"\u0137","Kcy":"\u041A","kcy":"\u043A","Kfr":"\uD835\uDD0E","kfr":"\uD835\uDD28","kgreen":"\u0138","KHcy":"\u0425","khcy":"\u0445","KJcy":"\u040C","kjcy":"\u045C","Kopf":"\uD835\uDD42","kopf":"\uD835\uDD5C","Kscr":"\uD835\uDCA6","kscr":"\uD835\uDCC0","lAarr":"\u21DA","Lacute":"\u0139","lacute":"\u013A","laemptyv":"\u29B4","lagran":"\u2112","Lambda":"\u039B","lambda":"\u03BB","lang":"\u27E8","Lang":"\u27EA","langd":"\u2991","langle":"\u27E8","lap":"\u2A85","Laplacetrf":"\u2112","laquo":"\u00AB","larrb":"\u21E4","larrbfs":"\u291F","larr":"\u2190","Larr":"\u219E","lArr":"\u21D0","larrfs":"\u291D","larrhk":"\u21A9","larrlp":"\u21AB","larrpl":"\u2939","larrsim":"\u2973","larrtl":"\u21A2","latail":"\u2919","lAtail":"\u291B","lat":"\u2AAB","late":"\u2AAD","lates":"\u2AAD\uFE00","lbarr":"\u290C","lBarr":"\u290E","lbbrk":"\u2772","lbrace":"{","lbrack":"[","lbrke":"\u298B","lbrksld":"\u298F","lbrkslu":"\u298D","Lcaron":"\u013D","lcaron":"\u013E","Lcedil":"\u013B","lcedil":"\u013C","lceil":"\u2308","lcub":"{","Lcy":"\u041B","lcy":"\u043B","ldca":"\u2936","ldquo":"\u201C","ldquor":"\u201E","ldrdhar":"\u2967","ldrushar":"\u294B","ldsh":"\u21B2","le":"\u2264","lE":"\u2266","LeftAngleBracket":"\u27E8","LeftArrowBar":"\u21E4","leftarrow":"\u2190","LeftArrow":"\u2190","Leftarrow":"\u21D0","LeftArrowRightArrow":"\u21C6","leftarrowtail":"\u21A2","LeftCeiling":"\u2308","LeftDoubleBracket":"\u27E6","LeftDownTeeVector":"\u2961","LeftDownVectorBar":"\u2959","LeftDownVector":"\u21C3","LeftFloor":"\u230A","leftharpoondown":"\u21BD","leftharpoonup":"\u21BC","leftleftarrows":"\u21C7","leftrightarrow":"\u2194","LeftRightArrow":"\u2194","Leftrightarrow":"\u21D4","leftrightarrows":"\u21C6","leftrightharpoons":"\u21CB","leftrightsquigarrow":"\u21AD","LeftRightVector":"\u294E","LeftTeeArrow":"\u21A4","LeftTee":"\u22A3","LeftTeeVector":"\u295A","leftthreetimes":"\u22CB","LeftTriangleBar":"\u29CF","LeftTriangle":"\u22B2","LeftTriangleEqual":"\u22B4","LeftUpDownVector":"\u2951","LeftUpTeeVector":"\u2960","LeftUpVectorBar":"\u2958","LeftUpVector":"\u21BF","LeftVectorBar":"\u2952","LeftVector":"\u21BC","lEg":"\u2A8B","leg":"\u22DA","leq":"\u2264","leqq":"\u2266","leqslant":"\u2A7D","lescc":"\u2AA8","les":"\u2A7D","lesdot":"\u2A7F","lesdoto":"\u2A81","lesdotor":"\u2A83","lesg":"\u22DA\uFE00","lesges":"\u2A93","lessapprox":"\u2A85","lessdot":"\u22D6","lesseqgtr":"\u22DA","lesseqqgtr":"\u2A8B","LessEqualGreater":"\u22DA","LessFullEqual":"\u2266","LessGreater":"\u2276","lessgtr":"\u2276","LessLess":"\u2AA1","lesssim":"\u2272","LessSlantEqual":"\u2A7D","LessTilde":"\u2272","lfisht":"\u297C","lfloor":"\u230A","Lfr":"\uD835\uDD0F","lfr":"\uD835\uDD29","lg":"\u2276","lgE":"\u2A91","lHar":"\u2962","lhard":"\u21BD","lharu":"\u21BC","lharul":"\u296A","lhblk":"\u2584","LJcy":"\u0409","ljcy":"\u0459","llarr":"\u21C7","ll":"\u226A","Ll":"\u22D8","llcorner":"\u231E","Lleftarrow":"\u21DA","llhard":"\u296B","lltri":"\u25FA","Lmidot":"\u013F","lmidot":"\u0140","lmoustache":"\u23B0","lmoust":"\u23B0","lnap":"\u2A89","lnapprox":"\u2A89","lne":"\u2A87","lnE":"\u2268","lneq":"\u2A87","lneqq":"\u2268","lnsim":"\u22E6","loang":"\u27EC","loarr":"\u21FD","lobrk":"\u27E6","longleftarrow":"\u27F5","LongLeftArrow":"\u27F5","Longleftarrow":"\u27F8","longleftrightarrow":"\u27F7","LongLeftRightArrow":"\u27F7","Longleftrightarrow":"\u27FA","longmapsto":"\u27FC","longrightarrow":"\u27F6","LongRightArrow":"\u27F6","Longrightarrow":"\u27F9","looparrowleft":"\u21AB","looparrowright":"\u21AC","lopar":"\u2985","Lopf":"\uD835\uDD43","lopf":"\uD835\uDD5D","loplus":"\u2A2D","lotimes":"\u2A34","lowast":"\u2217","lowbar":"_","LowerLeftArrow":"\u2199","LowerRightArrow":"\u2198","loz":"\u25CA","lozenge":"\u25CA","lozf":"\u29EB","lpar":"(","lparlt":"\u2993","lrarr":"\u21C6","lrcorner":"\u231F","lrhar":"\u21CB","lrhard":"\u296D","lrm":"\u200E","lrtri":"\u22BF","lsaquo":"\u2039","lscr":"\uD835\uDCC1","Lscr":"\u2112","lsh":"\u21B0","Lsh":"\u21B0","lsim":"\u2272","lsime":"\u2A8D","lsimg":"\u2A8F","lsqb":"[","lsquo":"\u2018","lsquor":"\u201A","Lstrok":"\u0141","lstrok":"\u0142","ltcc":"\u2AA6","ltcir":"\u2A79","lt":"<","LT":"<","Lt":"\u226A","ltdot":"\u22D6","lthree":"\u22CB","ltimes":"\u22C9","ltlarr":"\u2976","ltquest":"\u2A7B","ltri":"\u25C3","ltrie":"\u22B4","ltrif":"\u25C2","ltrPar":"\u2996","lurdshar":"\u294A","luruhar":"\u2966","lvertneqq":"\u2268\uFE00","lvnE":"\u2268\uFE00","macr":"\u00AF","male":"\u2642","malt":"\u2720","maltese":"\u2720","Map":"\u2905","map":"\u21A6","mapsto":"\u21A6","mapstodown":"\u21A7","mapstoleft":"\u21A4","mapstoup":"\u21A5","marker":"\u25AE","mcomma":"\u2A29","Mcy":"\u041C","mcy":"\u043C","mdash":"\u2014","mDDot":"\u223A","measuredangle":"\u2221","MediumSpace":"\u205F","Mellintrf":"\u2133","Mfr":"\uD835\uDD10","mfr":"\uD835\uDD2A","mho":"\u2127","micro":"\u00B5","midast":"*","midcir":"\u2AF0","mid":"\u2223","middot":"\u00B7","minusb":"\u229F","minus":"\u2212","minusd":"\u2238","minusdu":"\u2A2A","MinusPlus":"\u2213","mlcp":"\u2ADB","mldr":"\u2026","mnplus":"\u2213","models":"\u22A7","Mopf":"\uD835\uDD44","mopf":"\uD835\uDD5E","mp":"\u2213","mscr":"\uD835\uDCC2","Mscr":"\u2133","mstpos":"\u223E","Mu":"\u039C","mu":"\u03BC","multimap":"\u22B8","mumap":"\u22B8","nabla":"\u2207","Nacute":"\u0143","nacute":"\u0144","nang":"\u2220\u20D2","nap":"\u2249","napE":"\u2A70\u0338","napid":"\u224B\u0338","napos":"\u0149","napprox":"\u2249","natural":"\u266E","naturals":"\u2115","natur":"\u266E","nbsp":"\u00A0","nbump":"\u224E\u0338","nbumpe":"\u224F\u0338","ncap":"\u2A43","Ncaron":"\u0147","ncaron":"\u0148","Ncedil":"\u0145","ncedil":"\u0146","ncong":"\u2247","ncongdot":"\u2A6D\u0338","ncup":"\u2A42","Ncy":"\u041D","ncy":"\u043D","ndash":"\u2013","nearhk":"\u2924","nearr":"\u2197","neArr":"\u21D7","nearrow":"\u2197","ne":"\u2260","nedot":"\u2250\u0338","NegativeMediumSpace":"\u200B","NegativeThickSpace":"\u200B","NegativeThinSpace":"\u200B","NegativeVeryThinSpace":"\u200B","nequiv":"\u2262","nesear":"\u2928","nesim":"\u2242\u0338","NestedGreaterGreater":"\u226B","NestedLessLess":"\u226A","NewLine":"\n","nexist":"\u2204","nexists":"\u2204","Nfr":"\uD835\uDD11","nfr":"\uD835\uDD2B","ngE":"\u2267\u0338","nge":"\u2271","ngeq":"\u2271","ngeqq":"\u2267\u0338","ngeqslant":"\u2A7E\u0338","nges":"\u2A7E\u0338","nGg":"\u22D9\u0338","ngsim":"\u2275","nGt":"\u226B\u20D2","ngt":"\u226F","ngtr":"\u226F","nGtv":"\u226B\u0338","nharr":"\u21AE","nhArr":"\u21CE","nhpar":"\u2AF2","ni":"\u220B","nis":"\u22FC","nisd":"\u22FA","niv":"\u220B","NJcy":"\u040A","njcy":"\u045A","nlarr":"\u219A","nlArr":"\u21CD","nldr":"\u2025","nlE":"\u2266\u0338","nle":"\u2270","nleftarrow":"\u219A","nLeftarrow":"\u21CD","nleftrightarrow":"\u21AE","nLeftrightarrow":"\u21CE","nleq":"\u2270","nleqq":"\u2266\u0338","nleqslant":"\u2A7D\u0338","nles":"\u2A7D\u0338","nless":"\u226E","nLl":"\u22D8\u0338","nlsim":"\u2274","nLt":"\u226A\u20D2","nlt":"\u226E","nltri":"\u22EA","nltrie":"\u22EC","nLtv":"\u226A\u0338","nmid":"\u2224","NoBreak":"\u2060","NonBreakingSpace":"\u00A0","nopf":"\uD835\uDD5F","Nopf":"\u2115","Not":"\u2AEC","not":"\u00AC","NotCongruent":"\u2262","NotCupCap":"\u226D","NotDoubleVerticalBar":"\u2226","NotElement":"\u2209","NotEqual":"\u2260","NotEqualTilde":"\u2242\u0338","NotExists":"\u2204","NotGreater":"\u226F","NotGreaterEqual":"\u2271","NotGreaterFullEqual":"\u2267\u0338","NotGreaterGreater":"\u226B\u0338","NotGreaterLess":"\u2279","NotGreaterSlantEqual":"\u2A7E\u0338","NotGreaterTilde":"\u2275","NotHumpDownHump":"\u224E\u0338","NotHumpEqual":"\u224F\u0338","notin":"\u2209","notindot":"\u22F5\u0338","notinE":"\u22F9\u0338","notinva":"\u2209","notinvb":"\u22F7","notinvc":"\u22F6","NotLeftTriangleBar":"\u29CF\u0338","NotLeftTriangle":"\u22EA","NotLeftTriangleEqual":"\u22EC","NotLess":"\u226E","NotLessEqual":"\u2270","NotLessGreater":"\u2278","NotLessLess":"\u226A\u0338","NotLessSlantEqual":"\u2A7D\u0338","NotLessTilde":"\u2274","NotNestedGreaterGreater":"\u2AA2\u0338","NotNestedLessLess":"\u2AA1\u0338","notni":"\u220C","notniva":"\u220C","notnivb":"\u22FE","notnivc":"\u22FD","NotPrecedes":"\u2280","NotPrecedesEqual":"\u2AAF\u0338","NotPrecedesSlantEqual":"\u22E0","NotReverseElement":"\u220C","NotRightTriangleBar":"\u29D0\u0338","NotRightTriangle":"\u22EB","NotRightTriangleEqual":"\u22ED","NotSquareSubset":"\u228F\u0338","NotSquareSubsetEqual":"\u22E2","NotSquareSuperset":"\u2290\u0338","NotSquareSupersetEqual":"\u22E3","NotSubset":"\u2282\u20D2","NotSubsetEqual":"\u2288","NotSucceeds":"\u2281","NotSucceedsEqual":"\u2AB0\u0338","NotSucceedsSlantEqual":"\u22E1","NotSucceedsTilde":"\u227F\u0338","NotSuperset":"\u2283\u20D2","NotSupersetEqual":"\u2289","NotTilde":"\u2241","NotTildeEqual":"\u2244","NotTildeFullEqual":"\u2247","NotTildeTilde":"\u2249","NotVerticalBar":"\u2224","nparallel":"\u2226","npar":"\u2226","nparsl":"\u2AFD\u20E5","npart":"\u2202\u0338","npolint":"\u2A14","npr":"\u2280","nprcue":"\u22E0","nprec":"\u2280","npreceq":"\u2AAF\u0338","npre":"\u2AAF\u0338","nrarrc":"\u2933\u0338","nrarr":"\u219B","nrArr":"\u21CF","nrarrw":"\u219D\u0338","nrightarrow":"\u219B","nRightarrow":"\u21CF","nrtri":"\u22EB","nrtrie":"\u22ED","nsc":"\u2281","nsccue":"\u22E1","nsce":"\u2AB0\u0338","Nscr":"\uD835\uDCA9","nscr":"\uD835\uDCC3","nshortmid":"\u2224","nshortparallel":"\u2226","nsim":"\u2241","nsime":"\u2244","nsimeq":"\u2244","nsmid":"\u2224","nspar":"\u2226","nsqsube":"\u22E2","nsqsupe":"\u22E3","nsub":"\u2284","nsubE":"\u2AC5\u0338","nsube":"\u2288","nsubset":"\u2282\u20D2","nsubseteq":"\u2288","nsubseteqq":"\u2AC5\u0338","nsucc":"\u2281","nsucceq":"\u2AB0\u0338","nsup":"\u2285","nsupE":"\u2AC6\u0338","nsupe":"\u2289","nsupset":"\u2283\u20D2","nsupseteq":"\u2289","nsupseteqq":"\u2AC6\u0338","ntgl":"\u2279","Ntilde":"\u00D1","ntilde":"\u00F1","ntlg":"\u2278","ntriangleleft":"\u22EA","ntrianglelefteq":"\u22EC","ntriangleright":"\u22EB","ntrianglerighteq":"\u22ED","Nu":"\u039D","nu":"\u03BD","num":"#","numero":"\u2116","numsp":"\u2007","nvap":"\u224D\u20D2","nvdash":"\u22AC","nvDash":"\u22AD","nVdash":"\u22AE","nVDash":"\u22AF","nvge":"\u2265\u20D2","nvgt":">\u20D2","nvHarr":"\u2904","nvinfin":"\u29DE","nvlArr":"\u2902","nvle":"\u2264\u20D2","nvlt":"<\u20D2","nvltrie":"\u22B4\u20D2","nvrArr":"\u2903","nvrtrie":"\u22B5\u20D2","nvsim":"\u223C\u20D2","nwarhk":"\u2923","nwarr":"\u2196","nwArr":"\u21D6","nwarrow":"\u2196","nwnear":"\u2927","Oacute":"\u00D3","oacute":"\u00F3","oast":"\u229B","Ocirc":"\u00D4","ocirc":"\u00F4","ocir":"\u229A","Ocy":"\u041E","ocy":"\u043E","odash":"\u229D","Odblac":"\u0150","odblac":"\u0151","odiv":"\u2A38","odot":"\u2299","odsold":"\u29BC","OElig":"\u0152","oelig":"\u0153","ofcir":"\u29BF","Ofr":"\uD835\uDD12","ofr":"\uD835\uDD2C","ogon":"\u02DB","Ograve":"\u00D2","ograve":"\u00F2","ogt":"\u29C1","ohbar":"\u29B5","ohm":"\u03A9","oint":"\u222E","olarr":"\u21BA","olcir":"\u29BE","olcross":"\u29BB","oline":"\u203E","olt":"\u29C0","Omacr":"\u014C","omacr":"\u014D","Omega":"\u03A9","omega":"\u03C9","Omicron":"\u039F","omicron":"\u03BF","omid":"\u29B6","ominus":"\u2296","Oopf":"\uD835\uDD46","oopf":"\uD835\uDD60","opar":"\u29B7","OpenCurlyDoubleQuote":"\u201C","OpenCurlyQuote":"\u2018","operp":"\u29B9","oplus":"\u2295","orarr":"\u21BB","Or":"\u2A54","or":"\u2228","ord":"\u2A5D","order":"\u2134","orderof":"\u2134","ordf":"\u00AA","ordm":"\u00BA","origof":"\u22B6","oror":"\u2A56","orslope":"\u2A57","orv":"\u2A5B","oS":"\u24C8","Oscr":"\uD835\uDCAA","oscr":"\u2134","Oslash":"\u00D8","oslash":"\u00F8","osol":"\u2298","Otilde":"\u00D5","otilde":"\u00F5","otimesas":"\u2A36","Otimes":"\u2A37","otimes":"\u2297","Ouml":"\u00D6","ouml":"\u00F6","ovbar":"\u233D","OverBar":"\u203E","OverBrace":"\u23DE","OverBracket":"\u23B4","OverParenthesis":"\u23DC","para":"\u00B6","parallel":"\u2225","par":"\u2225","parsim":"\u2AF3","parsl":"\u2AFD","part":"\u2202","PartialD":"\u2202","Pcy":"\u041F","pcy":"\u043F","percnt":"%","period":".","permil":"\u2030","perp":"\u22A5","pertenk":"\u2031","Pfr":"\uD835\uDD13","pfr":"\uD835\uDD2D","Phi":"\u03A6","phi":"\u03C6","phiv":"\u03D5","phmmat":"\u2133","phone":"\u260E","Pi":"\u03A0","pi":"\u03C0","pitchfork":"\u22D4","piv":"\u03D6","planck":"\u210F","planckh":"\u210E","plankv":"\u210F","plusacir":"\u2A23","plusb":"\u229E","pluscir":"\u2A22","plus":"+","plusdo":"\u2214","plusdu":"\u2A25","pluse":"\u2A72","PlusMinus":"\u00B1","plusmn":"\u00B1","plussim":"\u2A26","plustwo":"\u2A27","pm":"\u00B1","Poincareplane":"\u210C","pointint":"\u2A15","popf":"\uD835\uDD61","Popf":"\u2119","pound":"\u00A3","prap":"\u2AB7","Pr":"\u2ABB","pr":"\u227A","prcue":"\u227C","precapprox":"\u2AB7","prec":"\u227A","preccurlyeq":"\u227C","Precedes":"\u227A","PrecedesEqual":"\u2AAF","PrecedesSlantEqual":"\u227C","PrecedesTilde":"\u227E","preceq":"\u2AAF","precnapprox":"\u2AB9","precneqq":"\u2AB5","precnsim":"\u22E8","pre":"\u2AAF","prE":"\u2AB3","precsim":"\u227E","prime":"\u2032","Prime":"\u2033","primes":"\u2119","prnap":"\u2AB9","prnE":"\u2AB5","prnsim":"\u22E8","prod":"\u220F","Product":"\u220F","profalar":"\u232E","profline":"\u2312","profsurf":"\u2313","prop":"\u221D","Proportional":"\u221D","Proportion":"\u2237","propto":"\u221D","prsim":"\u227E","prurel":"\u22B0","Pscr":"\uD835\uDCAB","pscr":"\uD835\uDCC5","Psi":"\u03A8","psi":"\u03C8","puncsp":"\u2008","Qfr":"\uD835\uDD14","qfr":"\uD835\uDD2E","qint":"\u2A0C","qopf":"\uD835\uDD62","Qopf":"\u211A","qprime":"\u2057","Qscr":"\uD835\uDCAC","qscr":"\uD835\uDCC6","quaternions":"\u210D","quatint":"\u2A16","quest":"?","questeq":"\u225F","quot":"\"","QUOT":"\"","rAarr":"\u21DB","race":"\u223D\u0331","Racute":"\u0154","racute":"\u0155","radic":"\u221A","raemptyv":"\u29B3","rang":"\u27E9","Rang":"\u27EB","rangd":"\u2992","range":"\u29A5","rangle":"\u27E9","raquo":"\u00BB","rarrap":"\u2975","rarrb":"\u21E5","rarrbfs":"\u2920","rarrc":"\u2933","rarr":"\u2192","Rarr":"\u21A0","rArr":"\u21D2","rarrfs":"\u291E","rarrhk":"\u21AA","rarrlp":"\u21AC","rarrpl":"\u2945","rarrsim":"\u2974","Rarrtl":"\u2916","rarrtl":"\u21A3","rarrw":"\u219D","ratail":"\u291A","rAtail":"\u291C","ratio":"\u2236","rationals":"\u211A","rbarr":"\u290D","rBarr":"\u290F","RBarr":"\u2910","rbbrk":"\u2773","rbrace":"}","rbrack":"]","rbrke":"\u298C","rbrksld":"\u298E","rbrkslu":"\u2990","Rcaron":"\u0158","rcaron":"\u0159","Rcedil":"\u0156","rcedil":"\u0157","rceil":"\u2309","rcub":"}","Rcy":"\u0420","rcy":"\u0440","rdca":"\u2937","rdldhar":"\u2969","rdquo":"\u201D","rdquor":"\u201D","rdsh":"\u21B3","real":"\u211C","realine":"\u211B","realpart":"\u211C","reals":"\u211D","Re":"\u211C","rect":"\u25AD","reg":"\u00AE","REG":"\u00AE","ReverseElement":"\u220B","ReverseEquilibrium":"\u21CB","ReverseUpEquilibrium":"\u296F","rfisht":"\u297D","rfloor":"\u230B","rfr":"\uD835\uDD2F","Rfr":"\u211C","rHar":"\u2964","rhard":"\u21C1","rharu":"\u21C0","rharul":"\u296C","Rho":"\u03A1","rho":"\u03C1","rhov":"\u03F1","RightAngleBracket":"\u27E9","RightArrowBar":"\u21E5","rightarrow":"\u2192","RightArrow":"\u2192","Rightarrow":"\u21D2","RightArrowLeftArrow":"\u21C4","rightarrowtail":"\u21A3","RightCeiling":"\u2309","RightDoubleBracket":"\u27E7","RightDownTeeVector":"\u295D","RightDownVectorBar":"\u2955","RightDownVector":"\u21C2","RightFloor":"\u230B","rightharpoondown":"\u21C1","rightharpoonup":"\u21C0","rightleftarrows":"\u21C4","rightleftharpoons":"\u21CC","rightrightarrows":"\u21C9","rightsquigarrow":"\u219D","RightTeeArrow":"\u21A6","RightTee":"\u22A2","RightTeeVector":"\u295B","rightthreetimes":"\u22CC","RightTriangleBar":"\u29D0","RightTriangle":"\u22B3","RightTriangleEqual":"\u22B5","RightUpDownVector":"\u294F","RightUpTeeVector":"\u295C","RightUpVectorBar":"\u2954","RightUpVector":"\u21BE","RightVectorBar":"\u2953","RightVector":"\u21C0","ring":"\u02DA","risingdotseq":"\u2253","rlarr":"\u21C4","rlhar":"\u21CC","rlm":"\u200F","rmoustache":"\u23B1","rmoust":"\u23B1","rnmid":"\u2AEE","roang":"\u27ED","roarr":"\u21FE","robrk":"\u27E7","ropar":"\u2986","ropf":"\uD835\uDD63","Ropf":"\u211D","roplus":"\u2A2E","rotimes":"\u2A35","RoundImplies":"\u2970","rpar":")","rpargt":"\u2994","rppolint":"\u2A12","rrarr":"\u21C9","Rrightarrow":"\u21DB","rsaquo":"\u203A","rscr":"\uD835\uDCC7","Rscr":"\u211B","rsh":"\u21B1","Rsh":"\u21B1","rsqb":"]","rsquo":"\u2019","rsquor":"\u2019","rthree":"\u22CC","rtimes":"\u22CA","rtri":"\u25B9","rtrie":"\u22B5","rtrif":"\u25B8","rtriltri":"\u29CE","RuleDelayed":"\u29F4","ruluhar":"\u2968","rx":"\u211E","Sacute":"\u015A","sacute":"\u015B","sbquo":"\u201A","scap":"\u2AB8","Scaron":"\u0160","scaron":"\u0161","Sc":"\u2ABC","sc":"\u227B","sccue":"\u227D","sce":"\u2AB0","scE":"\u2AB4","Scedil":"\u015E","scedil":"\u015F","Scirc":"\u015C","scirc":"\u015D","scnap":"\u2ABA","scnE":"\u2AB6","scnsim":"\u22E9","scpolint":"\u2A13","scsim":"\u227F","Scy":"\u0421","scy":"\u0441","sdotb":"\u22A1","sdot":"\u22C5","sdote":"\u2A66","searhk":"\u2925","searr":"\u2198","seArr":"\u21D8","searrow":"\u2198","sect":"\u00A7","semi":";","seswar":"\u2929","setminus":"\u2216","setmn":"\u2216","sext":"\u2736","Sfr":"\uD835\uDD16","sfr":"\uD835\uDD30","sfrown":"\u2322","sharp":"\u266F","SHCHcy":"\u0429","shchcy":"\u0449","SHcy":"\u0428","shcy":"\u0448","ShortDownArrow":"\u2193","ShortLeftArrow":"\u2190","shortmid":"\u2223","shortparallel":"\u2225","ShortRightArrow":"\u2192","ShortUpArrow":"\u2191","shy":"\u00AD","Sigma":"\u03A3","sigma":"\u03C3","sigmaf":"\u03C2","sigmav":"\u03C2","sim":"\u223C","simdot":"\u2A6A","sime":"\u2243","simeq":"\u2243","simg":"\u2A9E","simgE":"\u2AA0","siml":"\u2A9D","simlE":"\u2A9F","simne":"\u2246","simplus":"\u2A24","simrarr":"\u2972","slarr":"\u2190","SmallCircle":"\u2218","smallsetminus":"\u2216","smashp":"\u2A33","smeparsl":"\u29E4","smid":"\u2223","smile":"\u2323","smt":"\u2AAA","smte":"\u2AAC","smtes":"\u2AAC\uFE00","SOFTcy":"\u042C","softcy":"\u044C","solbar":"\u233F","solb":"\u29C4","sol":"/","Sopf":"\uD835\uDD4A","sopf":"\uD835\uDD64","spades":"\u2660","spadesuit":"\u2660","spar":"\u2225","sqcap":"\u2293","sqcaps":"\u2293\uFE00","sqcup":"\u2294","sqcups":"\u2294\uFE00","Sqrt":"\u221A","sqsub":"\u228F","sqsube":"\u2291","sqsubset":"\u228F","sqsubseteq":"\u2291","sqsup":"\u2290","sqsupe":"\u2292","sqsupset":"\u2290","sqsupseteq":"\u2292","square":"\u25A1","Square":"\u25A1","SquareIntersection":"\u2293","SquareSubset":"\u228F","SquareSubsetEqual":"\u2291","SquareSuperset":"\u2290","SquareSupersetEqual":"\u2292","SquareUnion":"\u2294","squarf":"\u25AA","squ":"\u25A1","squf":"\u25AA","srarr":"\u2192","Sscr":"\uD835\uDCAE","sscr":"\uD835\uDCC8","ssetmn":"\u2216","ssmile":"\u2323","sstarf":"\u22C6","Star":"\u22C6","star":"\u2606","starf":"\u2605","straightepsilon":"\u03F5","straightphi":"\u03D5","strns":"\u00AF","sub":"\u2282","Sub":"\u22D0","subdot":"\u2ABD","subE":"\u2AC5","sube":"\u2286","subedot":"\u2AC3","submult":"\u2AC1","subnE":"\u2ACB","subne":"\u228A","subplus":"\u2ABF","subrarr":"\u2979","subset":"\u2282","Subset":"\u22D0","subseteq":"\u2286","subseteqq":"\u2AC5","SubsetEqual":"\u2286","subsetneq":"\u228A","subsetneqq":"\u2ACB","subsim":"\u2AC7","subsub":"\u2AD5","subsup":"\u2AD3","succapprox":"\u2AB8","succ":"\u227B","succcurlyeq":"\u227D","Succeeds":"\u227B","SucceedsEqual":"\u2AB0","SucceedsSlantEqual":"\u227D","SucceedsTilde":"\u227F","succeq":"\u2AB0","succnapprox":"\u2ABA","succneqq":"\u2AB6","succnsim":"\u22E9","succsim":"\u227F","SuchThat":"\u220B","sum":"\u2211","Sum":"\u2211","sung":"\u266A","sup1":"\u00B9","sup2":"\u00B2","sup3":"\u00B3","sup":"\u2283","Sup":"\u22D1","supdot":"\u2ABE","supdsub":"\u2AD8","supE":"\u2AC6","supe":"\u2287","supedot":"\u2AC4","Superset":"\u2283","SupersetEqual":"\u2287","suphsol":"\u27C9","suphsub":"\u2AD7","suplarr":"\u297B","supmult":"\u2AC2","supnE":"\u2ACC","supne":"\u228B","supplus":"\u2AC0","supset":"\u2283","Supset":"\u22D1","supseteq":"\u2287","supseteqq":"\u2AC6","supsetneq":"\u228B","supsetneqq":"\u2ACC","supsim":"\u2AC8","supsub":"\u2AD4","supsup":"\u2AD6","swarhk":"\u2926","swarr":"\u2199","swArr":"\u21D9","swarrow":"\u2199","swnwar":"\u292A","szlig":"\u00DF","Tab":"\t","target":"\u2316","Tau":"\u03A4","tau":"\u03C4","tbrk":"\u23B4","Tcaron":"\u0164","tcaron":"\u0165","Tcedil":"\u0162","tcedil":"\u0163","Tcy":"\u0422","tcy":"\u0442","tdot":"\u20DB","telrec":"\u2315","Tfr":"\uD835\uDD17","tfr":"\uD835\uDD31","there4":"\u2234","therefore":"\u2234","Therefore":"\u2234","Theta":"\u0398","theta":"\u03B8","thetasym":"\u03D1","thetav":"\u03D1","thickapprox":"\u2248","thicksim":"\u223C","ThickSpace":"\u205F\u200A","ThinSpace":"\u2009","thinsp":"\u2009","thkap":"\u2248","thksim":"\u223C","THORN":"\u00DE","thorn":"\u00FE","tilde":"\u02DC","Tilde":"\u223C","TildeEqual":"\u2243","TildeFullEqual":"\u2245","TildeTilde":"\u2248","timesbar":"\u2A31","timesb":"\u22A0","times":"\u00D7","timesd":"\u2A30","tint":"\u222D","toea":"\u2928","topbot":"\u2336","topcir":"\u2AF1","top":"\u22A4","Topf":"\uD835\uDD4B","topf":"\uD835\uDD65","topfork":"\u2ADA","tosa":"\u2929","tprime":"\u2034","trade":"\u2122","TRADE":"\u2122","triangle":"\u25B5","triangledown":"\u25BF","triangleleft":"\u25C3","trianglelefteq":"\u22B4","triangleq":"\u225C","triangleright":"\u25B9","trianglerighteq":"\u22B5","tridot":"\u25EC","trie":"\u225C","triminus":"\u2A3A","TripleDot":"\u20DB","triplus":"\u2A39","trisb":"\u29CD","tritime":"\u2A3B","trpezium":"\u23E2","Tscr":"\uD835\uDCAF","tscr":"\uD835\uDCC9","TScy":"\u0426","tscy":"\u0446","TSHcy":"\u040B","tshcy":"\u045B","Tstrok":"\u0166","tstrok":"\u0167","twixt":"\u226C","twoheadleftarrow":"\u219E","twoheadrightarrow":"\u21A0","Uacute":"\u00DA","uacute":"\u00FA","uarr":"\u2191","Uarr":"\u219F","uArr":"\u21D1","Uarrocir":"\u2949","Ubrcy":"\u040E","ubrcy":"\u045E","Ubreve":"\u016C","ubreve":"\u016D","Ucirc":"\u00DB","ucirc":"\u00FB","Ucy":"\u0423","ucy":"\u0443","udarr":"\u21C5","Udblac":"\u0170","udblac":"\u0171","udhar":"\u296E","ufisht":"\u297E","Ufr":"\uD835\uDD18","ufr":"\uD835\uDD32","Ugrave":"\u00D9","ugrave":"\u00F9","uHar":"\u2963","uharl":"\u21BF","uharr":"\u21BE","uhblk":"\u2580","ulcorn":"\u231C","ulcorner":"\u231C","ulcrop":"\u230F","ultri":"\u25F8","Umacr":"\u016A","umacr":"\u016B","uml":"\u00A8","UnderBar":"_","UnderBrace":"\u23DF","UnderBracket":"\u23B5","UnderParenthesis":"\u23DD","Union":"\u22C3","UnionPlus":"\u228E","Uogon":"\u0172","uogon":"\u0173","Uopf":"\uD835\uDD4C","uopf":"\uD835\uDD66","UpArrowBar":"\u2912","uparrow":"\u2191","UpArrow":"\u2191","Uparrow":"\u21D1","UpArrowDownArrow":"\u21C5","updownarrow":"\u2195","UpDownArrow":"\u2195","Updownarrow":"\u21D5","UpEquilibrium":"\u296E","upharpoonleft":"\u21BF","upharpoonright":"\u21BE","uplus":"\u228E","UpperLeftArrow":"\u2196","UpperRightArrow":"\u2197","upsi":"\u03C5","Upsi":"\u03D2","upsih":"\u03D2","Upsilon":"\u03A5","upsilon":"\u03C5","UpTeeArrow":"\u21A5","UpTee":"\u22A5","upuparrows":"\u21C8","urcorn":"\u231D","urcorner":"\u231D","urcrop":"\u230E","Uring":"\u016E","uring":"\u016F","urtri":"\u25F9","Uscr":"\uD835\uDCB0","uscr":"\uD835\uDCCA","utdot":"\u22F0","Utilde":"\u0168","utilde":"\u0169","utri":"\u25B5","utrif":"\u25B4","uuarr":"\u21C8","Uuml":"\u00DC","uuml":"\u00FC","uwangle":"\u29A7","vangrt":"\u299C","varepsilon":"\u03F5","varkappa":"\u03F0","varnothing":"\u2205","varphi":"\u03D5","varpi":"\u03D6","varpropto":"\u221D","varr":"\u2195","vArr":"\u21D5","varrho":"\u03F1","varsigma":"\u03C2","varsubsetneq":"\u228A\uFE00","varsubsetneqq":"\u2ACB\uFE00","varsupsetneq":"\u228B\uFE00","varsupsetneqq":"\u2ACC\uFE00","vartheta":"\u03D1","vartriangleleft":"\u22B2","vartriangleright":"\u22B3","vBar":"\u2AE8","Vbar":"\u2AEB","vBarv":"\u2AE9","Vcy":"\u0412","vcy":"\u0432","vdash":"\u22A2","vDash":"\u22A8","Vdash":"\u22A9","VDash":"\u22AB","Vdashl":"\u2AE6","veebar":"\u22BB","vee":"\u2228","Vee":"\u22C1","veeeq":"\u225A","vellip":"\u22EE","verbar":"|","Verbar":"\u2016","vert":"|","Vert":"\u2016","VerticalBar":"\u2223","VerticalLine":"|","VerticalSeparator":"\u2758","VerticalTilde":"\u2240","VeryThinSpace":"\u200A","Vfr":"\uD835\uDD19","vfr":"\uD835\uDD33","vltri":"\u22B2","vnsub":"\u2282\u20D2","vnsup":"\u2283\u20D2","Vopf":"\uD835\uDD4D","vopf":"\uD835\uDD67","vprop":"\u221D","vrtri":"\u22B3","Vscr":"\uD835\uDCB1","vscr":"\uD835\uDCCB","vsubnE":"\u2ACB\uFE00","vsubne":"\u228A\uFE00","vsupnE":"\u2ACC\uFE00","vsupne":"\u228B\uFE00","Vvdash":"\u22AA","vzigzag":"\u299A","Wcirc":"\u0174","wcirc":"\u0175","wedbar":"\u2A5F","wedge":"\u2227","Wedge":"\u22C0","wedgeq":"\u2259","weierp":"\u2118","Wfr":"\uD835\uDD1A","wfr":"\uD835\uDD34","Wopf":"\uD835\uDD4E","wopf":"\uD835\uDD68","wp":"\u2118","wr":"\u2240","wreath":"\u2240","Wscr":"\uD835\uDCB2","wscr":"\uD835\uDCCC","xcap":"\u22C2","xcirc":"\u25EF","xcup":"\u22C3","xdtri":"\u25BD","Xfr":"\uD835\uDD1B","xfr":"\uD835\uDD35","xharr":"\u27F7","xhArr":"\u27FA","Xi":"\u039E","xi":"\u03BE","xlarr":"\u27F5","xlArr":"\u27F8","xmap":"\u27FC","xnis":"\u22FB","xodot":"\u2A00","Xopf":"\uD835\uDD4F","xopf":"\uD835\uDD69","xoplus":"\u2A01","xotime":"\u2A02","xrarr":"\u27F6","xrArr":"\u27F9","Xscr":"\uD835\uDCB3","xscr":"\uD835\uDCCD","xsqcup":"\u2A06","xuplus":"\u2A04","xutri":"\u25B3","xvee":"\u22C1","xwedge":"\u22C0","Yacute":"\u00DD","yacute":"\u00FD","YAcy":"\u042F","yacy":"\u044F","Ycirc":"\u0176","ycirc":"\u0177","Ycy":"\u042B","ycy":"\u044B","yen":"\u00A5","Yfr":"\uD835\uDD1C","yfr":"\uD835\uDD36","YIcy":"\u0407","yicy":"\u0457","Yopf":"\uD835\uDD50","yopf":"\uD835\uDD6A","Yscr":"\uD835\uDCB4","yscr":"\uD835\uDCCE","YUcy":"\u042E","yucy":"\u044E","yuml":"\u00FF","Yuml":"\u0178","Zacute":"\u0179","zacute":"\u017A","Zcaron":"\u017D","zcaron":"\u017E","Zcy":"\u0417","zcy":"\u0437","Zdot":"\u017B","zdot":"\u017C","zeetrf":"\u2128","ZeroWidthSpace":"\u200B","Zeta":"\u0396","zeta":"\u03B6","zfr":"\uD835\uDD37","Zfr":"\u2128","ZHcy":"\u0416","zhcy":"\u0436","zigrarr":"\u21DD","zopf":"\uD835\uDD6B","Zopf":"\u2124","Zscr":"\uD835\uDCB5","zscr":"\uD835\uDCCF","zwj":"\u200D","zwnj":"\u200C"}
 },{}],159:[function(require,module,exports){
+module.exports={"Aacute":"\u00C1","aacute":"\u00E1","Abreve":"\u0102","abreve":"\u0103","ac":"\u223E","acd":"\u223F","acE":"\u223E\u0333","Acirc":"\u00C2","acirc":"\u00E2","acute":"\u00B4","Acy":"\u0410","acy":"\u0430","AElig":"\u00C6","aelig":"\u00E6","af":"\u2061","Afr":"\uD835\uDD04","afr":"\uD835\uDD1E","Agrave":"\u00C0","agrave":"\u00E0","alefsym":"\u2135","aleph":"\u2135","Alpha":"\u0391","alpha":"\u03B1","Amacr":"\u0100","amacr":"\u0101","amalg":"\u2A3F","amp":"&","AMP":"&","andand":"\u2A55","And":"\u2A53","and":"\u2227","andd":"\u2A5C","andslope":"\u2A58","andv":"\u2A5A","ang":"\u2220","ange":"\u29A4","angle":"\u2220","angmsdaa":"\u29A8","angmsdab":"\u29A9","angmsdac":"\u29AA","angmsdad":"\u29AB","angmsdae":"\u29AC","angmsdaf":"\u29AD","angmsdag":"\u29AE","angmsdah":"\u29AF","angmsd":"\u2221","angrt":"\u221F","angrtvb":"\u22BE","angrtvbd":"\u299D","angsph":"\u2222","angst":"\u00C5","angzarr":"\u237C","Aogon":"\u0104","aogon":"\u0105","Aopf":"\uD835\uDD38","aopf":"\uD835\uDD52","apacir":"\u2A6F","ap":"\u2248","apE":"\u2A70","ape":"\u224A","apid":"\u224B","apos":"'","ApplyFunction":"\u2061","approx":"\u2248","approxeq":"\u224A","Aring":"\u00C5","aring":"\u00E5","Ascr":"\uD835\uDC9C","ascr":"\uD835\uDCB6","Assign":"\u2254","ast":"*","asymp":"\u2248","asympeq":"\u224D","Atilde":"\u00C3","atilde":"\u00E3","Auml":"\u00C4","auml":"\u00E4","awconint":"\u2233","awint":"\u2A11","backcong":"\u224C","backepsilon":"\u03F6","backprime":"\u2035","backsim":"\u223D","backsimeq":"\u22CD","Backslash":"\u2216","Barv":"\u2AE7","barvee":"\u22BD","barwed":"\u2305","Barwed":"\u2306","barwedge":"\u2305","bbrk":"\u23B5","bbrktbrk":"\u23B6","bcong":"\u224C","Bcy":"\u0411","bcy":"\u0431","bdquo":"\u201E","becaus":"\u2235","because":"\u2235","Because":"\u2235","bemptyv":"\u29B0","bepsi":"\u03F6","bernou":"\u212C","Bernoullis":"\u212C","Beta":"\u0392","beta":"\u03B2","beth":"\u2136","between":"\u226C","Bfr":"\uD835\uDD05","bfr":"\uD835\uDD1F","bigcap":"\u22C2","bigcirc":"\u25EF","bigcup":"\u22C3","bigodot":"\u2A00","bigoplus":"\u2A01","bigotimes":"\u2A02","bigsqcup":"\u2A06","bigstar":"\u2605","bigtriangledown":"\u25BD","bigtriangleup":"\u25B3","biguplus":"\u2A04","bigvee":"\u22C1","bigwedge":"\u22C0","bkarow":"\u290D","blacklozenge":"\u29EB","blacksquare":"\u25AA","blacktriangle":"\u25B4","blacktriangledown":"\u25BE","blacktriangleleft":"\u25C2","blacktriangleright":"\u25B8","blank":"\u2423","blk12":"\u2592","blk14":"\u2591","blk34":"\u2593","block":"\u2588","bne":"=\u20E5","bnequiv":"\u2261\u20E5","bNot":"\u2AED","bnot":"\u2310","Bopf":"\uD835\uDD39","bopf":"\uD835\uDD53","bot":"\u22A5","bottom":"\u22A5","bowtie":"\u22C8","boxbox":"\u29C9","boxdl":"\u2510","boxdL":"\u2555","boxDl":"\u2556","boxDL":"\u2557","boxdr":"\u250C","boxdR":"\u2552","boxDr":"\u2553","boxDR":"\u2554","boxh":"\u2500","boxH":"\u2550","boxhd":"\u252C","boxHd":"\u2564","boxhD":"\u2565","boxHD":"\u2566","boxhu":"\u2534","boxHu":"\u2567","boxhU":"\u2568","boxHU":"\u2569","boxminus":"\u229F","boxplus":"\u229E","boxtimes":"\u22A0","boxul":"\u2518","boxuL":"\u255B","boxUl":"\u255C","boxUL":"\u255D","boxur":"\u2514","boxuR":"\u2558","boxUr":"\u2559","boxUR":"\u255A","boxv":"\u2502","boxV":"\u2551","boxvh":"\u253C","boxvH":"\u256A","boxVh":"\u256B","boxVH":"\u256C","boxvl":"\u2524","boxvL":"\u2561","boxVl":"\u2562","boxVL":"\u2563","boxvr":"\u251C","boxvR":"\u255E","boxVr":"\u255F","boxVR":"\u2560","bprime":"\u2035","breve":"\u02D8","Breve":"\u02D8","brvbar":"\u00A6","bscr":"\uD835\uDCB7","Bscr":"\u212C","bsemi":"\u204F","bsim":"\u223D","bsime":"\u22CD","bsolb":"\u29C5","bsol":"\\","bsolhsub":"\u27C8","bull":"\u2022","bullet":"\u2022","bump":"\u224E","bumpE":"\u2AAE","bumpe":"\u224F","Bumpeq":"\u224E","bumpeq":"\u224F","Cacute":"\u0106","cacute":"\u0107","capand":"\u2A44","capbrcup":"\u2A49","capcap":"\u2A4B","cap":"\u2229","Cap":"\u22D2","capcup":"\u2A47","capdot":"\u2A40","CapitalDifferentialD":"\u2145","caps":"\u2229\uFE00","caret":"\u2041","caron":"\u02C7","Cayleys":"\u212D","ccaps":"\u2A4D","Ccaron":"\u010C","ccaron":"\u010D","Ccedil":"\u00C7","ccedil":"\u00E7","Ccirc":"\u0108","ccirc":"\u0109","Cconint":"\u2230","ccups":"\u2A4C","ccupssm":"\u2A50","Cdot":"\u010A","cdot":"\u010B","cedil":"\u00B8","Cedilla":"\u00B8","cemptyv":"\u29B2","cent":"\u00A2","centerdot":"\u00B7","CenterDot":"\u00B7","cfr":"\uD835\uDD20","Cfr":"\u212D","CHcy":"\u0427","chcy":"\u0447","check":"\u2713","checkmark":"\u2713","Chi":"\u03A7","chi":"\u03C7","circ":"\u02C6","circeq":"\u2257","circlearrowleft":"\u21BA","circlearrowright":"\u21BB","circledast":"\u229B","circledcirc":"\u229A","circleddash":"\u229D","CircleDot":"\u2299","circledR":"\u00AE","circledS":"\u24C8","CircleMinus":"\u2296","CirclePlus":"\u2295","CircleTimes":"\u2297","cir":"\u25CB","cirE":"\u29C3","cire":"\u2257","cirfnint":"\u2A10","cirmid":"\u2AEF","cirscir":"\u29C2","ClockwiseContourIntegral":"\u2232","CloseCurlyDoubleQuote":"\u201D","CloseCurlyQuote":"\u2019","clubs":"\u2663","clubsuit":"\u2663","colon":":","Colon":"\u2237","Colone":"\u2A74","colone":"\u2254","coloneq":"\u2254","comma":",","commat":"@","comp":"\u2201","compfn":"\u2218","complement":"\u2201","complexes":"\u2102","cong":"\u2245","congdot":"\u2A6D","Congruent":"\u2261","conint":"\u222E","Conint":"\u222F","ContourIntegral":"\u222E","copf":"\uD835\uDD54","Copf":"\u2102","coprod":"\u2210","Coproduct":"\u2210","copy":"\u00A9","COPY":"\u00A9","copysr":"\u2117","CounterClockwiseContourIntegral":"\u2233","crarr":"\u21B5","cross":"\u2717","Cross":"\u2A2F","Cscr":"\uD835\uDC9E","cscr":"\uD835\uDCB8","csub":"\u2ACF","csube":"\u2AD1","csup":"\u2AD0","csupe":"\u2AD2","ctdot":"\u22EF","cudarrl":"\u2938","cudarrr":"\u2935","cuepr":"\u22DE","cuesc":"\u22DF","cularr":"\u21B6","cularrp":"\u293D","cupbrcap":"\u2A48","cupcap":"\u2A46","CupCap":"\u224D","cup":"\u222A","Cup":"\u22D3","cupcup":"\u2A4A","cupdot":"\u228D","cupor":"\u2A45","cups":"\u222A\uFE00","curarr":"\u21B7","curarrm":"\u293C","curlyeqprec":"\u22DE","curlyeqsucc":"\u22DF","curlyvee":"\u22CE","curlywedge":"\u22CF","curren":"\u00A4","curvearrowleft":"\u21B6","curvearrowright":"\u21B7","cuvee":"\u22CE","cuwed":"\u22CF","cwconint":"\u2232","cwint":"\u2231","cylcty":"\u232D","dagger":"\u2020","Dagger":"\u2021","daleth":"\u2138","darr":"\u2193","Darr":"\u21A1","dArr":"\u21D3","dash":"\u2010","Dashv":"\u2AE4","dashv":"\u22A3","dbkarow":"\u290F","dblac":"\u02DD","Dcaron":"\u010E","dcaron":"\u010F","Dcy":"\u0414","dcy":"\u0434","ddagger":"\u2021","ddarr":"\u21CA","DD":"\u2145","dd":"\u2146","DDotrahd":"\u2911","ddotseq":"\u2A77","deg":"\u00B0","Del":"\u2207","Delta":"\u0394","delta":"\u03B4","demptyv":"\u29B1","dfisht":"\u297F","Dfr":"\uD835\uDD07","dfr":"\uD835\uDD21","dHar":"\u2965","dharl":"\u21C3","dharr":"\u21C2","DiacriticalAcute":"\u00B4","DiacriticalDot":"\u02D9","DiacriticalDoubleAcute":"\u02DD","DiacriticalGrave":"`","DiacriticalTilde":"\u02DC","diam":"\u22C4","diamond":"\u22C4","Diamond":"\u22C4","diamondsuit":"\u2666","diams":"\u2666","die":"\u00A8","DifferentialD":"\u2146","digamma":"\u03DD","disin":"\u22F2","div":"\u00F7","divide":"\u00F7","divideontimes":"\u22C7","divonx":"\u22C7","DJcy":"\u0402","djcy":"\u0452","dlcorn":"\u231E","dlcrop":"\u230D","dollar":"$","Dopf":"\uD835\uDD3B","dopf":"\uD835\uDD55","Dot":"\u00A8","dot":"\u02D9","DotDot":"\u20DC","doteq":"\u2250","doteqdot":"\u2251","DotEqual":"\u2250","dotminus":"\u2238","dotplus":"\u2214","dotsquare":"\u22A1","doublebarwedge":"\u2306","DoubleContourIntegral":"\u222F","DoubleDot":"\u00A8","DoubleDownArrow":"\u21D3","DoubleLeftArrow":"\u21D0","DoubleLeftRightArrow":"\u21D4","DoubleLeftTee":"\u2AE4","DoubleLongLeftArrow":"\u27F8","DoubleLongLeftRightArrow":"\u27FA","DoubleLongRightArrow":"\u27F9","DoubleRightArrow":"\u21D2","DoubleRightTee":"\u22A8","DoubleUpArrow":"\u21D1","DoubleUpDownArrow":"\u21D5","DoubleVerticalBar":"\u2225","DownArrowBar":"\u2913","downarrow":"\u2193","DownArrow":"\u2193","Downarrow":"\u21D3","DownArrowUpArrow":"\u21F5","DownBreve":"\u0311","downdownarrows":"\u21CA","downharpoonleft":"\u21C3","downharpoonright":"\u21C2","DownLeftRightVector":"\u2950","DownLeftTeeVector":"\u295E","DownLeftVectorBar":"\u2956","DownLeftVector":"\u21BD","DownRightTeeVector":"\u295F","DownRightVectorBar":"\u2957","DownRightVector":"\u21C1","DownTeeArrow":"\u21A7","DownTee":"\u22A4","drbkarow":"\u2910","drcorn":"\u231F","drcrop":"\u230C","Dscr":"\uD835\uDC9F","dscr":"\uD835\uDCB9","DScy":"\u0405","dscy":"\u0455","dsol":"\u29F6","Dstrok":"\u0110","dstrok":"\u0111","dtdot":"\u22F1","dtri":"\u25BF","dtrif":"\u25BE","duarr":"\u21F5","duhar":"\u296F","dwangle":"\u29A6","DZcy":"\u040F","dzcy":"\u045F","dzigrarr":"\u27FF","Eacute":"\u00C9","eacute":"\u00E9","easter":"\u2A6E","Ecaron":"\u011A","ecaron":"\u011B","Ecirc":"\u00CA","ecirc":"\u00EA","ecir":"\u2256","ecolon":"\u2255","Ecy":"\u042D","ecy":"\u044D","eDDot":"\u2A77","Edot":"\u0116","edot":"\u0117","eDot":"\u2251","ee":"\u2147","efDot":"\u2252","Efr":"\uD835\uDD08","efr":"\uD835\uDD22","eg":"\u2A9A","Egrave":"\u00C8","egrave":"\u00E8","egs":"\u2A96","egsdot":"\u2A98","el":"\u2A99","Element":"\u2208","elinters":"\u23E7","ell":"\u2113","els":"\u2A95","elsdot":"\u2A97","Emacr":"\u0112","emacr":"\u0113","empty":"\u2205","emptyset":"\u2205","EmptySmallSquare":"\u25FB","emptyv":"\u2205","EmptyVerySmallSquare":"\u25AB","emsp13":"\u2004","emsp14":"\u2005","emsp":"\u2003","ENG":"\u014A","eng":"\u014B","ensp":"\u2002","Eogon":"\u0118","eogon":"\u0119","Eopf":"\uD835\uDD3C","eopf":"\uD835\uDD56","epar":"\u22D5","eparsl":"\u29E3","eplus":"\u2A71","epsi":"\u03B5","Epsilon":"\u0395","epsilon":"\u03B5","epsiv":"\u03F5","eqcirc":"\u2256","eqcolon":"\u2255","eqsim":"\u2242","eqslantgtr":"\u2A96","eqslantless":"\u2A95","Equal":"\u2A75","equals":"=","EqualTilde":"\u2242","equest":"\u225F","Equilibrium":"\u21CC","equiv":"\u2261","equivDD":"\u2A78","eqvparsl":"\u29E5","erarr":"\u2971","erDot":"\u2253","escr":"\u212F","Escr":"\u2130","esdot":"\u2250","Esim":"\u2A73","esim":"\u2242","Eta":"\u0397","eta":"\u03B7","ETH":"\u00D0","eth":"\u00F0","Euml":"\u00CB","euml":"\u00EB","euro":"\u20AC","excl":"!","exist":"\u2203","Exists":"\u2203","expectation":"\u2130","exponentiale":"\u2147","ExponentialE":"\u2147","fallingdotseq":"\u2252","Fcy":"\u0424","fcy":"\u0444","female":"\u2640","ffilig":"\uFB03","fflig":"\uFB00","ffllig":"\uFB04","Ffr":"\uD835\uDD09","ffr":"\uD835\uDD23","filig":"\uFB01","FilledSmallSquare":"\u25FC","FilledVerySmallSquare":"\u25AA","fjlig":"fj","flat":"\u266D","fllig":"\uFB02","fltns":"\u25B1","fnof":"\u0192","Fopf":"\uD835\uDD3D","fopf":"\uD835\uDD57","forall":"\u2200","ForAll":"\u2200","fork":"\u22D4","forkv":"\u2AD9","Fouriertrf":"\u2131","fpartint":"\u2A0D","frac12":"\u00BD","frac13":"\u2153","frac14":"\u00BC","frac15":"\u2155","frac16":"\u2159","frac18":"\u215B","frac23":"\u2154","frac25":"\u2156","frac34":"\u00BE","frac35":"\u2157","frac38":"\u215C","frac45":"\u2158","frac56":"\u215A","frac58":"\u215D","frac78":"\u215E","frasl":"\u2044","frown":"\u2322","fscr":"\uD835\uDCBB","Fscr":"\u2131","gacute":"\u01F5","Gamma":"\u0393","gamma":"\u03B3","Gammad":"\u03DC","gammad":"\u03DD","gap":"\u2A86","Gbreve":"\u011E","gbreve":"\u011F","Gcedil":"\u0122","Gcirc":"\u011C","gcirc":"\u011D","Gcy":"\u0413","gcy":"\u0433","Gdot":"\u0120","gdot":"\u0121","ge":"\u2265","gE":"\u2267","gEl":"\u2A8C","gel":"\u22DB","geq":"\u2265","geqq":"\u2267","geqslant":"\u2A7E","gescc":"\u2AA9","ges":"\u2A7E","gesdot":"\u2A80","gesdoto":"\u2A82","gesdotol":"\u2A84","gesl":"\u22DB\uFE00","gesles":"\u2A94","Gfr":"\uD835\uDD0A","gfr":"\uD835\uDD24","gg":"\u226B","Gg":"\u22D9","ggg":"\u22D9","gimel":"\u2137","GJcy":"\u0403","gjcy":"\u0453","gla":"\u2AA5","gl":"\u2277","glE":"\u2A92","glj":"\u2AA4","gnap":"\u2A8A","gnapprox":"\u2A8A","gne":"\u2A88","gnE":"\u2269","gneq":"\u2A88","gneqq":"\u2269","gnsim":"\u22E7","Gopf":"\uD835\uDD3E","gopf":"\uD835\uDD58","grave":"`","GreaterEqual":"\u2265","GreaterEqualLess":"\u22DB","GreaterFullEqual":"\u2267","GreaterGreater":"\u2AA2","GreaterLess":"\u2277","GreaterSlantEqual":"\u2A7E","GreaterTilde":"\u2273","Gscr":"\uD835\uDCA2","gscr":"\u210A","gsim":"\u2273","gsime":"\u2A8E","gsiml":"\u2A90","gtcc":"\u2AA7","gtcir":"\u2A7A","gt":">","GT":">","Gt":"\u226B","gtdot":"\u22D7","gtlPar":"\u2995","gtquest":"\u2A7C","gtrapprox":"\u2A86","gtrarr":"\u2978","gtrdot":"\u22D7","gtreqless":"\u22DB","gtreqqless":"\u2A8C","gtrless":"\u2277","gtrsim":"\u2273","gvertneqq":"\u2269\uFE00","gvnE":"\u2269\uFE00","Hacek":"\u02C7","hairsp":"\u200A","half":"\u00BD","hamilt":"\u210B","HARDcy":"\u042A","hardcy":"\u044A","harrcir":"\u2948","harr":"\u2194","hArr":"\u21D4","harrw":"\u21AD","Hat":"^","hbar":"\u210F","Hcirc":"\u0124","hcirc":"\u0125","hearts":"\u2665","heartsuit":"\u2665","hellip":"\u2026","hercon":"\u22B9","hfr":"\uD835\uDD25","Hfr":"\u210C","HilbertSpace":"\u210B","hksearow":"\u2925","hkswarow":"\u2926","hoarr":"\u21FF","homtht":"\u223B","hookleftarrow":"\u21A9","hookrightarrow":"\u21AA","hopf":"\uD835\uDD59","Hopf":"\u210D","horbar":"\u2015","HorizontalLine":"\u2500","hscr":"\uD835\uDCBD","Hscr":"\u210B","hslash":"\u210F","Hstrok":"\u0126","hstrok":"\u0127","HumpDownHump":"\u224E","HumpEqual":"\u224F","hybull":"\u2043","hyphen":"\u2010","Iacute":"\u00CD","iacute":"\u00ED","ic":"\u2063","Icirc":"\u00CE","icirc":"\u00EE","Icy":"\u0418","icy":"\u0438","Idot":"\u0130","IEcy":"\u0415","iecy":"\u0435","iexcl":"\u00A1","iff":"\u21D4","ifr":"\uD835\uDD26","Ifr":"\u2111","Igrave":"\u00CC","igrave":"\u00EC","ii":"\u2148","iiiint":"\u2A0C","iiint":"\u222D","iinfin":"\u29DC","iiota":"\u2129","IJlig":"\u0132","ijlig":"\u0133","Imacr":"\u012A","imacr":"\u012B","image":"\u2111","ImaginaryI":"\u2148","imagline":"\u2110","imagpart":"\u2111","imath":"\u0131","Im":"\u2111","imof":"\u22B7","imped":"\u01B5","Implies":"\u21D2","incare":"\u2105","in":"\u2208","infin":"\u221E","infintie":"\u29DD","inodot":"\u0131","intcal":"\u22BA","int":"\u222B","Int":"\u222C","integers":"\u2124","Integral":"\u222B","intercal":"\u22BA","Intersection":"\u22C2","intlarhk":"\u2A17","intprod":"\u2A3C","InvisibleComma":"\u2063","InvisibleTimes":"\u2062","IOcy":"\u0401","iocy":"\u0451","Iogon":"\u012E","iogon":"\u012F","Iopf":"\uD835\uDD40","iopf":"\uD835\uDD5A","Iota":"\u0399","iota":"\u03B9","iprod":"\u2A3C","iquest":"\u00BF","iscr":"\uD835\uDCBE","Iscr":"\u2110","isin":"\u2208","isindot":"\u22F5","isinE":"\u22F9","isins":"\u22F4","isinsv":"\u22F3","isinv":"\u2208","it":"\u2062","Itilde":"\u0128","itilde":"\u0129","Iukcy":"\u0406","iukcy":"\u0456","Iuml":"\u00CF","iuml":"\u00EF","Jcirc":"\u0134","jcirc":"\u0135","Jcy":"\u0419","jcy":"\u0439","Jfr":"\uD835\uDD0D","jfr":"\uD835\uDD27","jmath":"\u0237","Jopf":"\uD835\uDD41","jopf":"\uD835\uDD5B","Jscr":"\uD835\uDCA5","jscr":"\uD835\uDCBF","Jsercy":"\u0408","jsercy":"\u0458","Jukcy":"\u0404","jukcy":"\u0454","Kappa":"\u039A","kappa":"\u03BA","kappav":"\u03F0","Kcedil":"\u0136","kcedil":"\u0137","Kcy":"\u041A","kcy":"\u043A","Kfr":"\uD835\uDD0E","kfr":"\uD835\uDD28","kgreen":"\u0138","KHcy":"\u0425","khcy":"\u0445","KJcy":"\u040C","kjcy":"\u045C","Kopf":"\uD835\uDD42","kopf":"\uD835\uDD5C","Kscr":"\uD835\uDCA6","kscr":"\uD835\uDCC0","lAarr":"\u21DA","Lacute":"\u0139","lacute":"\u013A","laemptyv":"\u29B4","lagran":"\u2112","Lambda":"\u039B","lambda":"\u03BB","lang":"\u27E8","Lang":"\u27EA","langd":"\u2991","langle":"\u27E8","lap":"\u2A85","Laplacetrf":"\u2112","laquo":"\u00AB","larrb":"\u21E4","larrbfs":"\u291F","larr":"\u2190","Larr":"\u219E","lArr":"\u21D0","larrfs":"\u291D","larrhk":"\u21A9","larrlp":"\u21AB","larrpl":"\u2939","larrsim":"\u2973","larrtl":"\u21A2","latail":"\u2919","lAtail":"\u291B","lat":"\u2AAB","late":"\u2AAD","lates":"\u2AAD\uFE00","lbarr":"\u290C","lBarr":"\u290E","lbbrk":"\u2772","lbrace":"{","lbrack":"[","lbrke":"\u298B","lbrksld":"\u298F","lbrkslu":"\u298D","Lcaron":"\u013D","lcaron":"\u013E","Lcedil":"\u013B","lcedil":"\u013C","lceil":"\u2308","lcub":"{","Lcy":"\u041B","lcy":"\u043B","ldca":"\u2936","ldquo":"\u201C","ldquor":"\u201E","ldrdhar":"\u2967","ldrushar":"\u294B","ldsh":"\u21B2","le":"\u2264","lE":"\u2266","LeftAngleBracket":"\u27E8","LeftArrowBar":"\u21E4","leftarrow":"\u2190","LeftArrow":"\u2190","Leftarrow":"\u21D0","LeftArrowRightArrow":"\u21C6","leftarrowtail":"\u21A2","LeftCeiling":"\u2308","LeftDoubleBracket":"\u27E6","LeftDownTeeVector":"\u2961","LeftDownVectorBar":"\u2959","LeftDownVector":"\u21C3","LeftFloor":"\u230A","leftharpoondown":"\u21BD","leftharpoonup":"\u21BC","leftleftarrows":"\u21C7","leftrightarrow":"\u2194","LeftRightArrow":"\u2194","Leftrightarrow":"\u21D4","leftrightarrows":"\u21C6","leftrightharpoons":"\u21CB","leftrightsquigarrow":"\u21AD","LeftRightVector":"\u294E","LeftTeeArrow":"\u21A4","LeftTee":"\u22A3","LeftTeeVector":"\u295A","leftthreetimes":"\u22CB","LeftTriangleBar":"\u29CF","LeftTriangle":"\u22B2","LeftTriangleEqual":"\u22B4","LeftUpDownVector":"\u2951","LeftUpTeeVector":"\u2960","LeftUpVectorBar":"\u2958","LeftUpVector":"\u21BF","LeftVectorBar":"\u2952","LeftVector":"\u21BC","lEg":"\u2A8B","leg":"\u22DA","leq":"\u2264","leqq":"\u2266","leqslant":"\u2A7D","lescc":"\u2AA8","les":"\u2A7D","lesdot":"\u2A7F","lesdoto":"\u2A81","lesdotor":"\u2A83","lesg":"\u22DA\uFE00","lesges":"\u2A93","lessapprox":"\u2A85","lessdot":"\u22D6","lesseqgtr":"\u22DA","lesseqqgtr":"\u2A8B","LessEqualGreater":"\u22DA","LessFullEqual":"\u2266","LessGreater":"\u2276","lessgtr":"\u2276","LessLess":"\u2AA1","lesssim":"\u2272","LessSlantEqual":"\u2A7D","LessTilde":"\u2272","lfisht":"\u297C","lfloor":"\u230A","Lfr":"\uD835\uDD0F","lfr":"\uD835\uDD29","lg":"\u2276","lgE":"\u2A91","lHar":"\u2962","lhard":"\u21BD","lharu":"\u21BC","lharul":"\u296A","lhblk":"\u2584","LJcy":"\u0409","ljcy":"\u0459","llarr":"\u21C7","ll":"\u226A","Ll":"\u22D8","llcorner":"\u231E","Lleftarrow":"\u21DA","llhard":"\u296B","lltri":"\u25FA","Lmidot":"\u013F","lmidot":"\u0140","lmoustache":"\u23B0","lmoust":"\u23B0","lnap":"\u2A89","lnapprox":"\u2A89","lne":"\u2A87","lnE":"\u2268","lneq":"\u2A87","lneqq":"\u2268","lnsim":"\u22E6","loang":"\u27EC","loarr":"\u21FD","lobrk":"\u27E6","longleftarrow":"\u27F5","LongLeftArrow":"\u27F5","Longleftarrow":"\u27F8","longleftrightarrow":"\u27F7","LongLeftRightArrow":"\u27F7","Longleftrightarrow":"\u27FA","longmapsto":"\u27FC","longrightarrow":"\u27F6","LongRightArrow":"\u27F6","Longrightarrow":"\u27F9","looparrowleft":"\u21AB","looparrowright":"\u21AC","lopar":"\u2985","Lopf":"\uD835\uDD43","lopf":"\uD835\uDD5D","loplus":"\u2A2D","lotimes":"\u2A34","lowast":"\u2217","lowbar":"_","LowerLeftArrow":"\u2199","LowerRightArrow":"\u2198","loz":"\u25CA","lozenge":"\u25CA","lozf":"\u29EB","lpar":"(","lparlt":"\u2993","lrarr":"\u21C6","lrcorner":"\u231F","lrhar":"\u21CB","lrhard":"\u296D","lrm":"\u200E","lrtri":"\u22BF","lsaquo":"\u2039","lscr":"\uD835\uDCC1","Lscr":"\u2112","lsh":"\u21B0","Lsh":"\u21B0","lsim":"\u2272","lsime":"\u2A8D","lsimg":"\u2A8F","lsqb":"[","lsquo":"\u2018","lsquor":"\u201A","Lstrok":"\u0141","lstrok":"\u0142","ltcc":"\u2AA6","ltcir":"\u2A79","lt":"<","LT":"<","Lt":"\u226A","ltdot":"\u22D6","lthree":"\u22CB","ltimes":"\u22C9","ltlarr":"\u2976","ltquest":"\u2A7B","ltri":"\u25C3","ltrie":"\u22B4","ltrif":"\u25C2","ltrPar":"\u2996","lurdshar":"\u294A","luruhar":"\u2966","lvertneqq":"\u2268\uFE00","lvnE":"\u2268\uFE00","macr":"\u00AF","male":"\u2642","malt":"\u2720","maltese":"\u2720","Map":"\u2905","map":"\u21A6","mapsto":"\u21A6","mapstodown":"\u21A7","mapstoleft":"\u21A4","mapstoup":"\u21A5","marker":"\u25AE","mcomma":"\u2A29","Mcy":"\u041C","mcy":"\u043C","mdash":"\u2014","mDDot":"\u223A","measuredangle":"\u2221","MediumSpace":"\u205F","Mellintrf":"\u2133","Mfr":"\uD835\uDD10","mfr":"\uD835\uDD2A","mho":"\u2127","micro":"\u00B5","midast":"*","midcir":"\u2AF0","mid":"\u2223","middot":"\u00B7","minusb":"\u229F","minus":"\u2212","minusd":"\u2238","minusdu":"\u2A2A","MinusPlus":"\u2213","mlcp":"\u2ADB","mldr":"\u2026","mnplus":"\u2213","models":"\u22A7","Mopf":"\uD835\uDD44","mopf":"\uD835\uDD5E","mp":"\u2213","mscr":"\uD835\uDCC2","Mscr":"\u2133","mstpos":"\u223E","Mu":"\u039C","mu":"\u03BC","multimap":"\u22B8","mumap":"\u22B8","nabla":"\u2207","Nacute":"\u0143","nacute":"\u0144","nang":"\u2220\u20D2","nap":"\u2249","napE":"\u2A70\u0338","napid":"\u224B\u0338","napos":"\u0149","napprox":"\u2249","natural":"\u266E","naturals":"\u2115","natur":"\u266E","nbsp":"\u00A0","nbump":"\u224E\u0338","nbumpe":"\u224F\u0338","ncap":"\u2A43","Ncaron":"\u0147","ncaron":"\u0148","Ncedil":"\u0145","ncedil":"\u0146","ncong":"\u2247","ncongdot":"\u2A6D\u0338","ncup":"\u2A42","Ncy":"\u041D","ncy":"\u043D","ndash":"\u2013","nearhk":"\u2924","nearr":"\u2197","neArr":"\u21D7","nearrow":"\u2197","ne":"\u2260","nedot":"\u2250\u0338","NegativeMediumSpace":"\u200B","NegativeThickSpace":"\u200B","NegativeThinSpace":"\u200B","NegativeVeryThinSpace":"\u200B","nequiv":"\u2262","nesear":"\u2928","nesim":"\u2242\u0338","NestedGreaterGreater":"\u226B","NestedLessLess":"\u226A","NewLine":"\n","nexist":"\u2204","nexists":"\u2204","Nfr":"\uD835\uDD11","nfr":"\uD835\uDD2B","ngE":"\u2267\u0338","nge":"\u2271","ngeq":"\u2271","ngeqq":"\u2267\u0338","ngeqslant":"\u2A7E\u0338","nges":"\u2A7E\u0338","nGg":"\u22D9\u0338","ngsim":"\u2275","nGt":"\u226B\u20D2","ngt":"\u226F","ngtr":"\u226F","nGtv":"\u226B\u0338","nharr":"\u21AE","nhArr":"\u21CE","nhpar":"\u2AF2","ni":"\u220B","nis":"\u22FC","nisd":"\u22FA","niv":"\u220B","NJcy":"\u040A","njcy":"\u045A","nlarr":"\u219A","nlArr":"\u21CD","nldr":"\u2025","nlE":"\u2266\u0338","nle":"\u2270","nleftarrow":"\u219A","nLeftarrow":"\u21CD","nleftrightarrow":"\u21AE","nLeftrightarrow":"\u21CE","nleq":"\u2270","nleqq":"\u2266\u0338","nleqslant":"\u2A7D\u0338","nles":"\u2A7D\u0338","nless":"\u226E","nLl":"\u22D8\u0338","nlsim":"\u2274","nLt":"\u226A\u20D2","nlt":"\u226E","nltri":"\u22EA","nltrie":"\u22EC","nLtv":"\u226A\u0338","nmid":"\u2224","NoBreak":"\u2060","NonBreakingSpace":"\u00A0","nopf":"\uD835\uDD5F","Nopf":"\u2115","Not":"\u2AEC","not":"\u00AC","NotCongruent":"\u2262","NotCupCap":"\u226D","NotDoubleVerticalBar":"\u2226","NotElement":"\u2209","NotEqual":"\u2260","NotEqualTilde":"\u2242\u0338","NotExists":"\u2204","NotGreater":"\u226F","NotGreaterEqual":"\u2271","NotGreaterFullEqual":"\u2267\u0338","NotGreaterGreater":"\u226B\u0338","NotGreaterLess":"\u2279","NotGreaterSlantEqual":"\u2A7E\u0338","NotGreaterTilde":"\u2275","NotHumpDownHump":"\u224E\u0338","NotHumpEqual":"\u224F\u0338","notin":"\u2209","notindot":"\u22F5\u0338","notinE":"\u22F9\u0338","notinva":"\u2209","notinvb":"\u22F7","notinvc":"\u22F6","NotLeftTriangleBar":"\u29CF\u0338","NotLeftTriangle":"\u22EA","NotLeftTriangleEqual":"\u22EC","NotLess":"\u226E","NotLessEqual":"\u2270","NotLessGreater":"\u2278","NotLessLess":"\u226A\u0338","NotLessSlantEqual":"\u2A7D\u0338","NotLessTilde":"\u2274","NotNestedGreaterGreater":"\u2AA2\u0338","NotNestedLessLess":"\u2AA1\u0338","notni":"\u220C","notniva":"\u220C","notnivb":"\u22FE","notnivc":"\u22FD","NotPrecedes":"\u2280","NotPrecedesEqual":"\u2AAF\u0338","NotPrecedesSlantEqual":"\u22E0","NotReverseElement":"\u220C","NotRightTriangleBar":"\u29D0\u0338","NotRightTriangle":"\u22EB","NotRightTriangleEqual":"\u22ED","NotSquareSubset":"\u228F\u0338","NotSquareSubsetEqual":"\u22E2","NotSquareSuperset":"\u2290\u0338","NotSquareSupersetEqual":"\u22E3","NotSubset":"\u2282\u20D2","NotSubsetEqual":"\u2288","NotSucceeds":"\u2281","NotSucceedsEqual":"\u2AB0\u0338","NotSucceedsSlantEqual":"\u22E1","NotSucceedsTilde":"\u227F\u0338","NotSuperset":"\u2283\u20D2","NotSupersetEqual":"\u2289","NotTilde":"\u2241","NotTildeEqual":"\u2244","NotTildeFullEqual":"\u2247","NotTildeTilde":"\u2249","NotVerticalBar":"\u2224","nparallel":"\u2226","npar":"\u2226","nparsl":"\u2AFD\u20E5","npart":"\u2202\u0338","npolint":"\u2A14","npr":"\u2280","nprcue":"\u22E0","nprec":"\u2280","npreceq":"\u2AAF\u0338","npre":"\u2AAF\u0338","nrarrc":"\u2933\u0338","nrarr":"\u219B","nrArr":"\u21CF","nrarrw":"\u219D\u0338","nrightarrow":"\u219B","nRightarrow":"\u21CF","nrtri":"\u22EB","nrtrie":"\u22ED","nsc":"\u2281","nsccue":"\u22E1","nsce":"\u2AB0\u0338","Nscr":"\uD835\uDCA9","nscr":"\uD835\uDCC3","nshortmid":"\u2224","nshortparallel":"\u2226","nsim":"\u2241","nsime":"\u2244","nsimeq":"\u2244","nsmid":"\u2224","nspar":"\u2226","nsqsube":"\u22E2","nsqsupe":"\u22E3","nsub":"\u2284","nsubE":"\u2AC5\u0338","nsube":"\u2288","nsubset":"\u2282\u20D2","nsubseteq":"\u2288","nsubseteqq":"\u2AC5\u0338","nsucc":"\u2281","nsucceq":"\u2AB0\u0338","nsup":"\u2285","nsupE":"\u2AC6\u0338","nsupe":"\u2289","nsupset":"\u2283\u20D2","nsupseteq":"\u2289","nsupseteqq":"\u2AC6\u0338","ntgl":"\u2279","Ntilde":"\u00D1","ntilde":"\u00F1","ntlg":"\u2278","ntriangleleft":"\u22EA","ntrianglelefteq":"\u22EC","ntriangleright":"\u22EB","ntrianglerighteq":"\u22ED","Nu":"\u039D","nu":"\u03BD","num":"#","numero":"\u2116","numsp":"\u2007","nvap":"\u224D\u20D2","nvdash":"\u22AC","nvDash":"\u22AD","nVdash":"\u22AE","nVDash":"\u22AF","nvge":"\u2265\u20D2","nvgt":">\u20D2","nvHarr":"\u2904","nvinfin":"\u29DE","nvlArr":"\u2902","nvle":"\u2264\u20D2","nvlt":"<\u20D2","nvltrie":"\u22B4\u20D2","nvrArr":"\u2903","nvrtrie":"\u22B5\u20D2","nvsim":"\u223C\u20D2","nwarhk":"\u2923","nwarr":"\u2196","nwArr":"\u21D6","nwarrow":"\u2196","nwnear":"\u2927","Oacute":"\u00D3","oacute":"\u00F3","oast":"\u229B","Ocirc":"\u00D4","ocirc":"\u00F4","ocir":"\u229A","Ocy":"\u041E","ocy":"\u043E","odash":"\u229D","Odblac":"\u0150","odblac":"\u0151","odiv":"\u2A38","odot":"\u2299","odsold":"\u29BC","OElig":"\u0152","oelig":"\u0153","ofcir":"\u29BF","Ofr":"\uD835\uDD12","ofr":"\uD835\uDD2C","ogon":"\u02DB","Ograve":"\u00D2","ograve":"\u00F2","ogt":"\u29C1","ohbar":"\u29B5","ohm":"\u03A9","oint":"\u222E","olarr":"\u21BA","olcir":"\u29BE","olcross":"\u29BB","oline":"\u203E","olt":"\u29C0","Omacr":"\u014C","omacr":"\u014D","Omega":"\u03A9","omega":"\u03C9","Omicron":"\u039F","omicron":"\u03BF","omid":"\u29B6","ominus":"\u2296","Oopf":"\uD835\uDD46","oopf":"\uD835\uDD60","opar":"\u29B7","OpenCurlyDoubleQuote":"\u201C","OpenCurlyQuote":"\u2018","operp":"\u29B9","oplus":"\u2295","orarr":"\u21BB","Or":"\u2A54","or":"\u2228","ord":"\u2A5D","order":"\u2134","orderof":"\u2134","ordf":"\u00AA","ordm":"\u00BA","origof":"\u22B6","oror":"\u2A56","orslope":"\u2A57","orv":"\u2A5B","oS":"\u24C8","Oscr":"\uD835\uDCAA","oscr":"\u2134","Oslash":"\u00D8","oslash":"\u00F8","osol":"\u2298","Otilde":"\u00D5","otilde":"\u00F5","otimesas":"\u2A36","Otimes":"\u2A37","otimes":"\u2297","Ouml":"\u00D6","ouml":"\u00F6","ovbar":"\u233D","OverBar":"\u203E","OverBrace":"\u23DE","OverBracket":"\u23B4","OverParenthesis":"\u23DC","para":"\u00B6","parallel":"\u2225","par":"\u2225","parsim":"\u2AF3","parsl":"\u2AFD","part":"\u2202","PartialD":"\u2202","Pcy":"\u041F","pcy":"\u043F","percnt":"%","period":".","permil":"\u2030","perp":"\u22A5","pertenk":"\u2031","Pfr":"\uD835\uDD13","pfr":"\uD835\uDD2D","Phi":"\u03A6","phi":"\u03C6","phiv":"\u03D5","phmmat":"\u2133","phone":"\u260E","Pi":"\u03A0","pi":"\u03C0","pitchfork":"\u22D4","piv":"\u03D6","planck":"\u210F","planckh":"\u210E","plankv":"\u210F","plusacir":"\u2A23","plusb":"\u229E","pluscir":"\u2A22","plus":"+","plusdo":"\u2214","plusdu":"\u2A25","pluse":"\u2A72","PlusMinus":"\u00B1","plusmn":"\u00B1","plussim":"\u2A26","plustwo":"\u2A27","pm":"\u00B1","Poincareplane":"\u210C","pointint":"\u2A15","popf":"\uD835\uDD61","Popf":"\u2119","pound":"\u00A3","prap":"\u2AB7","Pr":"\u2ABB","pr":"\u227A","prcue":"\u227C","precapprox":"\u2AB7","prec":"\u227A","preccurlyeq":"\u227C","Precedes":"\u227A","PrecedesEqual":"\u2AAF","PrecedesSlantEqual":"\u227C","PrecedesTilde":"\u227E","preceq":"\u2AAF","precnapprox":"\u2AB9","precneqq":"\u2AB5","precnsim":"\u22E8","pre":"\u2AAF","prE":"\u2AB3","precsim":"\u227E","prime":"\u2032","Prime":"\u2033","primes":"\u2119","prnap":"\u2AB9","prnE":"\u2AB5","prnsim":"\u22E8","prod":"\u220F","Product":"\u220F","profalar":"\u232E","profline":"\u2312","profsurf":"\u2313","prop":"\u221D","Proportional":"\u221D","Proportion":"\u2237","propto":"\u221D","prsim":"\u227E","prurel":"\u22B0","Pscr":"\uD835\uDCAB","pscr":"\uD835\uDCC5","Psi":"\u03A8","psi":"\u03C8","puncsp":"\u2008","Qfr":"\uD835\uDD14","qfr":"\uD835\uDD2E","qint":"\u2A0C","qopf":"\uD835\uDD62","Qopf":"\u211A","qprime":"\u2057","Qscr":"\uD835\uDCAC","qscr":"\uD835\uDCC6","quaternions":"\u210D","quatint":"\u2A16","quest":"?","questeq":"\u225F","quot":"\"","QUOT":"\"","rAarr":"\u21DB","race":"\u223D\u0331","Racute":"\u0154","racute":"\u0155","radic":"\u221A","raemptyv":"\u29B3","rang":"\u27E9","Rang":"\u27EB","rangd":"\u2992","range":"\u29A5","rangle":"\u27E9","raquo":"\u00BB","rarrap":"\u2975","rarrb":"\u21E5","rarrbfs":"\u2920","rarrc":"\u2933","rarr":"\u2192","Rarr":"\u21A0","rArr":"\u21D2","rarrfs":"\u291E","rarrhk":"\u21AA","rarrlp":"\u21AC","rarrpl":"\u2945","rarrsim":"\u2974","Rarrtl":"\u2916","rarrtl":"\u21A3","rarrw":"\u219D","ratail":"\u291A","rAtail":"\u291C","ratio":"\u2236","rationals":"\u211A","rbarr":"\u290D","rBarr":"\u290F","RBarr":"\u2910","rbbrk":"\u2773","rbrace":"}","rbrack":"]","rbrke":"\u298C","rbrksld":"\u298E","rbrkslu":"\u2990","Rcaron":"\u0158","rcaron":"\u0159","Rcedil":"\u0156","rcedil":"\u0157","rceil":"\u2309","rcub":"}","Rcy":"\u0420","rcy":"\u0440","rdca":"\u2937","rdldhar":"\u2969","rdquo":"\u201D","rdquor":"\u201D","rdsh":"\u21B3","real":"\u211C","realine":"\u211B","realpart":"\u211C","reals":"\u211D","Re":"\u211C","rect":"\u25AD","reg":"\u00AE","REG":"\u00AE","ReverseElement":"\u220B","ReverseEquilibrium":"\u21CB","ReverseUpEquilibrium":"\u296F","rfisht":"\u297D","rfloor":"\u230B","rfr":"\uD835\uDD2F","Rfr":"\u211C","rHar":"\u2964","rhard":"\u21C1","rharu":"\u21C0","rharul":"\u296C","Rho":"\u03A1","rho":"\u03C1","rhov":"\u03F1","RightAngleBracket":"\u27E9","RightArrowBar":"\u21E5","rightarrow":"\u2192","RightArrow":"\u2192","Rightarrow":"\u21D2","RightArrowLeftArrow":"\u21C4","rightarrowtail":"\u21A3","RightCeiling":"\u2309","RightDoubleBracket":"\u27E7","RightDownTeeVector":"\u295D","RightDownVectorBar":"\u2955","RightDownVector":"\u21C2","RightFloor":"\u230B","rightharpoondown":"\u21C1","rightharpoonup":"\u21C0","rightleftarrows":"\u21C4","rightleftharpoons":"\u21CC","rightrightarrows":"\u21C9","rightsquigarrow":"\u219D","RightTeeArrow":"\u21A6","RightTee":"\u22A2","RightTeeVector":"\u295B","rightthreetimes":"\u22CC","RightTriangleBar":"\u29D0","RightTriangle":"\u22B3","RightTriangleEqual":"\u22B5","RightUpDownVector":"\u294F","RightUpTeeVector":"\u295C","RightUpVectorBar":"\u2954","RightUpVector":"\u21BE","RightVectorBar":"\u2953","RightVector":"\u21C0","ring":"\u02DA","risingdotseq":"\u2253","rlarr":"\u21C4","rlhar":"\u21CC","rlm":"\u200F","rmoustache":"\u23B1","rmoust":"\u23B1","rnmid":"\u2AEE","roang":"\u27ED","roarr":"\u21FE","robrk":"\u27E7","ropar":"\u2986","ropf":"\uD835\uDD63","Ropf":"\u211D","roplus":"\u2A2E","rotimes":"\u2A35","RoundImplies":"\u2970","rpar":")","rpargt":"\u2994","rppolint":"\u2A12","rrarr":"\u21C9","Rrightarrow":"\u21DB","rsaquo":"\u203A","rscr":"\uD835\uDCC7","Rscr":"\u211B","rsh":"\u21B1","Rsh":"\u21B1","rsqb":"]","rsquo":"\u2019","rsquor":"\u2019","rthree":"\u22CC","rtimes":"\u22CA","rtri":"\u25B9","rtrie":"\u22B5","rtrif":"\u25B8","rtriltri":"\u29CE","RuleDelayed":"\u29F4","ruluhar":"\u2968","rx":"\u211E","Sacute":"\u015A","sacute":"\u015B","sbquo":"\u201A","scap":"\u2AB8","Scaron":"\u0160","scaron":"\u0161","Sc":"\u2ABC","sc":"\u227B","sccue":"\u227D","sce":"\u2AB0","scE":"\u2AB4","Scedil":"\u015E","scedil":"\u015F","Scirc":"\u015C","scirc":"\u015D","scnap":"\u2ABA","scnE":"\u2AB6","scnsim":"\u22E9","scpolint":"\u2A13","scsim":"\u227F","Scy":"\u0421","scy":"\u0441","sdotb":"\u22A1","sdot":"\u22C5","sdote":"\u2A66","searhk":"\u2925","searr":"\u2198","seArr":"\u21D8","searrow":"\u2198","sect":"\u00A7","semi":";","seswar":"\u2929","setminus":"\u2216","setmn":"\u2216","sext":"\u2736","Sfr":"\uD835\uDD16","sfr":"\uD835\uDD30","sfrown":"\u2322","sharp":"\u266F","SHCHcy":"\u0429","shchcy":"\u0449","SHcy":"\u0428","shcy":"\u0448","ShortDownArrow":"\u2193","ShortLeftArrow":"\u2190","shortmid":"\u2223","shortparallel":"\u2225","ShortRightArrow":"\u2192","ShortUpArrow":"\u2191","shy":"\u00AD","Sigma":"\u03A3","sigma":"\u03C3","sigmaf":"\u03C2","sigmav":"\u03C2","sim":"\u223C","simdot":"\u2A6A","sime":"\u2243","simeq":"\u2243","simg":"\u2A9E","simgE":"\u2AA0","siml":"\u2A9D","simlE":"\u2A9F","simne":"\u2246","simplus":"\u2A24","simrarr":"\u2972","slarr":"\u2190","SmallCircle":"\u2218","smallsetminus":"\u2216","smashp":"\u2A33","smeparsl":"\u29E4","smid":"\u2223","smile":"\u2323","smt":"\u2AAA","smte":"\u2AAC","smtes":"\u2AAC\uFE00","SOFTcy":"\u042C","softcy":"\u044C","solbar":"\u233F","solb":"\u29C4","sol":"/","Sopf":"\uD835\uDD4A","sopf":"\uD835\uDD64","spades":"\u2660","spadesuit":"\u2660","spar":"\u2225","sqcap":"\u2293","sqcaps":"\u2293\uFE00","sqcup":"\u2294","sqcups":"\u2294\uFE00","Sqrt":"\u221A","sqsub":"\u228F","sqsube":"\u2291","sqsubset":"\u228F","sqsubseteq":"\u2291","sqsup":"\u2290","sqsupe":"\u2292","sqsupset":"\u2290","sqsupseteq":"\u2292","square":"\u25A1","Square":"\u25A1","SquareIntersection":"\u2293","SquareSubset":"\u228F","SquareSubsetEqual":"\u2291","SquareSuperset":"\u2290","SquareSupersetEqual":"\u2292","SquareUnion":"\u2294","squarf":"\u25AA","squ":"\u25A1","squf":"\u25AA","srarr":"\u2192","Sscr":"\uD835\uDCAE","sscr":"\uD835\uDCC8","ssetmn":"\u2216","ssmile":"\u2323","sstarf":"\u22C6","Star":"\u22C6","star":"\u2606","starf":"\u2605","straightepsilon":"\u03F5","straightphi":"\u03D5","strns":"\u00AF","sub":"\u2282","Sub":"\u22D0","subdot":"\u2ABD","subE":"\u2AC5","sube":"\u2286","subedot":"\u2AC3","submult":"\u2AC1","subnE":"\u2ACB","subne":"\u228A","subplus":"\u2ABF","subrarr":"\u2979","subset":"\u2282","Subset":"\u22D0","subseteq":"\u2286","subseteqq":"\u2AC5","SubsetEqual":"\u2286","subsetneq":"\u228A","subsetneqq":"\u2ACB","subsim":"\u2AC7","subsub":"\u2AD5","subsup":"\u2AD3","succapprox":"\u2AB8","succ":"\u227B","succcurlyeq":"\u227D","Succeeds":"\u227B","SucceedsEqual":"\u2AB0","SucceedsSlantEqual":"\u227D","SucceedsTilde":"\u227F","succeq":"\u2AB0","succnapprox":"\u2ABA","succneqq":"\u2AB6","succnsim":"\u22E9","succsim":"\u227F","SuchThat":"\u220B","sum":"\u2211","Sum":"\u2211","sung":"\u266A","sup1":"\u00B9","sup2":"\u00B2","sup3":"\u00B3","sup":"\u2283","Sup":"\u22D1","supdot":"\u2ABE","supdsub":"\u2AD8","supE":"\u2AC6","supe":"\u2287","supedot":"\u2AC4","Superset":"\u2283","SupersetEqual":"\u2287","suphsol":"\u27C9","suphsub":"\u2AD7","suplarr":"\u297B","supmult":"\u2AC2","supnE":"\u2ACC","supne":"\u228B","supplus":"\u2AC0","supset":"\u2283","Supset":"\u22D1","supseteq":"\u2287","supseteqq":"\u2AC6","supsetneq":"\u228B","supsetneqq":"\u2ACC","supsim":"\u2AC8","supsub":"\u2AD4","supsup":"\u2AD6","swarhk":"\u2926","swarr":"\u2199","swArr":"\u21D9","swarrow":"\u2199","swnwar":"\u292A","szlig":"\u00DF","Tab":"\t","target":"\u2316","Tau":"\u03A4","tau":"\u03C4","tbrk":"\u23B4","Tcaron":"\u0164","tcaron":"\u0165","Tcedil":"\u0162","tcedil":"\u0163","Tcy":"\u0422","tcy":"\u0442","tdot":"\u20DB","telrec":"\u2315","Tfr":"\uD835\uDD17","tfr":"\uD835\uDD31","there4":"\u2234","therefore":"\u2234","Therefore":"\u2234","Theta":"\u0398","theta":"\u03B8","thetasym":"\u03D1","thetav":"\u03D1","thickapprox":"\u2248","thicksim":"\u223C","ThickSpace":"\u205F\u200A","ThinSpace":"\u2009","thinsp":"\u2009","thkap":"\u2248","thksim":"\u223C","THORN":"\u00DE","thorn":"\u00FE","tilde":"\u02DC","Tilde":"\u223C","TildeEqual":"\u2243","TildeFullEqual":"\u2245","TildeTilde":"\u2248","timesbar":"\u2A31","timesb":"\u22A0","times":"\u00D7","timesd":"\u2A30","tint":"\u222D","toea":"\u2928","topbot":"\u2336","topcir":"\u2AF1","top":"\u22A4","Topf":"\uD835\uDD4B","topf":"\uD835\uDD65","topfork":"\u2ADA","tosa":"\u2929","tprime":"\u2034","trade":"\u2122","TRADE":"\u2122","triangle":"\u25B5","triangledown":"\u25BF","triangleleft":"\u25C3","trianglelefteq":"\u22B4","triangleq":"\u225C","triangleright":"\u25B9","trianglerighteq":"\u22B5","tridot":"\u25EC","trie":"\u225C","triminus":"\u2A3A","TripleDot":"\u20DB","triplus":"\u2A39","trisb":"\u29CD","tritime":"\u2A3B","trpezium":"\u23E2","Tscr":"\uD835\uDCAF","tscr":"\uD835\uDCC9","TScy":"\u0426","tscy":"\u0446","TSHcy":"\u040B","tshcy":"\u045B","Tstrok":"\u0166","tstrok":"\u0167","twixt":"\u226C","twoheadleftarrow":"\u219E","twoheadrightarrow":"\u21A0","Uacute":"\u00DA","uacute":"\u00FA","uarr":"\u2191","Uarr":"\u219F","uArr":"\u21D1","Uarrocir":"\u2949","Ubrcy":"\u040E","ubrcy":"\u045E","Ubreve":"\u016C","ubreve":"\u016D","Ucirc":"\u00DB","ucirc":"\u00FB","Ucy":"\u0423","ucy":"\u0443","udarr":"\u21C5","Udblac":"\u0170","udblac":"\u0171","udhar":"\u296E","ufisht":"\u297E","Ufr":"\uD835\uDD18","ufr":"\uD835\uDD32","Ugrave":"\u00D9","ugrave":"\u00F9","uHar":"\u2963","uharl":"\u21BF","uharr":"\u21BE","uhblk":"\u2580","ulcorn":"\u231C","ulcorner":"\u231C","ulcrop":"\u230F","ultri":"\u25F8","Umacr":"\u016A","umacr":"\u016B","uml":"\u00A8","UnderBar":"_","UnderBrace":"\u23DF","UnderBracket":"\u23B5","UnderParenthesis":"\u23DD","Union":"\u22C3","UnionPlus":"\u228E","Uogon":"\u0172","uogon":"\u0173","Uopf":"\uD835\uDD4C","uopf":"\uD835\uDD66","UpArrowBar":"\u2912","uparrow":"\u2191","UpArrow":"\u2191","Uparrow":"\u21D1","UpArrowDownArrow":"\u21C5","updownarrow":"\u2195","UpDownArrow":"\u2195","Updownarrow":"\u21D5","UpEquilibrium":"\u296E","upharpoonleft":"\u21BF","upharpoonright":"\u21BE","uplus":"\u228E","UpperLeftArrow":"\u2196","UpperRightArrow":"\u2197","upsi":"\u03C5","Upsi":"\u03D2","upsih":"\u03D2","Upsilon":"\u03A5","upsilon":"\u03C5","UpTeeArrow":"\u21A5","UpTee":"\u22A5","upuparrows":"\u21C8","urcorn":"\u231D","urcorner":"\u231D","urcrop":"\u230E","Uring":"\u016E","uring":"\u016F","urtri":"\u25F9","Uscr":"\uD835\uDCB0","uscr":"\uD835\uDCCA","utdot":"\u22F0","Utilde":"\u0168","utilde":"\u0169","utri":"\u25B5","utrif":"\u25B4","uuarr":"\u21C8","Uuml":"\u00DC","uuml":"\u00FC","uwangle":"\u29A7","vangrt":"\u299C","varepsilon":"\u03F5","varkappa":"\u03F0","varnothing":"\u2205","varphi":"\u03D5","varpi":"\u03D6","varpropto":"\u221D","varr":"\u2195","vArr":"\u21D5","varrho":"\u03F1","varsigma":"\u03C2","varsubsetneq":"\u228A\uFE00","varsubsetneqq":"\u2ACB\uFE00","varsupsetneq":"\u228B\uFE00","varsupsetneqq":"\u2ACC\uFE00","vartheta":"\u03D1","vartriangleleft":"\u22B2","vartriangleright":"\u22B3","vBar":"\u2AE8","Vbar":"\u2AEB","vBarv":"\u2AE9","Vcy":"\u0412","vcy":"\u0432","vdash":"\u22A2","vDash":"\u22A8","Vdash":"\u22A9","VDash":"\u22AB","Vdashl":"\u2AE6","veebar":"\u22BB","vee":"\u2228","Vee":"\u22C1","veeeq":"\u225A","vellip":"\u22EE","verbar":"|","Verbar":"\u2016","vert":"|","Vert":"\u2016","VerticalBar":"\u2223","VerticalLine":"|","VerticalSeparator":"\u2758","VerticalTilde":"\u2240","VeryThinSpace":"\u200A","Vfr":"\uD835\uDD19","vfr":"\uD835\uDD33","vltri":"\u22B2","vnsub":"\u2282\u20D2","vnsup":"\u2283\u20D2","Vopf":"\uD835\uDD4D","vopf":"\uD835\uDD67","vprop":"\u221D","vrtri":"\u22B3","Vscr":"\uD835\uDCB1","vscr":"\uD835\uDCCB","vsubnE":"\u2ACB\uFE00","vsubne":"\u228A\uFE00","vsupnE":"\u2ACC\uFE00","vsupne":"\u228B\uFE00","Vvdash":"\u22AA","vzigzag":"\u299A","Wcirc":"\u0174","wcirc":"\u0175","wedbar":"\u2A5F","wedge":"\u2227","Wedge":"\u22C0","wedgeq":"\u2259","weierp":"\u2118","Wfr":"\uD835\uDD1A","wfr":"\uD835\uDD34","Wopf":"\uD835\uDD4E","wopf":"\uD835\uDD68","wp":"\u2118","wr":"\u2240","wreath":"\u2240","Wscr":"\uD835\uDCB2","wscr":"\uD835\uDCCC","xcap":"\u22C2","xcirc":"\u25EF","xcup":"\u22C3","xdtri":"\u25BD","Xfr":"\uD835\uDD1B","xfr":"\uD835\uDD35","xharr":"\u27F7","xhArr":"\u27FA","Xi":"\u039E","xi":"\u03BE","xlarr":"\u27F5","xlArr":"\u27F8","xmap":"\u27FC","xnis":"\u22FB","xodot":"\u2A00","Xopf":"\uD835\uDD4F","xopf":"\uD835\uDD69","xoplus":"\u2A01","xotime":"\u2A02","xrarr":"\u27F6","xrArr":"\u27F9","Xscr":"\uD835\uDCB3","xscr":"\uD835\uDCCD","xsqcup":"\u2A06","xuplus":"\u2A04","xutri":"\u25B3","xvee":"\u22C1","xwedge":"\u22C0","Yacute":"\u00DD","yacute":"\u00FD","YAcy":"\u042F","yacy":"\u044F","Ycirc":"\u0176","ycirc":"\u0177","Ycy":"\u042B","ycy":"\u044B","yen":"\u00A5","Yfr":"\uD835\uDD1C","yfr":"\uD835\uDD36","YIcy":"\u0407","yicy":"\u0457","Yopf":"\uD835\uDD50","yopf":"\uD835\uDD6A","Yscr":"\uD835\uDCB4","yscr":"\uD835\uDCCE","YUcy":"\u042E","yucy":"\u044E","yuml":"\u00FF","Yuml":"\u0178","Zacute":"\u0179","zacute":"\u017A","Zcaron":"\u017D","zcaron":"\u017E","Zcy":"\u0417","zcy":"\u0437","Zdot":"\u017B","zdot":"\u017C","zeetrf":"\u2128","ZeroWidthSpace":"\u200B","Zeta":"\u0396","zeta":"\u03B6","zfr":"\uD835\uDD37","Zfr":"\u2128","ZHcy":"\u0416","zhcy":"\u0436","zigrarr":"\u21DD","zopf":"\uD835\uDD6B","Zopf":"\u2124","Zscr":"\uD835\uDCB5","zscr":"\uD835\uDCCF","zwj":"\u200D","zwnj":"\u200C"}
+},{}],160:[function(require,module,exports){
 'use strict';
 
 
@@ -21049,7 +18857,7 @@ LinkifyIt.prototype.normalize = function normalize(match) {
 
 module.exports = LinkifyIt;
 
-},{"./lib/re":160}],160:[function(require,module,exports){
+},{"./lib/re":161}],161:[function(require,module,exports){
 'use strict';
 
 // Use direct extract instead of `regenerate` to reduse browserified size
@@ -21211,7 +19019,7 @@ exports.tpl_link_no_ip_fuzzy =
     '(^|(?![.:/\\-_@])(?:[$+<=>^`|]|' + src_ZPCc + '))' +
     '((?![$+<=>^`|])' + tpl_host_port_no_ip_fuzzy_strict + src_path + ')';
 
-},{"uc.micro/categories/Cc/regex":166,"uc.micro/categories/P/regex":168,"uc.micro/categories/Z/regex":169,"uc.micro/properties/Any/regex":171}],161:[function(require,module,exports){
+},{"uc.micro/categories/Cc/regex":167,"uc.micro/categories/P/regex":169,"uc.micro/categories/Z/regex":170,"uc.micro/properties/Any/regex":172}],162:[function(require,module,exports){
 
 'use strict';
 
@@ -21335,7 +19143,7 @@ decode.componentChars = '';
 
 module.exports = decode;
 
-},{}],162:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 
 'use strict';
 
@@ -21435,7 +19243,7 @@ encode.componentChars = "-_.!~*'()";
 
 module.exports = encode;
 
-},{}],163:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 
 'use strict';
 
@@ -21462,7 +19270,7 @@ module.exports = function format(url) {
   return result;
 };
 
-},{}],164:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 'use strict';
 
 
@@ -21471,7 +19279,7 @@ module.exports.decode = require('./decode');
 module.exports.format = require('./format');
 module.exports.parse  = require('./parse');
 
-},{"./decode":161,"./encode":162,"./format":163,"./parse":165}],165:[function(require,module,exports){
+},{"./decode":162,"./encode":163,"./format":164,"./parse":166}],166:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21785,15 +19593,15 @@ Url.prototype.parseHost = function(host) {
 
 module.exports = urlParse;
 
-},{}],166:[function(require,module,exports){
-module.exports=/[\0-\x1F\x7F-\x9F]/
 },{}],167:[function(require,module,exports){
-module.exports=/[\xAD\u0600-\u0605\u061C\u06DD\u070F\u180E\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u206F\uFEFF\uFFF9-\uFFFB]|\uD804\uDCBD|\uD82F[\uDCA0-\uDCA3]|\uD834[\uDD73-\uDD7A]|\uDB40[\uDC01\uDC20-\uDC7F]/
+module.exports=/[\0-\x1F\x7F-\x9F]/
 },{}],168:[function(require,module,exports){
-module.exports=/[!-#%-\*,-/:;\?@\[-\]_\{\}\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u0AF0\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166D\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E42\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65]|\uD800[\uDD00-\uDD02\uDF9F\uDFD0]|\uD801\uDD6F|\uD802[\uDC57\uDD1F\uDD3F\uDE50-\uDE58\uDE7F\uDEF0-\uDEF6\uDF39-\uDF3F\uDF99-\uDF9C]|\uD804[\uDC47-\uDC4D\uDCBB\uDCBC\uDCBE-\uDCC1\uDD40-\uDD43\uDD74\uDD75\uDDC5-\uDDC8\uDDCD\uDE38-\uDE3D]|\uD805[\uDCC6\uDDC1-\uDDC9\uDE41-\uDE43]|\uD809[\uDC70-\uDC74]|\uD81A[\uDE6E\uDE6F\uDEF5\uDF37-\uDF3B\uDF44]|\uD82F\uDC9F/
+module.exports=/[\xAD\u0600-\u0605\u061C\u06DD\u070F\u180E\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u206F\uFEFF\uFFF9-\uFFFB]|\uD804\uDCBD|\uD82F[\uDCA0-\uDCA3]|\uD834[\uDD73-\uDD7A]|\uDB40[\uDC01\uDC20-\uDC7F]/
 },{}],169:[function(require,module,exports){
-module.exports=/[ \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]/
+module.exports=/[!-#%-\*,-/:;\?@\[-\]_\{\}\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u0AF0\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166D\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E42\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65]|\uD800[\uDD00-\uDD02\uDF9F\uDFD0]|\uD801\uDD6F|\uD802[\uDC57\uDD1F\uDD3F\uDE50-\uDE58\uDE7F\uDEF0-\uDEF6\uDF39-\uDF3F\uDF99-\uDF9C]|\uD804[\uDC47-\uDC4D\uDCBB\uDCBC\uDCBE-\uDCC1\uDD40-\uDD43\uDD74\uDD75\uDDC5-\uDDC8\uDDCD\uDE38-\uDE3D]|\uD805[\uDCC6\uDDC1-\uDDC9\uDE41-\uDE43]|\uD809[\uDC70-\uDC74]|\uD81A[\uDE6E\uDE6F\uDEF5\uDF37-\uDF3B\uDF44]|\uD82F\uDC9F/
 },{}],170:[function(require,module,exports){
+module.exports=/[ \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]/
+},{}],171:[function(require,module,exports){
 
 module.exports.Any = require('./properties/Any/regex');
 module.exports.Cc  = require('./categories/Cc/regex');
@@ -21801,9 +19609,9 @@ module.exports.Cf  = require('./categories/Cf/regex');
 module.exports.P   = require('./categories/P/regex');
 module.exports.Z   = require('./categories/Z/regex');
 
-},{"./categories/Cc/regex":166,"./categories/Cf/regex":167,"./categories/P/regex":168,"./categories/Z/regex":169,"./properties/Any/regex":171}],171:[function(require,module,exports){
+},{"./categories/Cc/regex":167,"./categories/Cf/regex":168,"./categories/P/regex":169,"./categories/Z/regex":170,"./properties/Any/regex":172}],172:[function(require,module,exports){
 module.exports=/[\0-\uD7FF\uDC00-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF]/
-},{}],172:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -21920,4 +19728,4 @@ module.exports=/[\0-\uD7FF\uDC00-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[13]);
+},{}]},{},[14]);
