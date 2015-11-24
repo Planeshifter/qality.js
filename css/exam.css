@@ -1,0 +1,215 @@
+.exam_panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	background: white;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
+
+	font-size: 1em;
+	font-family: Droid Sans Mono;
+	overflow: hidden;
+}
+
+.exam_panel #exit {
+	position: absolute;
+	right: 20px;
+	top: 20px;
+	width: 48px;
+	height: 48px;
+	opacity: 0.5;
+	z-index: 100;
+	font-size: 3em;
+}
+
+
+.exam_panel #exit:hover {
+	cursor: pointer;
+	opacity: 1;
+}
+
+.exam_panel #exit img {
+	width: 100%;
+	height: 100%;
+}
+
+
+.exam_panel .node_area {
+	position: absolute;
+	left: 0%;
+	top: 5%;
+	width: 100%;
+	height: 90%;
+	z-index: 2;
+	opacity: 1;
+	overflow-y: auto;
+	background: white;
+}
+
+
+.exam_panel .timer {
+	position: absolute;
+	right: 30px;
+	bottom: 0;
+	height: 200px;
+	width: 300px;
+	font-size: 3em;
+	text-align: center;
+}
+
+
+.exam_panel .result {
+	position: absolute;
+	left: 0;
+	top: 0%;
+	width: 100%;
+	height: 100%;
+	background: white;
+	z-index: 5;
+	color: rgb(64,64,64);
+}
+
+
+.exam_panel .result h1 {
+	text-align: center;
+	text-decoration: underline;
+	text-shadow: 1px 1px rgba(0,0,0, 0.2);
+	font-size: 1.5em;
+	color: black;
+	margin-top: 0.3em;
+}
+
+.exam_panel .result h3 {
+	color: rgb(32,32,32);
+	font-style: normal;
+	font-weight: 400;
+	font-size: 1.1em;
+	margin-top: 0;
+	margin-bottom: 0.8em;
+	line-height: 1.3em;
+}
+
+
+.exam_panel .result #assessment {
+	position: absolute;
+	left: 7%;
+	top: 10%;
+	width: 90%;
+	height: 80%;
+	overflow: auto;
+}
+
+.exam_panel .result #assessment ul {
+	font-size: 1.1em;
+	line-height: 1.3em;
+	width: 80%;
+}
+
+.exam_panel .result #assessment li {
+	margin-bottom: 0.3em;
+	padding: 0;
+}
+
+.exam_panel .result #assessment p {
+	font-size: 1.1em;
+	line-height: 1.3em;
+	margin-top: 0.2em;
+	margin-bottom: 0.2em;
+	width: 80%;
+}
+
+.phigh {
+	color: darkorange;
+}
+
+.pcaps {
+	color: darkred;
+}
+
+.exam_panel .ip_input {
+	position: relative;
+	margin-left: 10%;
+	margin-top: 2%;
+	width: 80%;
+	height: auto;
+	padding: 4px;
+	font-size: 1em;
+	z-index: 2;
+	cursor: pointer;
+	outline: none;
+	box-shadow: 0 0 3px darkgrey;
+	border: none;
+}
+
+
+
+.exam_panel .mc_question {
+	position: relative;
+	left: 2%;
+	top: 1%;
+	width: 90%;
+	height: auto;
+	font-size: 1em;
+	z-index: 2;
+	cursor: pointer;
+}
+
+.exam_panel .mc_question p {
+	font-size: 1.3em;
+	width: 100%;
+	margin-top: 0.3em;
+	margin-left: 0.8em;
+	margin-bottom: 0.8em;
+	line-height: 1.2em;
+}
+
+
+.exam_panel input[type="radio"] {
+	margin-left: 0.8em;
+	margin-right: 0.8em;
+	float: left;
+	width: 1.5em;
+	height: 1.5em;
+	cursor: pointer;
+}
+
+.exam_panel .mc_answer {
+	position: relative;
+	float: left;
+	width: 97%;
+	margin-left: 2.5%;
+}
+
+
+.exam_panel .answers {
+	position: relative;
+	margin-left: 4%;
+	margin-top: 30px;
+	width: 90%;
+	height: auto;
+	font-size: 1.5em;
+	z-index: 2;
+	cursor: pointer;
+}
+
+
+.exam_panel .answer {
+	position: relative;
+	font-size: 1em;
+	color: black;
+	margin-bottom: 3px;
+	cursor: pointer;
+}
+
+
+.exam_panel .answer:hover {
+	color: darkorange;
+}
+
+.exam_panel .Assessment {
+	margin-left: 3%;
+	font-weight: 400;
+	font-size: 0.9em;
+	line-height: 1.2em;
+}
